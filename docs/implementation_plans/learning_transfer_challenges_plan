@@ -1,0 +1,201 @@
+# Implementation Plan - Feature AC: Learning Transfer Challenges (Version 2)
+
+This plan details the technical steps to implement **Learning Transfer Challenges (Feature AC)** in the Tenali platform. **Version 2** extends this feature dynamically to **all** learning modules using a dynamic wrapper system, enabling real-world context challenges for any possible topic key.
+
+---
+
+## Proposed Architecture Overview
+
+```mermaid
+graph TD
+    A[Topic Welcome Box] -->|Stage 3 Completed?| B(Show 'Start Transfer Challenge' CTA)
+    B -->|Click| C[Transfer Challenge Interface]
+    C -->|Fetch Q| D[GET /transfer-api/question]
+    D -->|Serves stateless template & vars| C
+    C -->|Submit Answer| E[POST /transfer-api/check]
+    E -->|Deterministic Validation| F{Correct?}
+    F -->|No| G[Show Diagnostic Feedback & Transfer Mapping]
+    F -->|Yes| H[Increment Transfer Progress]
+    H -->|2 Correct?| I[Award Gold Mastery + 75 Sun Coins]
+```
+
+To preserve Tenali's core principles, this feature implements **Approach C (Hybrid Curated Templates with Parametric Expansion)**. Scenarios are generated deterministically from pre-authored templates by plugging in randomized variables. The client stays lightweight, and answer checking runs statelessly on the server.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Extending the MongoDB Schema**: We are adding `completedTopics` (array), `goldMastery` (array), and `coins` (number) fields to the existing `User` model, and creating a new `StudentAttemptLog` collection for attempt logging.
+>
+> **Soft Fallback for Guest Mode**: If MongoDB is disconnected or if the student plays as a guest (without logging in), progress will be saved/retrieved in/from `localStorage` (e.g. `tenali-completed-topics`, `tenali-gold-mastery`, `tenali-coins`). This ensures the app works in all local/production environments.
+
+---
+
+## Open Questions
+
+None at this stage. The specification document provides comprehensive details for the initial implementation scope.
+
+---
+
+## Proposed Changes
+
+### 1. Server Configuration & Data Models
+
+#### [MODIFY] [auth.js](file:///c:/Users/varsh/My%20Projects/tenali/server/auth.js)
+* Extend `UserSchema` to support:
+  * `completedTopics`: `[String]` (Default: `[]`)
+  * `goldMastery`: `[String]` (Default: `[]`)
+  * `coins`: `Number` (Default: `0`)
+* Define and export `StudentAttemptLog` schema and model:
+  * `studentId`: ObjectId (references User)
+  * `topicKey`: String
+  * `timestamp`: Date
+  * `questionPrompt`: String
+  * `userInput`: String
+  * `correct`: Boolean
+  * `hintsClickedCount`: Number
+  * `timeSpentSeconds`: Number
+  * `stageNumber`: Number
+  * `challengeType`: String ('standard' | 'transfer')
+  * `transferScenarioId`: String
+  * `transferContext`: String
+* Add compound index `{ studentId: 1, challengeType: 1, topicKey: 1 }` on `student_attempt_logs`.
+
+#### [NEW] [transferScenarios.js](file:///c:/Users/varsh/My%20Projects/tenali/server/transferScenarios.js)
+Create a clean scenario generator registry module. It will house scenarios for `percent` (Percentages), `ratio` (Ratio), and `fractionadd` (Fraction Addition).
+Each scenario includes:
+* `scenarioId`: unique identifier.
+* `context`: e.g., 'shopping', 'sports', 'cooking', 'travel'.
+* `transferLevel`: 2 (cued) or 3 (unguided).
+* `generate()`: A function returning randomized variables, narrative prompt, answer, hints, explanation, and transfer mapping.
+* `evaluate(variables)`: A function returning the expected numerical/fractional answer based on variables.
+
+Example Scenarios to implement:
+* **Percentages (`percent`)**:
+  * *Shopping*: Discount + GST calculation (e.g., base price, discount %, GST %).
+  * *Cricket Run Rate*: Calculate % of target runs already scored.
+  * *Recipe Scaling*: Calculate % increase required when scaling servings (with distractor sugar quantity).
+* **Ratio (`ratio`)**:
+  * *Map Scale*: Map cm distance to actual life km distance.
+  * *Lemonade*: Lemon juice to water ratio scaling.
+  * *Pocket Money*: Divide total amount in a given ratio and find difference between shares.
+* **Fraction Addition (`fractionadd`)**:
+  * *Pocket Money Fraction*: Spends fractions of pocket money, calculate remainder.
+  * *Pizza Sharing*: Sum up fractions of pizza eaten.
+
+---
+
+### 2. Express Server Endpoints
+
+#### [MODIFY] [index.js](file:///c:/Users/varsh/My%20Projects/tenali/server/index.js)
+* Import `transferScenarios` registry and the new `StudentAttemptLog` model.
+* Implement endpoints:
+  * `GET /api/progress`: Fetch student progress (`completedTopics`, `goldMastery`, `coins`) for logged-in users.
+  * `POST /api/progress`: Update student progress (e.g. mark a topic completed or add coins).
+  * `GET /transfer-api/question?topic=...`:
+    * Validate that topic is supported.
+    * Select a random scenario generator for that topic.
+    * Generate specific parameters and return `{ scenarioId, context, prompt, hints, variables }` (crucially, do *not* leak the correct answer).
+  * `POST /transfer-api/check`:
+    * Validate the userAnswer using the scenario's evaluator with the passed variables.
+    * Support tolerance matching (strip `₹`, `%`, spaces, check within `±0.01`).
+    * If authenticated, log the attempt to `StudentAttemptLog` with `challengeType: "transfer"`.
+    * If correct, check user's transfer progress. If they complete 2 distinct challenges:
+      * Mark topic as `goldMastery` in database.
+      * Add `+75` Sun Coins to user profile.
+      * Return `goldMasteryEarned: true`.
+    * Return validation response with `correct`, `answer` (expected), `explanation`, `transferMapping`, and `progress`.
+
+---
+
+### 3. Client Configuration & Styles
+
+#### [MODIFY] [vite.config.js](file:///c:/Users/varsh/My%20Projects/tenali/client/vite.config.js)
+* Add `/transfer-api` and `/api/progress` routes to the backend Express server proxy target.
+
+#### [MODIFY] [App.css](file:///c:/Users/varsh/My%20Projects/tenali/client/src/App.css)
+* Add styling for the Transfer Challenge gold gradient interface:
+  * `.transfer-challenge-box` (gold/amber gradient theme: `#F7B731` → `#F5A623`).
+  * `.gold-mastery-badge` shimmery metallic gold styling.
+  * `.coin-pill` display at the top right of the application.
+  * Animation rules for coin rewards (+75 coins numeric pop-up) and badge reveal.
+
+---
+
+### 4. Client Components
+
+#### [MODIFY] [App.jsx](file:///c:/Users/varsh/My%20Projects/tenali/client/src/App.jsx)
+* **Progress Tracking Hook / State**:
+  * Track `completedTopics`, `goldMastery`, `coins` states in the root `App` component.
+  * Synchronize with `/api/progress` API calls on login and progress updates, falling back to `localStorage` when offline or in guest mode.
+* **Top Bar Coin Pill**:
+  * Render a persistent indicator pill `🪙 {coins}` at the top-right of the dashboard (placed at `position: fixed, top: 16px, right: 120px` next to the hamburger button).
+* **Topic Card badges in `Home`**:
+  * Render `🥇` next to the title if the topic is in `goldMastery`.
+  * Render `✅` next to the title if the topic is in `completedTopics` but not `goldMastery`.
+* **Welcome Box integration**:
+  * Modify `makeQuizApp`, `PercentApp`, `RatioApp`, and `FractionAddApp` welcome boxes to display:
+    * If the topic is in `completedTopics`: A "Start Transfer Challenge" CTA button styled with a shiny gold gradient to earn Gold Mastery.
+* **Standard Quiz Completion Trigger**:
+  * When a standard quiz is completed successfully (score >= 80%), check if the topic is already in `completedTopics`. If not, add it and sync to backend/localStorage.
+  * Add a developer shortcut "Toggle Stage 3 Mastery" on the Home page/welcome boxes to make testing easy.
+* **New `TransferChallengeApp` Component**:
+  * Rendered when `mode === 'transfer'`.
+  * Untimed interface, no count-down pressure.
+  * Cycles through 2 transfer challenges fetched from `GET /transfer-api/question`.
+  * Submits to `POST /transfer-api/check`.
+  * Stepped hint system (first hint is free).
+  * Shows step-by-step diagnostic feedback and transfer mappings.
+  * Confetti and coin credit celebration on earning Gold Mastery.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+* Create a test script `scratch/test_transfer.js` to simulate:
+  * Fetching questions from `GET /transfer-api/question` for `percent`, `ratio`, and `fractionadd`.
+  * Checking correct and incorrect answers on `POST /transfer-api/check` and verifying tolerance parsing.
+  * Simulating Stage 3 completion and Gold Mastery badge award database operations.
+
+### Manual Verification
+1. Run the Express server (`node index.js`) and start Vite development server (`npm run dev`).
+2. Log in or run in guest mode. Use the developer debug button to grant Stage 3 mastery on Percentages.
+3. Verify that the "Start Transfer Challenge" CTA appears on the Percentages card and welcome screen.
+4. Launch the Transfer Challenge, check hints, and submit correct/incorrect answers.
+5. Verify step-by-step explanations and transfer mappings are rendered.
+6. Complete 2 challenges successfully and confirm:
+   * Gold Mastery badge animation plays.
+   * `🥇` badge appears on the main menu card.
+   * Sun Coins count increments by +75 in the top-right pill.
+7. Reload the page to verify that progress and coins persist across sessions (in Mongo or `localStorage`).
+
+---
+
+## Version 2: Dynamic Fallback Scenario Expansion
+
+To apply Learning Transfer Challenges to **all** learning modules (not just Percentages, Ratios, and Fractions), the following dynamic extension is added:
+
+### Dynamic Fallback Generation on Server
+If a requested `topic` key does not have hand-crafted template definitions in `transferScenarios`, the server dynamically runs a fallback generator:
+1. It executes an internal loopback HTTP request to the topic's standard endpoint: `GET /:topic-api/question?difficulty=medium`.
+2. It takes the returned abstract question prompt (e.g. `"24 + 36"` or `"2x - 4 = 10"`) and cleans it of leading keywords (`Solve`, `Calculate`, etc.).
+3. It maps this math expression into a randomly selected real-world story context from five pools:
+   * **Shopping 🛒**: Arjuna is checking out items; cashier terminal shows equation.
+   * **Sports 🏏**: Scoreboard analyzer software evaluates team projection.
+   * **Cooking 🍕**: Scaling recipe spice amounts or ingredient quantities.
+   * **Travel 🚂**: Train timetable digital system evaluates speed/distance.
+   * **Pocket Money 🪙**: Budgeting pocket money or calculating book prices.
+4. The system packages this as a transfer challenge question returning a structured object containing customized free hints.
+
+### Dynamic Verification on Server
+1. For generic scenarios, the server receives the `originalQuestion` inside the post body payload.
+2. It attempts to submit the user's answer to the standard check API of the target topic: `POST /:topic-api/check`.
+3. If it gets a valid response, it grades the transfer response accordingly.
+4. If the call fails or is not found, it falls back to standard strict-tolerance comparison via `compareAnswers(userAnswer, originalQuestion.answer)`.
+5. Integrates fully with MongoDB database attempt logs and `goldMastery` badges.
+
+### Dynamic UI Scaling on Client
+1. Removes the hardcoded list limit `['percent', 'ratio', 'fractionadd']` from the welcome card stage-3 completion check. Any game generated by the `makeQuizApp` factory is eligible for transfer once completed.
+2. Formats and capitalizes the topic keys dynamically (e.g. `coordgeom` -> `Coordgeom`) for the title bar of the Transfer Challenge.

@@ -9017,6 +9017,86 @@ app.post('/api/progress', express.json(), async (req, res) => {
 });
 
 // Transfer challenge API endpoints
+function generateGenericTransfer(topic, originalQuestion) {
+  const cleanPrompt = String(originalQuestion.prompt || '')
+    .trim()
+    .replace(/^(Calculate|Evaluate|Solve|Find|What is|Compute|Value of)\s*:?/i, '')
+    .trim();
+
+  const mathExpr = cleanPrompt || 'the given calculation';
+
+  const contexts = [
+    {
+      key: 'shopping',
+      name: 'Shopping',
+      icon: '🛒',
+      templates: [
+        `Arjun is shopping at a local store. The cashier's terminal displays the transaction balance: '${mathExpr}'. What is the computed total?`,
+        `Ananya is checking out items from her online shopping cart. The payment gateway requires verifying the transaction key: '${mathExpr}'. Solve it to complete the purchase.`,
+        `Ravi gets a discount coupon at a store. The cashier tells him the final bill amount depends on solving: '${mathExpr}'. Find the final price.`
+      ]
+    },
+    {
+      key: 'sports',
+      name: 'Sports',
+      icon: '🏏',
+      templates: [
+        `During a cricket match, the run-rate analyzer software evaluates the team's projection equation: '${mathExpr}'. What is the correct value?`,
+        `A coach is comparing running times and performance metrics. The comparison formula evaluates to: '${mathExpr}'. Compute the final value.`
+      ]
+    },
+    {
+      key: 'cooking',
+      name: 'Cooking',
+      icon: '🍕',
+      templates: [
+        `A pastry chef is scaling up recipe measurements for a large banquet. The ratio equation is written as: '${mathExpr}'. Find the scaled value.`,
+        `Priya is adjusting spice levels for a pizza recipe. She needs to solve the following proportion calculation: '${mathExpr}'. What is the resulting quantity?`
+      ]
+    },
+    {
+      key: 'travel',
+      name: 'Travel',
+      icon: '🚂',
+      templates: [
+        `Priya is traveling on an express train. The digital route information system displays the estimated speed calculation: '${mathExpr}'. Calculate the speed value.`,
+        `An outdoor guide maps the route distances using a dynamic scale. The trekking formula reduces to: '${mathExpr}'. Find the distance.`
+      ]
+    },
+    {
+      key: 'pocketmoney',
+      name: 'Pocket Money',
+      icon: '🪙',
+      templates: [
+        `Meena is planning her savings and weekly pocket money budget. She writes down the budget expression: '${mathExpr}'. What is the final amount?`,
+        `Rohan is counting coins to purchase a science book. The price formula evaluates to: '${mathExpr}'. What is the final cost of the book?`
+      ]
+    }
+  ];
+
+  const selectedContext = contexts[Math.floor(Math.random() * contexts.length)];
+  const selectedTemplate = selectedContext.templates[Math.floor(Math.random() * selectedContext.templates.length)];
+
+  return {
+    scenarioId: `generic-transfer-${topic}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    context: selectedContext.key,
+    prompt: selectedTemplate,
+    hints: [
+      `This challenge requires you to solve the underlying math problem: '${mathExpr}'.`,
+      `Apply the same algebraic or arithmetic methods you used in Stage 3 Practice.`,
+      `Solve the calculation step-by-step to find the correct value.`
+    ],
+    variables: {
+      originalQuestion,
+      topic
+    },
+    icon: selectedContext.icon,
+    transferLevel: 2,
+    topic: topic
+  };
+}
+
+// Transfer challenge API endpoints
 app.get('/transfer-api/question', async (req, res) => {
   try {
     const topic = String(req.query.topic || '').trim().toLowerCase();
@@ -9026,7 +9106,23 @@ app.get('/transfer-api/question', async (req, res) => {
 
     const scenarios = transferScenarios[topic];
     if (!scenarios || !scenarios.length) {
-      return res.status(404).json({ error: `No transfer scenarios available for topic: ${topic}` });
+      // Dynamic fallback
+      try {
+        const response = await fetch(`http://localhost:${PORT}/${topic}-api/question?difficulty=medium`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch standard question for topic: ${topic}. Status: ${response.status}`);
+        }
+        const originalQuestion = await response.json();
+        if (!originalQuestion || !originalQuestion.prompt) {
+          throw new Error(`Standard question endpoint for ${topic} returned malformed data.`);
+        }
+
+        const generated = generateGenericTransfer(topic, originalQuestion);
+        return res.json(generated);
+      } catch (fetchErr) {
+        console.error(`Generic transfer fallback failed to fetch for topic '${topic}':`, fetchErr);
+        return res.status(404).json({ error: `No transfer scenarios available for topic: ${topic}. Fallback failed: ${fetchErr.message}` });
+      }
     }
 
     // Pick a random scenario
@@ -9055,26 +9151,78 @@ app.post('/transfer-api/check', express.json(), async (req, res) => {
       return res.status(400).json({ error: 'Missing required parameters (topic, scenarioId, variables)' });
     }
 
-    const scenarios = transferScenarios[topic];
-    if (!scenarios) {
-      return res.status(404).json({ error: `Topic not found: ${topic}` });
-    }
+    let correct = false;
+    let expectedAnswer = '';
+    let explanation = '';
+    let transferMapping = '';
+    let context = 'generic';
 
-    const scenario = scenarios.find(s => s.scenarioId === scenarioId);
-    if (!scenario) {
-      return res.status(404).json({ error: `Scenario not found: ${scenarioId}` });
-    }
+    if (scenarioId.startsWith('generic-transfer-')) {
+      const { originalQuestion, topic: varTopic } = variables;
+      if (!originalQuestion || !varTopic) {
+        return res.status(400).json({ error: 'Malformed generic transfer variables' });
+      }
 
-    // Evaluate answer deterministically on the server using scenario evaluate function
-    const expectedAnswer = scenario.evaluate(variables);
-    const correct = compareAnswers(userAnswer, expectedAnswer);
+      expectedAnswer = originalQuestion.answer !== undefined ? originalQuestion.answer : '';
+      explanation = 'The calculations are verified against standard procedural rules.';
+      transferMapping = `This real-world challenge tests the concept of ${varTopic.toUpperCase()} applied to a practical scenario.`;
+      context = 'generic';
+
+      try {
+        const checkHeaders = { 'Content-Type': 'application/json' };
+        if (req.headers.authorization) {
+          checkHeaders['Authorization'] = req.headers.authorization;
+        }
+
+        const checkResponse = await fetch(`http://localhost:${PORT}/${varTopic}-api/check`, {
+          method: 'POST',
+          headers: checkHeaders,
+          body: JSON.stringify({
+            ...originalQuestion,
+            userAnswer: String(userAnswer || '').trim(),
+            answer: String(userAnswer || '').trim()
+          })
+        });
+
+        if (checkResponse.ok) {
+          const checkResult = await checkResponse.json();
+          correct = checkResult.correct;
+          expectedAnswer = checkResult.display || checkResult.correctAnswer || checkResult.answer || expectedAnswer;
+          explanation = checkResult.explanation || checkResult.message || explanation;
+        } else {
+          correct = compareAnswers(userAnswer, expectedAnswer);
+        }
+      } catch (checkErr) {
+        console.error(`Generic check call failed for topic ${varTopic}, falling back to compareAnswers:`, checkErr);
+        correct = compareAnswers(userAnswer, expectedAnswer);
+      }
+    } else {
+      const scenarios = transferScenarios[topic];
+      if (!scenarios) {
+        return res.status(404).json({ error: `Topic not found: ${topic}` });
+      }
+
+      const scenario = scenarios.find(s => s.scenarioId === scenarioId);
+      if (!scenario) {
+        return res.status(404).json({ error: `Scenario not found: ${scenarioId}` });
+      }
+
+      expectedAnswer = scenario.evaluate(variables);
+      correct = compareAnswers(userAnswer, expectedAnswer);
+      explanation = scenario.explanation(variables);
+      transferMapping = scenario.transferMapping;
+      context = scenario.context;
+    }
 
     let goldMasteryEarned = false;
     const user = await getUserFromReq(req);
     
     // Log attempt if user is authenticated and DB is connected
     if (user && auth.StudentAttemptLog) {
-      const promptText = scenario.generate().prompt;
+      const promptText = scenarioId.startsWith('generic-transfer-') 
+        ? `Generic transfer challenge prompt for ${topic}`
+        : (transferScenarios[topic]?.find(s => s.scenarioId === scenarioId)?.generate()?.prompt || 'Transfer Challenge');
+
       await auth.StudentAttemptLog.create({
         studentId: user._id,
         topicKey: topic,
@@ -9086,7 +9234,7 @@ app.post('/transfer-api/check', express.json(), async (req, res) => {
         stageNumber: 3,
         challengeType: 'transfer',
         transferScenarioId: scenarioId,
-        transferContext: scenario.context
+        transferContext: context
       });
 
       if (correct) {
@@ -9111,8 +9259,8 @@ app.post('/transfer-api/check', express.json(), async (req, res) => {
     res.json({
       correct,
       answer: expectedAnswer,
-      explanation: scenario.explanation(variables),
-      transferMapping: scenario.transferMapping,
+      explanation,
+      transferMapping,
       goldMasteryEarned
     });
   } catch (err) {

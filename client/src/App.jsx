@@ -39679,9 +39679,15 @@ function TransferChallengeApp({ topicKey, onBack, completedTopics, goldMastery, 
     pocketmoney: '🪙'
   }
 
+  const getTopicTitle = () => {
+    if (topicTitles[topicKey]) return topicTitles[topicKey]
+    // Clean and capitalize key (e.g. hcf_lcm -> Hcf lcm, trig -> Trig)
+    return topicKey.charAt(0).toUpperCase() + topicKey.slice(1).replace(/_/g, ' ')
+  }
+
   return (
     <QuizLayout
-      title={`Transfer Challenge: ${topicTitles[topicKey] || topicKey}`}
+      title={`Transfer Challenge: ${getTopicTitle()}`}
       subtitle="Apply your knowledge to real-world problems!"
       onBack={onBack}
       timer={started && !finished ? timer : null}
@@ -40035,7 +40041,7 @@ function makeQuizApp({ title, subtitle, apiPath, diffLabels, placeholders, tip, 
             <input className="answer-input question-count-input" type="text" value={numQuestions} onChange={e => { const v = e.target.value; if (v === '' || /^\d+$/.test(v)) setNumQuestions(v) }} />
           </div>
           <div className="button-row"><button onClick={startQuiz}>Start Quiz</button></div>
-          {completedTopics.includes(topicKey) && ['percent', 'ratio', 'fractionadd'].includes(topicKey) && (
+          {completedTopics.includes(topicKey) && (
             <div className="transfer-cta-box" style={{ marginTop: '20px', padding: '16px', background: 'var(--clr-hover, rgba(255,255,255,0.03))', borderRadius: '10px', border: '1px solid var(--clr-border)', textAlign: 'center' }}>
               <p style={{ margin: '0 0 12px', fontSize: '0.9rem', color: 'var(--clr-text-soft)', lineHeight: '1.4' }}>
                 🎉 You have completed Stage 3 Practice for this topic!
