@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './PercentExplanationApp.css';
+import { playSound } from './audioContext';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QUIZ HELPER UTILITIES
@@ -575,8 +576,15 @@ function LevelsSelectView({ onBack, onSelectLevel }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Level1ExplanationView({ onBack, onContinueToQuiz, initialStep, clearInitialStep }) {
+  const [activeSection, setActiveSection] = useState(1); // 1 to 5
+
   React.useEffect(() => {
     if (initialStep) {
+      if (initialStep === 'convert') {
+        setActiveSection(2);
+      } else if (initialStep === 'multiply') {
+        setActiveSection(3);
+      }
       setTimeout(() => {
         let el = null;
         if (initialStep === 'convert') {
@@ -657,257 +665,420 @@ function Level1ExplanationView({ onBack, onContinueToQuiz, initialStep, clearIni
         the theory and worked example.
       </p>
 
-      {/* ── SECTION A: INTERACTIVE VISUAL ── */}
-      <div className="explanation-card interactive-card">
-        <h2 className="section-title">1. Interactive Visual Model</h2>
-        <p className="section-subtitle">
-          Drag the slider and select different wholes to see how percentages
-          represent parts of a quantity.
-        </p>
-
-        <div className="equation-banner">
-          <div className="math-display">
-            Find <span className="highlight-accent">{percent}%</span> of{' '}
-            <span className="highlight-purple">{whole}</span>
-            <span className="equals"> = </span>
-            <span className="highlight-green">{calculatedPart}</span>
-          </div>
-          <div className="math-breakdown">
-            ({percent} / 100) × {whole} = {(percent / 100).toFixed(2)} × {whole} = {calculatedPart}
-          </div>
+      {/* Persistent progress bar indicator */}
+      <div className="explanation-progress-bar-container" style={{ marginBottom: '30px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', margin: '0 auto', maxWidth: '600px' }}>
+          {/* Background Line */}
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            left: '5%',
+            right: '5%',
+            height: '4px',
+            backgroundColor: '#CFD8DC',
+            zIndex: 1
+          }} />
+          {/* Active Line Fill */}
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            left: '5%',
+            width: `${((activeSection - 1) / 4) * 90}%`,
+            height: '4px',
+            backgroundColor: 'var(--clr-accent)',
+            zIndex: 2,
+            transition: 'width 0.3s ease'
+          }} />
+          
+          {/* Step Circles */}
+          {[
+            { id: 1, label: 'Visual', desc: 'Visual Model' },
+            { id: 2, label: 'Theory', desc: 'Theory' },
+            { id: 3, label: 'Example', desc: 'Worked Example' },
+            { id: 4, label: 'Prompt', desc: 'AI Prompt' },
+            { id: 5, label: 'Quiz', desc: 'Quick Quiz' }
+          ].map((step) => {
+            const isCompleted = step.id < activeSection;
+            const isActive = step.id === activeSection;
+            
+            let bgColor = '#FFF';
+            let borderColor = '#CFD8DC';
+            let textColor = '#78909C';
+            
+            if (isCompleted) {
+              bgColor = '#E8F5E9';
+              borderColor = '#4CAF50';
+              textColor = '#2E7D32';
+            } else if (isActive) {
+              bgColor = '#FFFBEA';
+              borderColor = 'var(--clr-accent)';
+              textColor = 'var(--clr-accent)';
+            }
+            
+            return (
+              <button
+                key={step.id}
+                onClick={() => {
+                  if (step.id === 5 && !isExplanationFinished) return;
+                  setActiveSection(step.id);
+                }}
+                disabled={step.id === 5 && !isExplanationFinished}
+                style={{
+                  zIndex: 3,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  background: 'none',
+                  border: 'none',
+                  cursor: (step.id === 5 && !isExplanationFinished) ? 'not-allowed' : 'pointer',
+                  padding: 0
+                }}
+              >
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  backgroundColor: bgColor,
+                  border: `3px solid ${borderColor}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '900',
+                  color: textColor,
+                  transition: 'all 0.2s ease',
+                  boxShadow: isActive ? '0 0 10px rgba(232, 134, 74, 0.4)' : 'none'
+                }}>
+                  {isCompleted ? '✓' : step.id}
+                </div>
+                <span style={{
+                  marginTop: '6px',
+                  fontSize: '0.85rem',
+                  fontWeight: isActive ? '800' : '500',
+                  color: textColor
+                }}>
+                  {step.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
+        
+        <div style={{ textAlign: 'center', marginTop: '15px', fontWeight: '800', color: 'var(--clr-dim)' }}>
+          {`Section ${activeSection} of 5 · ${['Interactive Visual Model', 'Concept Theory', 'Step-by-Step Worked Example', 'AI Study Assistant Prompt', 'Quick Check Quiz'][activeSection - 1]}`}
+        </div>
+      </div>
 
-        <div className="percent-bar-wrapper">
-          <div className="percent-bar-labels">
-            <span>0</span>
-            <span>{whole / 4}</span>
-            <span>{whole / 2}</span>
-            <span>{(3 * whole) / 4}</span>
-            <span>{whole}</span>
-          </div>
-          <div className="percent-bar-container">
-            <div className="percent-bar-track"></div>
-            <div className="percent-bar-fill" style={{ width: `${percent}%` }}>
-              <span className="percent-fill-label">{percent}%</span>
+      {/* Card swap transitions wrapper */}
+      <div key={activeSection} className="explanation-card-transition-wrapper">
+        {/* ── SECTION A: INTERACTIVE VISUAL ── */}
+        {activeSection === 1 && (
+          <div className="explanation-card interactive-card">
+            <h2 className="section-title">1. Interactive Visual Model</h2>
+            <p className="section-subtitle">
+              Drag the slider and select different wholes to see how percentages
+              represent parts of a quantity.
+            </p>
+
+            <div className="equation-banner">
+              <div className="math-display">
+                Find <span className="highlight-accent">{percent}%</span> of{' '}
+                <span className="highlight-purple">{whole}</span>
+                <span className="equals"> = </span>
+                <span className="highlight-green">{calculatedPart}</span>
+              </div>
+              <div className="math-breakdown">
+                ({percent} / 100) × {whole} = {(percent / 100).toFixed(2)} × {whole} = {calculatedPart}
+              </div>
+            </div>
+
+            <div className="percent-bar-wrapper">
+              <div className="percent-bar-labels">
+                <span>0</span>
+                <span>{whole / 4}</span>
+                <span>{whole / 2}</span>
+                <span>{(3 * whole) / 4}</span>
+                <span>{whole}</span>
+              </div>
+              <div className="percent-bar-container">
+                <div className="percent-bar-track"></div>
+                <div className="percent-bar-fill" style={{ width: `${percent}%` }}>
+                  <span className="percent-fill-label">{percent}%</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="controls-row">
+              <div className="control-group slider-group">
+                <label>Percentage: <strong>{percent}%</strong></label>
+                <input
+                  type="range" min="0" max="100" step="1" value={percent}
+                  onChange={(e) => setPercent(parseInt(e.target.value, 10))}
+                  className="accent-slider"
+                />
+              </div>
+
+              <div className="control-group whole-group">
+                <label>Whole Amount: <strong>{whole}</strong></label>
+                <div className="presets-row">
+                  {[50, 100, 200, 500].map((preset) => (
+                    <button
+                      key={preset}
+                      className={`preset-btn ${whole === preset ? 'active' : ''}`}
+                      onClick={() => setWholePreset(preset)}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+                <div className="custom-input-wrapper">
+                  <span className="input-prefix">Custom:</span>
+                  <input
+                    type="text"
+                    value={customWhole}
+                    onChange={handleWholeChange}
+                    placeholder="E.g., 80"
+                    className="whole-text-input"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="explanation-nav-row" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '30px' }}>
+              <button className="percentages-btn" onClick={() => setActiveSection(2)}>
+                Next: Theory ➡️
+              </button>
             </div>
           </div>
-        </div>
+        )}
 
-        <div className="controls-row">
-          <div className="control-group slider-group">
-            <label>Percentage: <strong>{percent}%</strong></label>
-            <input
-              type="range" min="0" max="100" step="1" value={percent}
-              onChange={(e) => setPercent(parseInt(e.target.value, 10))}
-              className="accent-slider"
-            />
-          </div>
+        {/* ── SECTION B: CONCEPT THEORY ── */}
+        {activeSection === 2 && (
+          <div className="explanation-card theory-card">
+            <h2 className="section-title">2. Concept Theory</h2>
 
-          <div className="control-group whole-group">
-            <label>Whole Amount: <strong>{whole}</strong></label>
-            <div className="presets-row">
-              {[50, 100, 200, 500].map((preset) => (
+            <div className="theory-steps-list">
+              {theoryStep >= 1 && (
+                <div className="step-item fade-in">
+                  <div className="step-num">1</div>
+                  <div className="step-content">
+                    <strong>What is a percentage?</strong> A percentage is a way of
+                    expressing a quantity as a fraction of 100. The term comes from
+                    the Latin <em>per centum</em>, meaning "by the hundred."
+                  </div>
+                </div>
+              )}
+              {theoryStep >= 2 && (
+                <div className="step-item fade-in">
+                  <div className="step-num">2</div>
+                  <div className="step-content">
+                    <strong>Visualize the grid:</strong> Imagine the whole amount
+                    (e.g., {whole}) is divided into 100 equal parts. Each part
+                    contains 1% of the total. For {whole}, each 1% is equal to{' '}
+                    {whole / 100}.
+                  </div>
+                </div>
+              )}
+              {theoryStep >= 3 && (
+                <div className="step-item fade-in">
+                  <div className="step-num">3</div>
+                  <div className="step-content">
+                    <strong>Converting the Percent:</strong> To make it ready for
+                    calculation, we convert the percentage sign into a divisor of
+                    100. So {percent}% is written as{' '}
+                    <span className="monospace">({percent} / 100)</span> or{' '}
+                    <span className="monospace">{(percent / 100).toFixed(2)}</span>.
+                  </div>
+                </div>
+              )}
+              {theoryStep >= 4 && (
+                <div className="step-item fade-in">
+                  <div className="step-num">4</div>
+                  <div className="step-content">
+                    <strong>The General Formula:</strong> To calculate the part,
+                    scale the whole amount by this fraction:
+                    <div className="formula-block">Part = (Percent / 100) × Whole</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="explanation-nav-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '30px', gap: '15px' }}>
+              <button className="percentages-btn percentages-btn-secondary" onClick={() => setActiveSection(1)}>
+                ⬅️ Back
+              </button>
+              {theoryStep < totalTheorySteps ? (
                 <button
-                  key={preset}
-                  className={`preset-btn ${whole === preset ? 'active' : ''}`}
-                  onClick={() => setWholePreset(preset)}
+                  className="next-reveal-btn"
+                  style={{ margin: 0 }}
+                  onClick={() => setTheoryStep(prev => prev + 1)}
                 >
-                  {preset}
+                  Next Idea
                 </button>
-              ))}
-            </div>
-            <div className="custom-input-wrapper">
-              <span className="input-prefix">Custom:</span>
-              <input
-                type="text"
-                value={customWhole}
-                onChange={handleWholeChange}
-                placeholder="E.g., 80"
-                className="whole-text-input"
-              />
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  <div className="completion-badge" style={{ margin: 0, position: 'static', transform: 'none' }}>✓ Theory Completed</div>
+                  <button className="percentages-btn" onClick={() => setActiveSection(3)}>
+                    Next: Example ➡️
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* ── SECTION B: CONCEPT THEORY ── */}
-      <div className="explanation-card theory-card">
-        <h2 className="section-title">2. Concept Theory</h2>
+        {/* ── SECTION C: WORKED EXAMPLE ── */}
+        {activeSection === 3 && (
+          <div className="explanation-card example-card">
+            <h2 className="section-title">3. Step-by-Step Worked Example</h2>
+            <p className="section-subtitle">Problem: Find 15% of 80.</p>
 
-        <div className="theory-steps-list">
-          {theoryStep >= 1 && (
-            <div className="step-item fade-in">
-              <div className="step-num">1</div>
-              <div className="step-content">
-                <strong>What is a percentage?</strong> A percentage is a way of
-                expressing a quantity as a fraction of 100. The term comes from
-                the Latin <em>per centum</em>, meaning "by the hundred."
-              </div>
+            <div className="example-steps-list">
+              {exampleStep >= 1 && (
+                <div className="step-item fade-in">
+                  <div className="step-indicator">Step 1</div>
+                  <div className="step-content">
+                    Convert the percentage to a fraction over 100:
+                    <div className="math-equation">15% = 15 / 100</div>
+                  </div>
+                </div>
+              )}
+              {exampleStep >= 2 && (
+                <div className="step-item fade-in">
+                  <div className="step-indicator">Step 2</div>
+                  <div className="step-content">
+                    Set up the multiplication equation by scaling the whole amount:
+                    <div className="math-equation">(15 / 100) × 80</div>
+                  </div>
+                </div>
+              )}
+              {exampleStep >= 3 && (
+                <div className="step-item fade-in">
+                  <div className="step-indicator">Step 3</div>
+                  <div className="step-content">
+                    Convert the fraction to a decimal to simplify the math:
+                    <div className="math-equation">0.15 × 80</div>
+                  </div>
+                </div>
+              )}
+              {exampleStep >= 4 && (
+                <div className="step-item fade-in">
+                  <div className="step-indicator">Step 4</div>
+                  <div className="step-content">
+                    Multiply to get the final answer:
+                    <div className="math-equation">0.15 × 80 = 12</div>
+                    <p style={{ marginTop: '8px', color: 'var(--clr-correct)' }}>
+                      So, <strong>15% of 80 is 12</strong>.
+                        </p>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-          {theoryStep >= 2 && (
-            <div className="step-item fade-in">
-              <div className="step-num">2</div>
-              <div className="step-content">
-                <strong>Visualize the grid:</strong> Imagine the whole amount
-                (e.g., {whole}) is divided into 100 equal parts. Each part
-                contains 1% of the total. For {whole}, each 1% is equal to{' '}
-                {whole / 100}.
-              </div>
-            </div>
-          )}
-          {theoryStep >= 3 && (
-            <div className="step-item fade-in">
-              <div className="step-content">
-                <strong>Converting the Percent:</strong> To make it ready for
-                calculation, we convert the percentage sign into a divisor of
-                100. So {percent}% is written as{' '}
-                <span className="monospace">({percent} / 100)</span> or{' '}
-                <span className="monospace">{(percent / 100).toFixed(2)}</span>.
-              </div>
-            </div>
-          )}
-          {theoryStep >= 4 && (
-            <div className="step-item fade-in">
-              <div className="step-num">4</div>
-              <div className="step-content">
-                <strong>The General Formula:</strong> To calculate the part,
-                scale the whole amount by this fraction:
-                <div className="formula-block">Part = (Percent / 100) × Whole</div>
-              </div>
-            </div>
-          )}
-        </div>
 
-        {theoryStep < totalTheorySteps ? (
-          <button
-            className="next-reveal-btn"
-            onClick={() => setTheoryStep(prev => prev + 1)}
-          >
-            Next Idea
-          </button>
-        ) : (
-          <div className="completion-badge">✓ Theory Completed</div>
+            <div className="explanation-nav-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '30px', gap: '15px' }}>
+              <button className="percentages-btn percentages-btn-secondary" onClick={() => setActiveSection(2)}>
+                ⬅️ Back
+              </button>
+              {exampleStep < totalExampleSteps ? (
+                <button
+                  className="next-reveal-btn"
+                  style={{ margin: 0 }}
+                  onClick={() => setExampleStep(prev => prev + 1)}
+                >
+                  Next Step
+                </button>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  <div className="completion-badge" style={{ margin: 0, position: 'static', transform: 'none' }}>✓ Example Completed</div>
+                  <button className="percentages-btn" onClick={() => setActiveSection(4)}>
+                    Next: AI Prompt ➡️
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── SECTION D: AI STUDY ASSISTANT PROMPT ── */}
+        {activeSection === 4 && (
+          <div className="explanation-card prompt-card">
+            <h2 className="section-title">4. AI Study Assistant Prompt</h2>
+            <p className="section-subtitle">
+              Copy this generic prompt and paste it into any AI chat tool (like
+              Gemini or ChatGPT) for further personalised analogies and drills.
+            </p>
+
+            <div className="prompt-box">
+              <p className="prompt-content-text">{aiPromptText}</p>
+              <button
+                className={`copy-btn ${copied ? 'copied' : ''}`}
+                onClick={copyToClipboard}
+              >
+                {copied ? '✓ Copied!' : '📋 Copy Prompt'}
+              </button>
+            </div>
+
+            <div className="explanation-nav-row" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px' }}>
+              <button className="percentages-btn percentages-btn-secondary" onClick={() => setActiveSection(3)}>
+                ⬅️ Back
+              </button>
+              <button
+                className="percentages-btn"
+                onClick={() => setActiveSection(5)}
+                disabled={!isExplanationFinished}
+              >
+                Next: Quick Quiz ➡️
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── SECTION E: MICRO-QUIZ GATE ── */}
+        {activeSection === 5 && isExplanationFinished && (
+          <div>
+            <div className="explanation-card quiz-gate-card">
+              <h2 className="section-title">
+                5. Quick Check Quiz
+                <span className="ungraded-badge">Ungraded</span>
+              </h2>
+              <p className="section-subtitle">
+                Answer <strong>3 out of 4</strong> questions correctly to unlock
+                "Continue to Practice". Questions are freshly generated every
+                time — no two will ever be the same.
+              </p>
+
+              <MicroQuiz onPass={() => setQuizPassed(true)} />
+              
+              <div className="explanation-nav-row" style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
+                <button className="percentages-btn percentages-btn-secondary" onClick={() => setActiveSection(4)}>
+                  ⬅️ Back
+                </button>
+              </div>
+            </div>
+
+            {/* ── FINISH BLOCK ── */}
+            <div
+              className={`finish-action-block fade-in ${
+                quizPassed ? 'quiz-unlocked' : 'quiz-locked'
+              }`}
+              style={{ marginTop: '20px' }}
+            >
+              {quizPassed ? (
+                <p>🎉 Well done! You have passed the quiz and are ready to practise.</p>
+              ) : (
+                <p>Complete the Quick Check Quiz above to unlock practice.</p>
+              )}
+              <button
+                className="continue-practice-btn"
+                onClick={onContinueToQuiz}
+                disabled={!quizPassed}
+                aria-disabled={!quizPassed}
+              >
+                {quizPassed ? 'Continue to Practice Quiz →' : '🔒 Complete Quiz to Unlock'}
+              </button>
+            </div>
+          </div>
         )}
       </div>
-
-      {/* ── SECTION C: WORKED EXAMPLE ── */}
-      <div className="explanation-card example-card">
-        <h2 className="section-title">3. Step-by-Step Worked Example</h2>
-        <p className="section-subtitle">Problem: Find 15% of 80.</p>
-
-        <div className="example-steps-list">
-          {exampleStep >= 1 && (
-            <div className="step-item fade-in">
-              <div className="step-indicator">Step 1</div>
-              <div className="step-content">
-                Convert the percentage to a fraction over 100:
-                <div className="math-equation">15% = 15 / 100</div>
-              </div>
-            </div>
-          )}
-          {exampleStep >= 2 && (
-            <div className="step-item fade-in">
-              <div className="step-indicator">Step 2</div>
-              <div className="step-content">
-                Set up the multiplication equation by scaling the whole amount:
-                <div className="math-equation">(15 / 100) × 80</div>
-              </div>
-            </div>
-          )}
-          {exampleStep >= 3 && (
-            <div className="step-item fade-in">
-              <div className="step-indicator">Step 3</div>
-              <div className="step-content">
-                Convert the fraction to a decimal to simplify the math:
-                <div className="math-equation">0.15 × 80</div>
-              </div>
-            </div>
-          )}
-          {exampleStep >= 4 && (
-            <div className="step-item fade-in">
-              <div className="step-indicator">Step 4</div>
-              <div className="step-content">
-                Multiply to get the final answer:
-                <div className="math-equation">0.15 × 80 = 12</div>
-                <p style={{ marginTop: '8px', color: 'var(--clr-correct)' }}>
-                  So, <strong>15% of 80 is 12</strong>.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {exampleStep < totalExampleSteps ? (
-          <button
-            className="next-reveal-btn"
-            onClick={() => setExampleStep(prev => prev + 1)}
-          >
-            Next Step
-          </button>
-        ) : (
-          <div className="completion-badge">✓ Example Completed</div>
-        )}
-      </div>
-
-      {/* ── SECTION D: AI STUDY ASSISTANT PROMPT ── */}
-      <div className="explanation-card prompt-card">
-        <h2 className="section-title">4. AI Study Assistant Prompt</h2>
-        <p className="section-subtitle">
-          Copy this generic prompt and paste it into any AI chat tool (like
-          Gemini or ChatGPT) for further personalised analogies and drills.
-        </p>
-
-        <div className="prompt-box">
-          <p className="prompt-content-text">{aiPromptText}</p>
-          <button
-            className={`copy-btn ${copied ? 'copied' : ''}`}
-            onClick={copyToClipboard}
-          >
-            {copied ? '✓ Copied!' : '📋 Copy Prompt'}
-          </button>
-        </div>
-      </div>
-
-      {/* ── SECTION E: MICRO-QUIZ GATE (appears only after theory + example done) ── */}
-      {isExplanationFinished && (
-        <div className="explanation-card quiz-gate-card fade-in">
-          <h2 className="section-title">
-            5. Quick Check Quiz
-            <span className="ungraded-badge">Ungraded</span>
-          </h2>
-          <p className="section-subtitle">
-            Answer <strong>3 out of 4</strong> questions correctly to unlock
-            "Continue to Practice". Questions are freshly generated every
-            time — no two will ever be the same.
-          </p>
-
-          <MicroQuiz onPass={() => setQuizPassed(true)} />
-        </div>
-      )}
-
-      {/* ── FINISH BLOCK (always visible once explanation done; button locked until quiz passed) ── */}
-      {isExplanationFinished && (
-        <div
-          className={`finish-action-block fade-in ${
-            quizPassed ? 'quiz-unlocked' : 'quiz-locked'
-          }`}
-        >
-          {quizPassed ? (
-            <p>🎉 Well done! You have passed the quiz and are ready to practise.</p>
-          ) : (
-            <p>Complete the Quick Check Quiz above to unlock practice.</p>
-          )}
-          <button
-            className="continue-practice-btn"
-            onClick={onContinueToQuiz}
-            disabled={!quizPassed}
-            aria-disabled={!quizPassed}
-          >
-            {quizPassed ? 'Continue to Practice Quiz →' : '🔒 Complete Quiz to Unlock'}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
@@ -933,6 +1104,7 @@ function MicroQuiz({ onPass }) {
     const newResults    = [...roundResults, isCorrect];
 
     setLastFeedback(isCorrect ? 'correct' : 'wrong');
+    playSound(isCorrect ? 'correct' : 'wrong', true);
     setPhase('feedback');
 
     setTimeout(() => {

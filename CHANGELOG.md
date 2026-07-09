@@ -100,3 +100,48 @@ To support students who repeatedly struggle with a specific step inside the grad
 ### Notes
 - `PercentExplanationApp.jsx` / `PercentExplanationApp.css` (the theory/explanation screen) were kept unmodified in this release, aside from the minimal redirect-hook addition (`initialStep` / `clearInitialStep` props, and a `view` state transition to a `QUIZ` view rendering the new `PercentApp`) needed to support the escalation deep-link/scroll feature.
 - All new gamification and visual styling is scoped exclusively to the Percentages quiz and does not affect any of the other quiz modules in the shared `App.jsx` / `App.css` files.
+
+---
+
+## Version 2 — 2026-07-09
+
+### Overview
+Refactoring pass across the Percentages feature addressing two issues raised after a Proof of Concept review: excessive cognitive load from stacked, scrollable content, and a browser-limit bug in sound playback caused by repeatedly creating new `AudioContext` instances. This release intentionally touches both `App.jsx` (graded quiz) **and** `PercentExplanationApp.jsx` / `.css` (explanation screen) — the prior restriction against modifying the explanation screen was deliberately lifted for this task.
+
+### Changed — One-Card-at-a-Time View
+- **Graded Quiz — Step-Wise Diagnostic Mode (`App.jsx`):**
+  - Previously, all step cards (Step 1, Step 2, full solution recap) were stacked and simultaneously visible.
+  - Now, exactly one card is rendered at a time — either the current step (`stepwiseState.currentStepIndex`) or the recap card (`stepwiseState.showRecap === true`).
+  - A `key` prop on the card wrapper forces React to unmount/remount on each transition, triggering a `@keyframes percentages-card-fade-in` animation on every card swap.
+  - A persistent step progress badge (e.g. "Step 1 of 2") is shown in the header.
+- **Explanation Screen — Level 1 View (`PercentExplanationApp.jsx`):**
+  - Previously, all 5 sections (Interactive Visual, Theory, Worked Example, AI Prompt, Quick Check Quiz) were stacked and simultaneously visible on one long scrollable page.
+  - Now, an `activeSection` state (1–5) controls which single section is rendered.
+  - Added a horizontal timeline progress indicator at the top showing steps 1–5, with filled green circles for completed steps, an orange-highlighted active step, grey pending steps, a filled tracking line, and click-back navigation to any previously visited section.
+  - Added Previous/Next navigation buttons at the bottom of each card for sequential progression.
+  - A `key`-based wrapper triggers a matching `@keyframes explanation-card-fade-in` animation on every section change.
+  - The Quick Check Quiz (step 5) in the timeline remains disabled until `isExplanationFinished` is true (all 4 prior sections completed) — preserving the existing no-shortcut gating.
+
+### Changed — Audio Context Singleton
+- **New module — `client/src/audioContext.js`:**
+  - Exports `getAudioContext()` — lazily creates a single shared `AudioContext` singleton and resumes it if suspended, instead of creating a new instance per sound.
+  - Exports `playSound(type, enabled)` — builds fresh oscillator/gain nodes per sound event (unchanged behavior) against the shared singleton context, playing either a "correct" chime or "wrong" buzzer.
+  - `getAudioContext()` is only ever called from inside `playSound()`, which itself is only ever called from user-gesture event handlers (button clicks) — never on component mount, satisfying the browser's audio-gesture activation requirement.
+- **Graded Quiz (`App.jsx`):** removed the duplicated local `playSound` function; now imports the shared `playSound` from `./audioContext`. All existing call sites in the quiz submit handler continue to work unchanged.
+- **Explanation Screen (`PercentExplanationApp.jsx`):** imports `playSound` from `./audioContext`; `MicroQuiz.handleSelect` calls `playSound(isCorrect ? 'correct' : 'wrong', true)` inside the option-selection handler (a user-gesture callstack), adding audio cues to Quick Check Quiz answers for the first time.
+- **Mute toggle:** `playSound` accepts an `enabled` boolean parameter — passing `false` skips audio without touching or closing the singleton context (no `.close()` call), so the shared `AudioContext` persists across mute/unmute rather than being destroyed and needing re-creation.
+
+### Verification
+- `npm run build` succeeded (20 modules transformed, no errors).
+- 14/14 automated static checks passed, including: `getAudioContext` not called at module top-level; `getAudioContext` only called inside `playSound`; both apps correctly import the shared `playSound`; quiz step timeline disabled until `isExplanationFinished`; Quick Check Quiz gated by `isExplanationFinished`; escalation redirect correctly calls `setActiveSection`; stepwise card and recap card both correctly keyed for transition animation.
+- **Preserved invariants confirmed unchanged:** scoring/correctness-checking logic; state machine transitions and escalation logic (`handleQuizSubmit`, `stepwiseState` reducer, `failedRounds`); Quick Check Quiz randomization/no-repeat deduplication (`generateQuestion()`); no-direct-quiz-shortcut gating (`onContinueToQuiz` disabled gate, `isExplanationFinished` logic).
+- **Manual browser verification still required** (not yet performed as of this entry) — dev server running locally for: timeline/one-card view check, MicroQuiz gating check, sound playback on quiz answers, step-wise transition/fade-in check, escalation redirect check (fail same step twice), and mute toggle check.
+
+### Files Changed
+| File | Change |
+|---|---|
+| `audioContext.js` | **NEW** — Singleton AudioContext + `playSound` utility |
+| `App.jsx` | Removed duplicate `playSound`, imported shared one; rewrote stepwise rendering to one-card-at-a-time |
+| `App.css` | Added `.percentages-card-transition-wrapper` + `@keyframes percentages-card-fade-in` |
+| `PercentExplanationApp.jsx` | Imported `playSound`; added `activeSection` state, timeline indicator, nav buttons, transition wrapper; fixed a missing closing `</div>` |
+| `PercentExplanationApp.css` | Added `.explanation-card-transition-wrapper` + `@keyframes explanation-card-fade-in` + timeline hover styles |

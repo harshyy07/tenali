@@ -3231,3 +3231,18 @@ button:disabled {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.percentages-card-transition-wrapper {
+  animation: percentages-card-fade-in 0.25s ease-out forwards;
+}
+
+@keyframes percentages-card-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

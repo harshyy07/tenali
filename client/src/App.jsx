@@ -24,6 +24,7 @@
 import { useEffect, useState, useRef, useMemo } from 'react'
 import './App.css'
 import PercentExplanationApp from './PercentExplanationApp'
+import { playSound } from './audioContext'
 
 // API base URL from environment variables (Vite)
 const API = import.meta.env.VITE_API_BASE_URL || '';
@@ -42875,41 +42876,7 @@ const cleanAndParseNum = (str) => {
   return parseFloat(cleaned);
 };
 
-const playSound = (type, enabled) => {
-  if (!enabled) return;
-  try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
 
-    if (type === 'correct') {
-      const now = ctx.currentTime;
-      osc.type = 'triangle'; // Warm, game-like chime tone
-      osc.frequency.setValueAtTime(987.77, now); // B5 note
-      osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6 note
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.setValueAtTime(0.12, now + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-      osc.start(now);
-      osc.stop(now + 0.35);
-    } else if (type === 'wrong') {
-      const now = ctx.currentTime;
-      osc.type = 'sawtooth'; // Playful, retro buzzer slide down
-      osc.frequency.setValueAtTime(293.66, now); // D4
-      osc.frequency.linearRampToValueAtTime(110.00, now + 0.3); // A2 slide
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      osc.start(now);
-      osc.stop(now + 0.3);
-    }
-  } catch (e) {
-    console.warn('AudioContext playback failed:', e);
-  }
-};
 
 const triggerConfetti = () => {
   const container = document.createElement('div');
@@ -43686,9 +43653,14 @@ function PercentApp({
           ) : mode === 'stepwise' ? (
             <div>
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <span className="percentages-check-badge" style={{ backgroundColor: '#0288D1', boxShadow: '0 3px 0 #01579B' }}>
-                  Clue Path 🗺️
-                </span>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                  <span className="percentages-check-badge" style={{ backgroundColor: '#0288D1', boxShadow: '0 3px 0 #01579B' }}>
+                    Clue Path 🗺️
+                  </span>
+                  <span className="percentages-check-badge" style={{ backgroundColor: '#FF9800', boxShadow: '0 3px 0 #F57C00' }}>
+                    {stepwiseState.showRecap ? 'Recap 🌟' : `Step ${stepwiseState.currentStepIndex + 1} of 2`}
+                  </span>
+                </div>
                 {currentQuestion && (
                   <p style={{ fontSize: '1.3rem', margin: '5px 0', fontWeight: '800', color: 'var(--clr-text)' }}>
                     Let's solve: {currentQuestion.prompt}
@@ -43696,102 +43668,111 @@ function PercentApp({
                 )}
               </div>
 
-              {currentQuestion && stepwiseState.questionId === currentQuestion.id && currentQuestion.steps.map((step, idx) => {
-                const isActive = stepwiseState.currentStepIndex === idx;
-                const isChecked = stepwiseState.checked[idx];
-                const isCorrect = stepwiseState.correct[idx];
-                const displayClass = isChecked
-                  ? (isCorrect ? 'correct' : 'wrong')
-                  : (isActive ? 'active' : 'inactive');
-
-                return (
-                  <div
-                    key={`${currentQuestion.id}-step-${idx}-${isActive}`}
-                    className={`percentages-step-card ${displayClass} percentages-pop-in`}
-                  >
-                    <div className="percentages-step-title">
-                      <span>{idx === 0 ? '🎯 Clue 1:' : '🚀 Clue 2:'}</span>
-                      <span>{step.prompt}</span>
-                      {isChecked && (
-                        <span style={{ marginLeft: 'auto', fontWeight: '900', color: isCorrect ? 'var(--clr-correct)' : 'var(--clr-wrong)' }}>
-                          {isCorrect ? '✓ Correct' : '✗ Try this way'}
-                        </span>
-                      )}
+              <div key={stepwiseState.showRecap ? 'recap' : stepwiseState.currentStepIndex} className="percentages-card-transition-wrapper">
+                {stepwiseState.showRecap ? (
+                  currentQuestion && (
+                    <div className="percentages-celebration-popup percentages-pop-in" style={{ marginTop: '25px', background: '#FFF8E1', borderColor: '#FFD54F' }}>
+                      <div className="celebration-emoji-burst">🌟 🦉 🌟</div>
+                      <h2>Let's see how we solved it!</h2>
+                      <div className="percentages-step-formula" style={{ whiteSpace: 'pre-line', textAlign: 'left', marginBottom: '20px' }}>
+                        {currentQuestion.explanation}
+                      </div>
+                      <div className="button-row" style={{ justifyContent: 'center' }}>
+                        <button onClick={handleNextQuestionStepwise} className="percentages-btn">
+                          Next Question ➡️
+                        </button>
+                      </div>
                     </div>
+                  )
+                ) : (
+                  currentQuestion && stepwiseState.questionId === currentQuestion.id && (
+                    (() => {
+                      const idx = stepwiseState.currentStepIndex;
+                      const step = currentQuestion.steps[idx];
+                      if (!step) return null;
+                      const isActive = true;
+                      const isChecked = stepwiseState.checked[idx];
+                      const isCorrect = stepwiseState.correct[idx];
+                      const displayClass = isChecked
+                        ? (isCorrect ? 'correct' : 'wrong')
+                        : 'active';
 
-                    {!isChecked && isActive && (
-                      <div style={{ display: 'flex', gap: '15px', marginTop: '15px', flexWrap: 'wrap' }}>
-                        <input
-                          className="answer-input"
-                          type="text"
-                          value={stepwiseState.answers[idx]}
-                          onChange={e => {
-                            const val = e.target.value;
-                            setStepwiseState(prev => {
-                              if (prev.questionId !== currentQuestion.id) return prev;
-                              const nextAnsw = [...prev.answers];
-                              nextAnsw[idx] = val;
-                              return { ...prev, answers: nextAnsw };
-                            });
-                          }}
-                          placeholder={step.placeholder}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && stepwiseState.answers[idx].trim()) {
-                              handleStepSubmit(idx);
-                            }
-                          }}
-                          autoFocus
-                          style={{ flex: 1, minWidth: '150px' }}
-                        />
-                        <button
-                          onClick={() => handleStepSubmit(idx)}
-                          disabled={!stepwiseState.answers[idx].trim()}
-                          className="percentages-btn"
-                          style={{ fontSize: '1.05rem', padding: '10px 24px' }}
+                      return (
+                        <div
+                          key={`${currentQuestion.id}-step-${idx}`}
+                          className={`percentages-step-card ${displayClass} percentages-pop-in`}
                         >
-                          Check Clue 🔍
-                        </button>
-                      </div>
-                    )}
+                          <div className="percentages-step-title">
+                            <span>{idx === 0 ? '🎯 Clue 1:' : '🚀 Clue 2:'}</span>
+                            <span>{step.prompt}</span>
+                            {isChecked && (
+                              <span style={{ marginLeft: 'auto', fontWeight: '900', color: isCorrect ? 'var(--clr-correct)' : 'var(--clr-wrong)' }}>
+                                {isCorrect ? '✓ Correct' : '✗ Try this way'}
+                              </span>
+                            )}
+                          </div>
 
-                    {isChecked && !isCorrect && (
-                      <div className="percentages-step-formula">
-                        <p style={{ fontWeight: '800', margin: '0 0 6px 0' }}>💡 Let us see how:</p>
-                        {step.method.split('\n\n').map((line, i) => (
-                          <div key={i} style={{ marginBottom: '8px' }}>{line}</div>
-                        ))}
-                      </div>
-                    )}
+                          {!isChecked && isActive && (
+                            <div style={{ display: 'flex', gap: '15px', marginTop: '15px', flexWrap: 'wrap' }}>
+                              <input
+                                className="answer-input"
+                                type="text"
+                                value={stepwiseState.answers[idx]}
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setStepwiseState(prev => {
+                                    if (prev.questionId !== currentQuestion.id) return prev;
+                                    const nextAnsw = [...prev.answers];
+                                    nextAnsw[idx] = val;
+                                    return { ...prev, answers: nextAnsw };
+                                  });
+                                }}
+                                placeholder={step.placeholder}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter' && stepwiseState.answers[idx].trim()) {
+                                    handleStepSubmit(idx);
+                                  }
+                                }}
+                                autoFocus
+                                style={{ flex: 1, minWidth: '150px' }}
+                              />
+                              <button
+                                onClick={() => handleStepSubmit(idx)}
+                                disabled={!stepwiseState.answers[idx].trim()}
+                                className="percentages-btn"
+                                style={{ fontSize: '1.05rem', padding: '10px 24px' }}
+                              >
+                                Check Clue 🔍
+                              </button>
+                            </div>
+                          )}
 
-                    {isChecked && !isCorrect && isActive && (
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '15px' }}>
-                        <button
-                          onClick={() => handleStepwiseContinue(idx)}
-                          className="percentages-btn"
-                          style={{ fontSize: '1.05rem', padding: '10px 24px' }}
-                        >
-                          {idx === 0 ? 'Go to Step 2 ➡️' : 'Show Full Answer 🌟'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                          {isChecked && !isCorrect && (
+                            <div className="percentages-step-formula">
+                              <p style={{ fontWeight: '800', margin: '0 0 6px 0' }}>💡 Let us see how:</p>
+                              {step.method.split('\n\n').map((line, i) => (
+                                <div key={i} style={{ marginBottom: '8px' }}>{line}</div>
+                              ))}
+                            </div>
+                          )}
 
-              {stepwiseState.showRecap && currentQuestion && (
-                <div className="percentages-celebration-popup percentages-pop-in" style={{ marginTop: '25px', background: '#FFF8E1', borderColor: '#FFD54F' }}>
-                  <div className="celebration-emoji-burst">🌟 🦉 🌟</div>
-                  <h2>Let's see how we solved it!</h2>
-                  <div className="percentages-step-formula" style={{ whiteSpace: 'pre-line', textAlign: 'left', marginBottom: '20px' }}>
-                    {currentQuestion.explanation}
-                  </div>
-                  <div className="button-row" style={{ justifyContent: 'center' }}>
-                    <button onClick={handleNextQuestionStepwise} className="percentages-btn">
-                      Next Question ➡️
-                    </button>
-                  </div>
-                </div>
-              )}
+                          {isChecked && !isCorrect && isActive && (
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '15px' }}>
+                              <button
+                                onClick={() => handleStepwiseContinue(idx)}
+                                className="percentages-btn"
+                                style={{ fontSize: '1.05rem', padding: '10px 24px' }}
+                              >
+                                {idx === 0 ? 'Go to Step 2 ➡️' : 'Show Full Answer 🌟'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()
+                  )
+                )}
+              </div>
             </div>
           ) : (
             <div className={shake ? 'shake-animation' : ''}>
