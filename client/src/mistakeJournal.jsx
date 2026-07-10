@@ -22,6 +22,7 @@ const API = (typeof import.meta !== 'undefined' && import.meta.env && import.met
 const AUTH_TOKEN_KEY = 'tenali-auth-token';
 const GUEST_KEY      = 'tenali-mistake-journal:guest';
 const BADGE_KEY      = 'tenali-mistake-journal:badge';
+const MJ_OPENED_FLAG = 'tenali-mj:hasOpened'; // user has opened the book at least once with mistakes
 const AUTH_EVENT     = 'tenali-auth-change';
 
 const MAX_GUEST = 200; // hard cap on guest queue size
@@ -498,7 +499,16 @@ const selectStyle = {
 function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesCancel, onToggleReviewed, onDelete, stats, onBack }) {
   const N = items.length;
   const totalSpreads = Math.max(1, Math.ceil(N / 2));   // pairs + at least 1 (cover)
-  const [opened, setOpened] = useState(false);          // cover closed at first
+  // Cover-skip behaviour: after the user has opened the book at least once
+  // AND they currently have mistakes, skip the cover and land on spread 0.
+  // First-ever open (no flag) shows the cover so the empty / first-time
+  // experience is preserved. If items is empty, we stay on the cover (it
+  // shows the empty-state copy there).
+  const [opened, setOpened] = useState(() => {
+    if (N === 0) return false;
+    try { return localStorage.getItem(MJ_OPENED_FLAG) === '1'; }
+    catch { return false; }
+  });
   const [spreadIdx, setSpreadIdx] = useState(0);        // current pair index
   const [flipping, setFlipping] = useState(false);      // mid-flip guard
 
@@ -510,9 +520,13 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
   const flipForward = useCallback(() => {
     if (flipping) return;
     if (!opened) {
-      // Cover → open the book to spread 0
+      // Cover → open the book to spread 0. Persist a flag so future visits
+      // with mistakes skip the cover and land on spread 0 directly.
       setFlipping(true);
       setOpened(true);
+      if (N > 0) {
+        try { localStorage.setItem(MJ_OPENED_FLAG, '1'); } catch {}
+      }
       setTimeout(() => setFlipping(false), 780);
       return;
     }
