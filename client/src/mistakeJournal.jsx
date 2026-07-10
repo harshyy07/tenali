@@ -193,11 +193,12 @@ export async function mergeGuestMistakes() {
 // ─── BADGE HOOK ───────────────────────────────────────────────────────────────
 
 /**
- * Returns { unreviewed, loading, refresh } for the home tile.
+ * Returns { unreviewed, total, loading, refresh } for the home tile.
  * Auto-refreshes on auth change + custom invalidate event.
  */
 export function useMistakeBadge() {
   const [count, setCount] = useState(() => loadBadge().unreviewed);
+  const [total, setTotal] = useState(() => loadBadge().total || 0);
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -205,7 +206,8 @@ export function useMistakeBadge() {
       // Guest: derive from local guest queue length
       const c = loadGuest().length;
       setCount(c);
-      saveBadge(c);
+      setTotal(c);
+      saveBadge({ unreviewed: c, total: c });
       return c;
     }
     setLoading(true);
@@ -214,8 +216,10 @@ export function useMistakeBadge() {
       if (!r.ok) return 0;
       const data = await r.json();
       const u = Number(data.unreviewed) || 0;
+      const t = Number(data.total) || 0;
       setCount(u);
-      saveBadge(u);
+      setTotal(t);
+      saveBadge({ unreviewed: u, total: t });
       return u;
     } catch (_) {
       return 0;
@@ -244,7 +248,7 @@ export function useMistakeBadge() {
     };
   }, [refresh]);
 
-  return { unreviewed: count, loading, refresh };
+  return { unreviewed: count, total, loading, refresh };
 }
 
 // ─── MAIN UI ──────────────────────────────────────────────────────────────────
@@ -431,18 +435,12 @@ export function MistakeJournal({ onBack }) {
 
       {loading && <div style={{ color: 'var(--clr-text-soft)', padding: 12 }}>Loading…</div>}
 
-      {!loading && items.length === 0 && !error && (
-        <EmptyState
-          hasFilters={Boolean(filter.type || filter.reviewed || filter.q)}
-          guestCount={loadGuest().length}
-        />
-      )}
-
       {/* Mistake Book — 3D page-flip metaphor. Each "leaf" is a two-sided
           page: front = mistake N, back = mistake N+1. Leaf 0 front = cover;
           last leaf back = back cover. Click right edge to flip forward,
-          left edge to flip back. Keyboard arrows also work. */}
-      {!loading && !error && items.length > 0 && (
+          left edge to flip back. Keyboard arrows also work. Renders even
+          when there are 0 mistakes so the user always sees the book. */}
+      {!loading && !error && (
         <MistakeBook
           items={items}
           editingNotes={editingNotes}
@@ -800,12 +798,13 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
 }
 
 function BookCover({ stats, totalCount }) {
+  const isEmpty = totalCount === 0;
   return (
     <div className="mj-cover-content">
-      <div className="mj-cover-mark">📖</div>
+      <div className="mj-cover-mark">{isEmpty ? '🌱' : '📖'}</div>
       <div>
         <h1 className="mj-cover-title">Mistake Journal</h1>
-        <p className="mj-cover-sub">A workbook of lessons learned</p>
+        <p className="mj-cover-sub">{isEmpty ? 'A clean slate — keep it that way.' : 'A workbook of lessons learned'}</p>
         <div className="mj-cover-stats">
           <div>
             <strong>{totalCount}</strong>
@@ -820,8 +819,13 @@ function BookCover({ stats, totalCount }) {
             <span>topics</span>
           </div>
         </div>
+        {isEmpty && (
+          <div className="mj-cover-empty-hint">
+            Wrong answers will be logged here automatically as you quiz.
+          </div>
+        )}
       </div>
-      <div className="mj-cover-hint">click the right edge to open →</div>
+      <div className="mj-cover-hint">{isEmpty ? 'click → to peek inside' : 'click the right edge to open →'}</div>
     </div>
   );
 }

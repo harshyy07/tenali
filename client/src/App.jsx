@@ -36342,10 +36342,34 @@ function Home({ onSelect }) {
       <div className="menu-grid" ref={gridRef}>
         {filteredRegular.map((app) => {
           const showBadge = app.key === 'mistakeJournal' && mistakeBadge.unreviewed > 0
+          const isBookTile = app.key === 'mistakeJournal'
           return (
-            <button key={app.key} className={`menu-card ${app.color}`} onClick={() => onSelect(app.key)} style={{ position: 'relative' }}>
-              <span className="menu-title">{app.icon ? `${app.icon} ${app.name}` : app.name}</span>
-              <span className="menu-subtitle">{app.subtitle}</span>
+            <button
+              key={app.key}
+              className={`menu-card ${app.color}${isBookTile ? ' menu-card--book' : ''}`}
+              onClick={() => onSelect(app.key)}
+              style={isBookTile ? { position: 'relative', overflow: 'hidden' } : { position: 'relative' }}
+            >
+              {isBookTile ? (
+                <div className="menu-book-tile">
+                  <div className="menu-book-spine" aria-hidden="true" />
+                  <div className="menu-book-cover">
+                    <div className="menu-book-mark">📖</div>
+                    <span className="menu-book-title">{app.name}</span>
+                    <span className="menu-book-sub">{app.subtitle}</span>
+                    <div className="menu-book-stats">
+                      <span><strong>{mistakeBadge.total || 0}</strong> pages</span>
+                      <span><strong>{mistakeBadge.unreviewed || 0}</strong> to review</span>
+                    </div>
+                    <div className="menu-book-cta">tap to open →</div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <span className="menu-title">{app.icon ? `${app.icon} ${app.name}` : app.name}</span>
+                  <span className="menu-subtitle">{app.subtitle}</span>
+                </>
+              )}
               {showBadge && (
                 <span style={{
                   position: 'absolute', top: 8, right: 8,
@@ -36354,6 +36378,7 @@ function Home({ onSelect }) {
                   fontSize: '0.8rem', fontWeight: 600,
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                  zIndex: 2,
                 }} title={`${mistakeBadge.unreviewed} unreviewed mistake${mistakeBadge.unreviewed === 1 ? '' : 's'}`}>
                   {mistakeBadge.unreviewed > 99 ? '99+' : mistakeBadge.unreviewed}
                 </span>
