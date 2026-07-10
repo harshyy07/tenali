@@ -36131,16 +36131,17 @@ function MistakeJournalWidget({ onOpen }) {
   const { unreviewed, loading } = useMistakeBadge()
   if (loading) return null
   const count = Number(unreviewed) || 0
+  // Compact pill: book icon + count badge only. Hover tooltip carries the
+  // longer "Mistake Journal — N unreviewed" copy so it stays out of the way.
   return (
     <button
       type="button"
       className={`mj-widget mj-sage ${count > 0 ? 'mj-widget--active' : ''}`}
       onClick={onOpen}
-      title={count > 0 ? `Review your ${count} unreviewed mistake${count === 1 ? '' : 's'}` : 'Open Mistake Journal'}
+      title={count > 0 ? `Mistake Journal — ${count} unreviewed` : 'Mistake Journal'}
       aria-label="Open Mistake Journal"
     >
       <span className="mj-widget-icon" aria-hidden="true">📖</span>
-      <span className="mj-widget-label">Mistake Journal</span>
       {count > 0 && (
         <span className="mj-widget-badge">
           {count > 99 ? '99+' : count}
