@@ -266,7 +266,7 @@ export function MistakeJournal({ onBack }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [editingNotes, setEditingNotes] = useState({}); // id -> string
-  const limit = 25;
+  const limit = 1000; // effectively unlimited for typical journal sizes; pagination UI removed
   const qDebounce = useRef(null);
 
   const fetchList = useCallback(async () => {
@@ -380,19 +380,7 @@ export function MistakeJournal({ onBack }) {
     <div className="mj-screen-soft" style={{ maxWidth: 960, margin: '0 auto', padding: '10px 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, paddingBottom: 6, borderBottom: '1px solid var(--mj-line-soft)' }}>
         <button className="back-button" onClick={onBack}>← Home</button>
-        <h1 style={{ margin: 0, fontWeight: 600, letterSpacing: '-0.01em' }}>📝 Mistake Journal</h1>
-      </div>
-
-      {/* Stats strip */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-        gap: 10, marginBottom: 16,
-      }}>
-        <StatCard label="Total"     value={stats.total} />
-        <StatCard label="Unreviewed" value={stats.unreviewed} accent />
-        <StatCard label="Topics"    value={Object.keys(stats.byType || {}).length} />
-        <StatCard label="Guest queue" value={loadGuest().length} subtle />
+        <h1 style={{ margin: 0, fontWeight: 600, letterSpacing: '-0.01em' }}>📖 Mistake Journal</h1>
       </div>
 
       {/* Filter bar */}
@@ -453,126 +441,11 @@ export function MistakeJournal({ onBack }) {
           onBack={onBack}
         />
       )}
-
-      {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, marginTop: 18 }}>
-          <button disabled={page === 0} onClick={() => setPage(p => Math.max(0, p - 1))} style={pageBtn}>← Prev</button>
-          <span style={{ color: 'var(--clr-text-soft)' }}>Page {page + 1} of {totalPages} ({total} total)</span>
-          <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)} style={pageBtn}>Next →</button>
-        </div>
-      )}
     </div>
   );
 }
 
 // ─── SUB-COMPONENTS ───────────────────────────────────────────────────────────
-
-function StatCard({ label, value, accent, subtle }) {
-  return (
-    <div style={{
-      padding: '12px 14px', borderRadius: 10,
-      background: 'var(--clr-surface)', border: '1px solid var(--clr-border)',
-      color: accent ? 'var(--clr-accent)' : (subtle ? 'var(--clr-text-soft)' : 'var(--clr-text)'),
-    }}>
-      <div style={{ fontSize: '0.78rem', opacity: 0.8, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</div>
-      <div style={{ fontSize: '1.6rem', fontWeight: 600, marginTop: 2 }}>{value}</div>
-    </div>
-  );
-}
-
-function EmptyState({ hasFilters, guestCount }) {
-  if (hasFilters) {
-    return (
-      <div style={{ padding: 24, textAlign: 'center', color: 'var(--clr-text-soft)' }}>
-        No mistakes match the current filters.
-      </div>
-    );
-  }
-  return (
-    <div style={{ padding: 32, textAlign: 'center', color: 'var(--clr-text-soft)' }}>
-      <div style={{ fontSize: '2.2rem', marginBottom: 6 }}>📝</div>
-      <div style={{ fontSize: '1.05rem' }}>No mistakes yet. Great job!</div>
-      <div style={{ fontSize: '0.9rem', marginTop: 6 }}>
-        Wrong answers will appear here automatically.
-        {guestCount > 0 && <> You have <strong>{guestCount}</strong> in your guest queue — sign in to sync them to your account.</>}
-      </div>
-    </div>
-  );
-}
-
-function MistakeRow({ item, notes, onNotesChange, onNotesSave, onNotesCancel, onToggle, onDelete }) {
-  const [editingNote, setEditingNote] = useState(false);
-  const isReviewed = Boolean(item.reviewedAt);
-  const typeLabel = TYPE_LABELS[item.quizType] || defaultLabel(item.quizType);
-  const when = formatDate(item.ts);
-
-  return (
-    <li style={{
-      padding: '12px 14px', borderRadius: 10,
-      background: 'var(--clr-surface)', border: '1px solid var(--clr-border)',
-      opacity: isReviewed ? 0.75 : 1,
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap' }}>
-        <div style={{ minWidth: 0, flex: '1 1 200px' }}>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 4 }}>
-            <span style={{
-              fontSize: '0.75rem', padding: '2px 8px', borderRadius: 999,
-              background: 'var(--clr-bg-2)', color: 'var(--clr-text-soft)',
-              border: '1px solid var(--clr-border)',
-            }}>{typeLabel}</span>
-            <span style={{ fontSize: '0.78rem', color: 'var(--clr-text-soft)' }}>{when}</span>
-            {isReviewed && <span style={{ fontSize: '0.72rem', color: 'var(--clr-correct, #26de81)' }}>✓ reviewed</span>}
-          </div>
-          <div style={{ fontSize: '0.95rem', fontFamily: 'monospace', color: 'var(--clr-text)' }}>
-            {item.prompt}
-          </div>
-          <div style={{ fontSize: '0.9rem', marginTop: 4 }}>
-            <span style={{ color: 'var(--clr-wrong, #ff6b6b)' }}>Your answer: {item.userAnswer || '∅'}</span>
-            {item.correctAnswer && (
-              <span style={{ color: 'var(--clr-correct, #26de81)', marginLeft: 10 }}>Correct: {item.correctAnswer}</span>
-            )}
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-          <button onClick={onToggle} style={smallBtn}>
-            {isReviewed ? 'Mark unreviewed' : 'Mark reviewed'}
-          </button>
-          <button onClick={onDelete} style={{ ...smallBtn, color: 'var(--clr-wrong, #ff6b6b)' }}>Delete</button>
-        </div>
-      </div>
-
-      <div style={{ marginTop: 8 }}>
-        {!editingNote && (
-          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-            <div style={{ flex: 1, fontSize: '0.85rem', color: notes ? 'var(--clr-text-soft)' : 'var(--clr-text-soft)', fontStyle: notes ? 'normal' : 'italic' }}>
-              {notes ? ('📌 ' + notes) : 'No notes yet'}
-            </div>
-            <button onClick={() => setEditingNote(true)} style={linkBtn}>Edit note</button>
-          </div>
-        )}
-        {editingNote && (
-          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-            <textarea
-              value={notes}
-              onChange={(e) => onNotesChange(e.target.value)}
-              rows={2}
-              placeholder="What did you learn? What pattern did you spot?"
-              style={{
-                flex: 1, padding: '6px 8px', borderRadius: 6,
-                border: '1px solid var(--clr-border)',
-                background: 'var(--clr-bg-2)', color: 'var(--clr-text)',
-                fontFamily: 'inherit', fontSize: '0.9rem', resize: 'vertical',
-              }}
-            />
-            <button onClick={() => onNotesSave(notes)} style={smallBtn}>Save</button>
-            <button onClick={onNotesCancel} style={{ ...smallBtn, color: 'var(--clr-text-soft)' }}>Cancel</button>
-          </div>
-        )}
-      </div>
-    </li>
-  );
-}
 
 function formatDate(iso) {
   if (!iso) return '';
@@ -597,23 +470,8 @@ const selectStyle = {
   background: 'var(--clr-bg-2)', color: 'var(--clr-text)',
 };
 
-const smallBtn = {
-  padding: '6px 10px', borderRadius: 6,
-  background: 'transparent', color: 'var(--clr-accent)',
-  border: '1px solid var(--clr-accent)', cursor: 'pointer',
-  fontSize: '0.82rem',
-};
 
-const linkBtn = {
-  background: 'transparent', border: 'none', padding: 0,
-  color: 'var(--clr-accent)', cursor: 'pointer', fontSize: '0.82rem',
-};
 
-const pageBtn = {
-  padding: '6px 12px', borderRadius: 6,
-  background: 'var(--clr-surface)', color: 'var(--clr-text)',
-  border: '1px solid var(--clr-border)', cursor: 'pointer',
-};
 
 // ─── MISTAKE BOOK ─────────────────────────────────────────────────────────────
 // A 3D book metaphor for browsing mistakes. Each "leaf" is a two-sided page.
