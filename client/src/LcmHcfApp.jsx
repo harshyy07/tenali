@@ -84,9 +84,7 @@ export default function InteractiveLcmHcfApp({ onBack }) {
   const [unlockedCollectibles, setUnlockedCollectibles] = useState({}); // { level_stepIndex: bool }
 
   // --- Confidence State ---
-  const [, setConfidence] = useState(null); // 'very', 'mod', 'not'
-  const [showRevisionModal, setShowRevisionModal] = useState(false);
-  const [revisionOption, setRevisionOption] = useState(null); // 'not' or 'mod'
+  const [confidence, setConfidence] = useState(null); // 'very', 'mod', 'not'
 
   // --- Quiz State ---
   const [quizQuestions, setQuizQuestions] = useState([]);
@@ -101,15 +99,198 @@ export default function InteractiveLcmHcfApp({ onBack }) {
   // --- Activity State Helpers ---
   const [activityState, setActivityState] = useState({});
 
-  // Reset slide index when step changes
+  // Reset slide index and initialize dynamic activity values when step or level changes
   useEffect(() => {
     setCurrentSlide(0);
     setWhyOpen(false);
     setWhyAnswer('');
     setWhyFeedback(null);
     setActivityPopup(null);
-    setActivityState({});
-  }, [currentStep]);
+    
+    // Initialize activity parameters dynamically based on currentStep and level
+    const initialActivityState = {};
+    if (currentStep === 1) {
+      // Step 1: Prime numbers
+      let numbers = [];
+      let primes = [];
+      if (level === 1) {
+        numbers = [2, 3, 4, 6, 7, 8, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 22, 23, 24, 25];
+        primes = [2, 3, 7, 11, 13, 17, 19, 23];
+      } else if (level === 2) {
+        numbers = [5, 9, 12, 13, 15, 17, 21, 23, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49];
+        primes = [5, 13, 17, 23, 29, 31, 37, 41, 43, 47];
+      } else {
+        numbers = [47, 51, 53, 57, 59, 61, 63, 67, 69, 71, 73, 77, 79, 81, 83, 87, 89, 91, 93, 97];
+        primes = [47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+      }
+      initialActivityState.numbers = numbers;
+      initialActivityState.primes = primes;
+      initialActivityState.clickedPrimes = [];
+      initialActivityState.wrongPrimes = [];
+    } else if (currentStep === 2) {
+      // Step 2: Factors of a target number
+      let target = 12;
+      let allOptions = [];
+      let correctFactors = [];
+      if (level === 1) {
+        target = 12;
+        allOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12];
+        correctFactors = [1, 2, 3, 4, 6, 12];
+      } else if (level === 2) {
+        target = 24;
+        allOptions = [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24];
+        correctFactors = [1, 2, 3, 4, 6, 8, 12, 24];
+      } else {
+        target = 36;
+        allOptions = [1, 2, 3, 4, 5, 6, 8, 9, 12, 16, 18, 24, 36];
+        correctFactors = [1, 2, 3, 4, 6, 9, 12, 18, 36];
+      }
+      initialActivityState.target = target;
+      initialActivityState.allOptions = allOptions;
+      initialActivityState.correctFactors = correctFactors;
+      initialActivityState.selectedFactors = [];
+    } else if (currentStep === 3) {
+      // Step 3: Prime Factors tree
+      let target = 18;
+      if (level === 1) target = 12;
+      else if (level === 2) target = 18;
+      else target = 30;
+      initialActivityState.target = target;
+      initialActivityState.treeStep = 0;
+    } else if (currentStep === 4) {
+      // Step 4: LCM jumps
+      let jumpA = 3, jumpB = 4, maxVal = 16, lcmVal = 12;
+      if (level === 1) {
+        jumpA = 2; jumpB = 3; maxVal = 8; lcmVal = 6;
+      } else if (level === 2) {
+        jumpA = 3; jumpB = 4; maxVal = 16; lcmVal = 12;
+      } else {
+        jumpA = 3; jumpB = 5; maxVal = 20; lcmVal = 15;
+      }
+      initialActivityState.jumpA = jumpA;
+      initialActivityState.jumpB = jumpB;
+      initialActivityState.maxVal = maxVal;
+      initialActivityState.lcmVal = lcmVal;
+      initialActivityState.jumpsA = 0;
+      initialActivityState.jumpsB = 0;
+    } else if (currentStep === 5) {
+      // Step 5: HCF Venn Diagram
+      let numA = 12, numB = 18;
+      let leftOnly = [4, 12];
+      let rightOnly = [9, 18];
+      let both = [1, 2, 3, 6];
+      let allNums = [1, 2, 3, 4, 6, 9, 12, 18];
+      
+      if (level === 1) {
+        numA = 8; numB = 12;
+        leftOnly = [8];
+        rightOnly = [3, 6, 12];
+        both = [1, 2, 4];
+        allNums = [1, 2, 3, 4, 6, 8, 12];
+      } else if (level === 2) {
+        numA = 12; numB = 18;
+        leftOnly = [4, 12];
+        rightOnly = [9, 18];
+        both = [1, 2, 3, 6];
+        allNums = [1, 2, 3, 4, 6, 9, 12, 18];
+      } else {
+        numA = 18; numB = 24;
+        leftOnly = [9];
+        rightOnly = [4, 8, 12, 24];
+        both = [1, 2, 3, 6];
+        allNums = [1, 2, 3, 4, 6, 8, 9, 12, 18, 24];
+      }
+      initialActivityState.numA = numA;
+      initialActivityState.numB = numB;
+      initialActivityState.leftOnly = leftOnly;
+      initialActivityState.rightOnly = rightOnly;
+      initialActivityState.both = both;
+      initialActivityState.allNums = allNums;
+      initialActivityState.placements = {};
+      allNums.forEach(n => { initialActivityState.placements[n] = 'pool'; });
+    } else if (currentStep === 6) {
+      // Step 6: How to Find LCM
+      let numA = 3, numB = 4;
+      let listA = [3, 6, 9, 12, 15, 18, 21, 24];
+      let listB = [4, 8, 12, 16, 20, 24];
+      let common = [12, 24];
+      let lcmVal = 12;
+      
+      if (level === 1) {
+        numA = 2; numB = 3;
+        listA = [2, 4, 6, 8, 10, 12];
+        listB = [3, 6, 9, 12];
+        common = [6, 12];
+        lcmVal = 6;
+      } else if (level === 2) {
+        numA = 3; numB = 4;
+        listA = [3, 6, 9, 12, 15, 18, 21, 24];
+        listB = [4, 8, 12, 16, 20, 24];
+        common = [12, 24];
+        lcmVal = 12;
+      } else {
+        numA = 4; numB = 5;
+        listA = [4, 8, 12, 16, 20, 24, 28, 32, 36, 40];
+        listB = [5, 10, 15, 20, 25, 30, 35, 40];
+        common = [20, 40];
+        lcmVal = 20;
+      }
+      initialActivityState.numA = numA;
+      initialActivityState.numB = numB;
+      initialActivityState.listA = listA;
+      initialActivityState.listB = listB;
+      initialActivityState.common = common;
+      initialActivityState.lcmVal = lcmVal;
+      initialActivityState.selectedLcmMults = [];
+    } else if (currentStep === 7) {
+      // Step 7: How to Find HCF
+      let numA = 8, numB = 20;
+      let factorsA = [1, 2, 4, 8];
+      let factorsB = [1, 2, 4, 5, 10, 20];
+      let common = [1, 2, 4];
+      let hcfVal = 4;
+      
+      if (level === 1) {
+        numA = 6; numB = 9;
+        factorsA = [1, 2, 3, 6];
+        factorsB = [1, 3, 9];
+        common = [1, 3];
+        hcfVal = 3;
+      } else if (level === 2) {
+        numA = 8; numB = 20;
+        factorsA = [1, 2, 4, 8];
+        factorsB = [1, 2, 4, 5, 10, 20];
+        common = [1, 2, 4];
+        hcfVal = 4;
+      } else {
+        numA = 12; numB = 30;
+        factorsA = [1, 2, 3, 4, 6, 12];
+        factorsB = [1, 2, 3, 5, 6, 10, 15, 30];
+        common = [1, 2, 3, 6];
+        hcfVal = 6;
+      }
+      initialActivityState.numA = numA;
+      initialActivityState.numB = numB;
+      initialActivityState.factorsA = factorsA;
+      initialActivityState.factorsB = factorsB;
+      initialActivityState.common = common;
+      initialActivityState.hcfVal = hcfVal;
+      initialActivityState.selectedHcfFacts = [];
+    } else if (currentStep === 8) {
+      if (level === 2) {
+        initialActivityState.numA = 18;
+        initialActivityState.numB = 30;
+        initialActivityState.dnaA = "2 × 3 × 3";
+        initialActivityState.dnaB = "2 × 3 × 5";
+        initialActivityState.primePairs = [];
+      } else if (level === 3) {
+        initialActivityState.numA = 45;
+        initialActivityState.numB = 105;
+        initialActivityState.divStep = 0;
+      }
+    }
+    setActivityState(initialActivityState);
+  }, [currentStep, level]);
 
   // Reset progression when level changes
   useEffect(() => {
@@ -158,12 +339,12 @@ export default function InteractiveLcmHcfApp({ onBack }) {
     switch (stepIndex) {
       case 1: {
         const clicked = activityState.clickedPrimes || [];
-        const primes = [2, 5, 11, 13, 17, 19, 23, 29, 31];
+        const primes = activityState.primes || [2, 5, 11, 13, 17, 19, 23, 29, 31];
         return clicked.length === primes.length;
       }
       case 2: {
         const selected = activityState.selectedFactors || [];
-        const correctFactors = [1, 2, 3, 4, 6, 12];
+        const correctFactors = activityState.correctFactors || [1, 2, 3, 4, 6, 12];
         return correctFactors.every(f => selected.includes(f)) && selected.every(f => correctFactors.includes(f));
       }
       case 3: {
@@ -171,19 +352,22 @@ export default function InteractiveLcmHcfApp({ onBack }) {
         return step === 3;
       }
       case 4: {
-        const jumps3 = activityState.jumps3 || 0;
-        const jumps4 = activityState.jumps4 || 0;
-        const pos3 = jumps3 * 3;
-        const pos4 = jumps4 * 4;
-        return pos3 > 0 && pos3 === pos4 && pos3 === 12;
+        const jumpsA = activityState.jumpsA || 0;
+        const jumpsB = activityState.jumpsB || 0;
+        const jumpA = activityState.jumpA || 3;
+        const jumpB = activityState.jumpB || 4;
+        const posA = jumpsA * jumpA;
+        const posB = jumpsB * jumpB;
+        const lcmVal = activityState.lcmVal || 12;
+        return posA > 0 && posA === posB && posA === lcmVal;
       }
       case 5: {
         const currentPlacements = activityState.placements || {};
-        const allNums = [1, 2, 3, 4, 6, 9, 12, 18];
+        const allNums = activityState.allNums || [1, 2, 3, 4, 6, 9, 12, 18];
         if (Object.keys(currentPlacements).length === 0) return false;
-        const leftOnly = [4, 12];
-        const rightOnly = [9, 18];
-        const both = [1, 2, 3, 6];
+        const leftOnly = activityState.leftOnly || [4, 12];
+        const rightOnly = activityState.rightOnly || [9, 18];
+        const both = activityState.both || [1, 2, 3, 6];
         return allNums.every(n => {
           const p = currentPlacements[n];
           if (leftOnly.includes(n)) return p === 'left';
@@ -194,12 +378,12 @@ export default function InteractiveLcmHcfApp({ onBack }) {
       }
       case 6: {
         const selected = activityState.selectedLcmMults || [];
-        const common = [12, 24];
+        const common = activityState.common || [12, 24];
         return common.every(c => selected.includes(c)) && selected.length === common.length;
       }
       case 7: {
         const selected = activityState.selectedHcfFacts || [];
-        const common = [1, 2, 4];
+        const common = activityState.common || [1, 2, 4];
         return common.every(c => selected.includes(c)) && selected.length === common.length;
       }
       case 8: {
@@ -490,26 +674,21 @@ export default function InteractiveLcmHcfApp({ onBack }) {
 
   // 1. Prime Numbers Activity: Click the primes
   const renderPrimeActivity = () => {
-    const numbers = [2, 4, 5, 8, 9, 11, 12, 13, 15, 17, 18, 19, 21, 23, 25, 27, 29, 30, 31, 33];
-    const primes = [2, 5, 11, 13, 17, 19, 23, 29, 31];
+    const numbers = activityState.numbers || [2, 4, 5, 8, 9, 11, 12, 13, 15, 17, 18, 19, 21, 23, 25, 27, 29, 30, 31, 33];
+    const primes = activityState.primes || [2, 5, 11, 13, 17, 19, 23, 29, 31];
     
     const clicked = activityState.clickedPrimes || [];
     const wrong = activityState.wrongPrimes || [];
     const done = clicked.length === primes.length;
 
     const explainWhyNotPrime = (n) => {
-      if (n === 4) return "4 is an even number (2 × 2), so it is not a prime number.";
-      if (n === 8) return "8 is an even number (2 × 4), so it is not a prime number.";
-      if (n === 9) return "9 is divisible by 3 (3 × 3), so it is not a prime number.";
-      if (n === 12) return "12 is even and has factors 1, 2, 3, 4, 6, and 12, so it is not a prime number.";
-      if (n === 15) return "15 is divisible by 3 and 5 (3 × 5), so it is not a prime number.";
-      if (n === 18) return "18 is even (2 × 9), so it is not a prime number.";
-      if (n === 21) return "21 is divisible by 3 and 7 (3 × 7), so it is not a prime number.";
-      if (n === 25) return "25 is divisible by 5 (5 × 5), so it is not a prime number.";
-      if (n === 27) return "27 is divisible by 3 and 9 (3 × 9), so it is not a prime number.";
-      if (n === 30) return "30 is even (2 × 15) and has many factors, so it is not a prime number.";
-      if (n === 33) return "33 is divisible by 3 and 11 (3 × 11), so it is not a prime number.";
-      return `${n} is not a prime number because it has divisors other than 1 and itself.`;
+      // Find the smallest divisor greater than 1
+      let divisor = 2;
+      while (divisor < n) {
+        if (n % divisor === 0) break;
+        divisor++;
+      }
+      return `${n} is not a prime number because it is divisible by ${divisor} (${divisor} × ${n / divisor} = ${n}).`;
     };
 
     const handleSelect = (n) => {
@@ -563,11 +742,11 @@ export default function InteractiveLcmHcfApp({ onBack }) {
     );
   };
 
-  // 2. Factors Activity: Find factors of 12
+  // 2. Factors Activity: Find factors of target
   const renderFactorsActivity = () => {
-    const target = 12;
-    const allOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12];
-    const correctFactors = [1, 2, 3, 4, 6, 12];
+    const target = activityState.target || 12;
+    const allOptions = activityState.allOptions || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12];
+    const correctFactors = activityState.correctFactors || [1, 2, 3, 4, 6, 12];
     
     const selected = activityState.selectedFactors || [];
     const done = correctFactors.every(f => selected.includes(f)) && selected.every(f => correctFactors.includes(f));
@@ -583,7 +762,7 @@ export default function InteractiveLcmHcfApp({ onBack }) {
         } else {
           setActivityPopup({
             title: 'Not a Factor',
-            text: `${n} is not a factor of 12. 12 is not perfectly divisible by ${n} (12 ÷ ${n} leaves a remainder of ${12 % n}).`,
+            text: `${n} is not a factor of ${target}. ${target} is not perfectly divisible by ${n} (${target} ÷ ${n} leaves a remainder of ${target % n}).`,
             type: 'error'
           });
         }
@@ -612,7 +791,7 @@ export default function InteractiveLcmHcfApp({ onBack }) {
         <div style={{ marginTop: '20px' }}>
           {done ? (
             <p style={{ color: 'var(--clr-correct)', fontWeight: 'bold' }}>
-              🎉 Perfect! {correctFactors.join(', ')} are all the factors of 12! Click "Next".
+              🎉 Perfect! {correctFactors.join(', ')} are all the factors of {target}! Click "Next".
             </p>
           ) : (
             <p style={{ color: 'var(--clr-text-soft)', fontSize: '0.85rem' }}>
@@ -624,20 +803,20 @@ export default function InteractiveLcmHcfApp({ onBack }) {
     );
   };
 
-  // 3. Prime Factors Activity: Factor Tree builder for 18
+  // 3. Prime Factors Activity: Factor Tree builder
   const renderPrimeFactorsActivity = () => {
-    // 18 splits into 2 and 9, 9 splits into 3 and 3
+    const target = activityState.target || 18;
     const step = activityState.treeStep || 0; // 0: start, 1: split 18, 2: split 9, 3: completed
     
     return (
       <div className="activity-box" style={{ minHeight: '260px' }}>
         <p style={{ fontWeight: 'bold', marginBottom: '12px' }}>
-          Let's build a Factor Tree to find the prime factors of <span style={{ color: 'var(--clr-accent)' }}>18</span>:
+          Let's build a Factor Tree to find the prime factors of <span style={{ color: 'var(--clr-accent)' }}>{target}</span>:
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Root node */}
-          <div className="tree-node-circle">18</div>
+          <div className="tree-node-circle">{target}</div>
 
           {step >= 1 && (
             <div className="tree-branches">
@@ -647,14 +826,14 @@ export default function InteractiveLcmHcfApp({ onBack }) {
               </div>
               <div className="tree-node-wrapper">
                 <div className="tree-node-circle" style={step >= 2 ? { background: 'var(--clr-badge)' } : { borderStyle: 'dashed' }}>
-                  {step >= 2 ? '9' : '?'}
+                  {step >= 2 ? (target / 2) : '?'}
                 </div>
                 {step < 2 && (
                   <button 
                     onClick={() => setActivityState({ ...activityState, treeStep: 2 })}
                     style={{ marginTop: '6px', padding: '4px 8px', fontSize: '0.75rem', cursor: 'pointer' }}
                   >
-                    18 = 2 × ?
+                    {target} = 2 × ?
                   </button>
                 )}
               </div>
@@ -665,19 +844,19 @@ export default function InteractiveLcmHcfApp({ onBack }) {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '12px' }}>
               <div className="tree-branches">
                 <div className="tree-node-wrapper">
-                  <div className="tree-node-circle prime">{step >= 3 ? '3' : '?'}</div>
+                  <div className="tree-node-circle prime">{step >= 3 ? (target === 12 ? 2 : 3) : '?'}</div>
                   {step === 2 && (
                     <button 
                       onClick={() => setActivityState({ ...activityState, treeStep: 3 })}
                       style={{ marginTop: '6px', padding: '4px 8px', fontSize: '0.75rem', cursor: 'pointer' }}
                     >
-                      9 = 3 × ?
+                      {target / 2} = {target === 12 ? 2 : 3} × ?
                     </button>
                   )}
                   {step >= 3 && <div style={{ fontSize: '0.75rem', color: 'var(--clr-accent)', marginTop: '4px' }}>Prime!</div>}
                 </div>
                 <div className="tree-node-wrapper">
-                  <div className="tree-node-circle prime">{step >= 3 ? '3' : '?'}</div>
+                  <div className="tree-node-circle prime">{step >= 3 ? (target === 12 ? 3 : (target === 18 ? 3 : 5)) : '?'}</div>
                   {step >= 3 && <div style={{ fontSize: '0.75rem', color: 'var(--clr-accent)', marginTop: '4px' }}>Prime!</div>}
                 </div>
               </div>
@@ -689,17 +868,17 @@ export default function InteractiveLcmHcfApp({ onBack }) {
               onClick={() => setActivityState({ ...activityState, treeStep: 1 })}
               style={{ marginTop: '16px', padding: '8px 16px', cursor: 'pointer' }}
             >
-              Start Splitting 18
+              Start Splitting {target}
             </button>
           )}
 
           {step === 3 && (
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
               <p style={{ color: 'var(--clr-correct)', fontWeight: 'bold' }}>
-                🎉 Completed! The Prime Factors of 18 are 2 and 3.
+                🎉 Completed! The Prime Factors of {target} are {target === 30 ? '2, 3, and 5' : '2 and 3'}.
               </p>
               <p style={{ fontSize: '0.9rem', color: 'var(--clr-text-soft)' }}>
-                18 = 2 × 3 × 3 (or 2 × 3²)
+                {target} = {target === 12 ? '2 × 2 × 3 (or 2² × 3)' : (target === 18 ? '2 × 3 × 3 (or 2 × 3²)' : '2 × 3 × 5')}
               </p>
             </div>
           )}
@@ -708,46 +887,49 @@ export default function InteractiveLcmHcfApp({ onBack }) {
     );
   };
 
-  // 4. LCM Activity: Jumps on number line to find LCM of 3 and 4
+  // 4. LCM Activity: Jumps on number line to find LCM of jumpA and jumpB
   const renderLcmActivity = () => {
-    const jumps3 = activityState.jumps3 || 0;
-    const jumps4 = activityState.jumps4 || 0;
-    
-    const pos3 = jumps3 * 3;
-    const pos4 = jumps4 * 4;
+    const jumpA = activityState.jumpA || 3;
+    const jumpB = activityState.jumpB || 4;
+    const maxVal = activityState.maxVal || 16;
+    const lcmVal = activityState.lcmVal || 12;
 
-    const maxVal = 16;
+    const jumpsA = activityState.jumpsA || 0;
+    const jumpsB = activityState.jumpsB || 0;
+    
+    const posA = jumpsA * jumpA;
+    const posB = jumpsB * jumpB;
     
     // Check if they matched at LCM
-    const matched = pos3 > 0 && pos3 === pos4;
-    const isLcm = matched && pos3 === 12;
+    const matched = posA > 0 && posA === posB;
+    const isLcm = matched && posA === lcmVal;
 
     const jump = (val) => {
-      if (val === 3 && pos3 < maxVal) {
-        const nextPos = pos3 + 3;
-        if (nextPos > 12) {
+      if (val === jumpA && posA < maxVal) {
+        const nextPos = posA + jumpA;
+        if (nextPos > lcmVal) {
           setActivityPopup({
             title: 'Crossing the Range',
-            text: `Whoops! Jump to ${nextPos} crosses the Lowest Common Multiple (12). The LCM is 12, where they first meet!`,
+            text: `Whoops! Jump to ${nextPos} crosses the Lowest Common Multiple (${lcmVal}). The LCM is ${lcmVal}, where they first meet!`,
             type: 'error'
           });
         }
-        setActivityState({ ...activityState, jumps3: jumps3 + 1 });
-      } else if (val === 4 && pos4 < maxVal) {
-        const nextPos = pos4 + 4;
-        if (nextPos > 12) {
+        setActivityState({ ...activityState, jumpsA: jumpsA + 1 });
+      } else if (val === jumpB && posB < maxVal) {
+        const nextPos = posB + jumpB;
+        if (nextPos > lcmVal) {
           setActivityPopup({
             title: 'Crossing the Range',
-            text: `Whoops! Jump to ${nextPos} crosses the Lowest Common Multiple (12). The LCM is 12, where they first meet!`,
+            text: `Whoops! Jump to ${nextPos} crosses the Lowest Common Multiple (${lcmVal}). The LCM is ${lcmVal}, where they first meet!`,
             type: 'error'
           });
         }
-        setActivityState({ ...activityState, jumps4: jumps4 + 1 });
+        setActivityState({ ...activityState, jumpsB: jumpsB + 1 });
       }
     };
 
     const reset = () => {
-      setActivityState({ ...activityState, jumps3: 0, jumps4: 0 });
+      setActivityState({ ...activityState, jumpsA: 0, jumpsB: 0 });
     };
 
     // Calculate SVG coordinates
@@ -756,7 +938,7 @@ export default function InteractiveLcmHcfApp({ onBack }) {
     return (
       <div className="activity-box">
         <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>
-          Find where jumps of <span style={{ color: '#4facfe' }}>3</span> and <span style={{ color: '#e29ffb' }}>4</span> meet!
+          Find where jumps of <span style={{ color: '#e8864a' }}>{jumpA}</span> and <span style={{ color: '#ede8e3' }}>{jumpB}</span> meet!
         </p>
 
         <svg className="jump-chart-svg" viewBox="0 0 610 120">
@@ -771,43 +953,45 @@ export default function InteractiveLcmHcfApp({ onBack }) {
             </g>
           ))}
 
-          {/* Arcs for 3 */}
-          {Array.from({ length: jumps3 }).map((_, i) => {
-            const start = i * 3;
-            const end = start + 3;
+          {/* Arcs for A */}
+          {Array.from({ length: jumpsA }).map((_, i) => {
+            const start = i * jumpA;
+            const end = start + jumpA;
             const x1 = getX(start);
             const x2 = getX(end);
-            const r = (x2 - x1) / 2;
-            const path = `M ${x1} 90 A ${r} ${r} 0 0 1 ${x2} 90`;
-            return <path key={`3_${i}`} d={path} className="jump-arc" stroke="#4facfe" />;
+            const rx = (x2 - x1) / 2;
+            const ry = Math.min(rx * 0.5, 45);
+            const path = `M ${x1} 90 A ${rx} ${ry} 0 0 1 ${x2} 90`;
+            return <path key={`A_${i}`} d={path} className="jump-arc" stroke="#e8864a" />;
           })}
 
-          {/* Arcs for 4 */}
-          {Array.from({ length: jumps4 }).map((_, i) => {
-            const start = i * 4;
-            const end = start + 4;
+          {/* Arcs for B */}
+          {Array.from({ length: jumpsB }).map((_, i) => {
+            const start = i * jumpB;
+            const end = start + jumpB;
             const x1 = getX(start);
             const x2 = getX(end);
-            const r = (x2 - x1) / 2;
-            const path = `M ${x1} 90 A ${r} ${r} 0 0 1 ${x2} 90`;
-            return <path key={`4_${i}`} d={path} className="jump-arc" stroke="#e29ffb" style={{ strokeDasharray: '4,4' }} />;
+            const rx = (x2 - x1) / 2;
+            const ry = Math.min(rx * 0.5, 45);
+            const path = `M ${x1} 90 A ${rx} ${ry} 0 0 1 ${x2} 90`;
+            return <path key={`B_${i}`} d={path} className="jump-arc" stroke="#ede8e3" style={{ strokeDasharray: '4,4' }} />;
           })}
         </svg>
 
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '12px' }}>
           <button 
-            onClick={() => jump(3)} 
-            disabled={pos3 >= maxVal || isLcm}
-            style={{ background: '#4facfe', color: '#fff', opacity: pos3 >= maxVal ? 0.5 : 1 }}
+            onClick={() => jump(jumpA)} 
+            disabled={posA >= maxVal || isLcm}
+            style={{ background: '#e8864a', color: '#fff', opacity: posA >= maxVal ? 0.5 : 1 }}
           >
-            Jump 3 (+3) = {pos3 + 3}
+            Jump {jumpA} (+{jumpA}) = {posA + jumpA}
           </button>
           <button 
-            onClick={() => jump(4)} 
-            disabled={pos4 >= maxVal || isLcm}
-            style={{ background: '#e29ffb', color: '#1a1614', opacity: pos4 >= maxVal ? 0.5 : 1 }}
+            onClick={() => jump(jumpB)} 
+            disabled={posB >= maxVal || isLcm}
+            style={{ background: '#ede8e3', color: '#1a1614', opacity: posB >= maxVal ? 0.5 : 1 }}
           >
-            Jump 4 (+4) = {pos4 + 4}
+            Jump {jumpB} (+{jumpB}) = {posB + jumpB}
           </button>
           <button onClick={reset} style={{ background: 'transparent', borderColor: 'var(--clr-border)' }}>
             Reset
@@ -818,11 +1002,11 @@ export default function InteractiveLcmHcfApp({ onBack }) {
           <div style={{ marginTop: '12px' }}>
             {isLcm ? (
               <p style={{ color: 'var(--clr-correct)', fontWeight: 'bold' }}>
-                🎉 Yes! They meet at 12. This is the Lowest Common Multiple (LCM)! Click "Next".
+                🎉 Yes! They meet at {lcmVal}. This is the Lowest Common Multiple (LCM)! Click "Next".
               </p>
             ) : (
               <p style={{ color: 'var(--clr-wrong)', fontWeight: 'bold' }}>
-                They met at {pos3}, but is that the smallest? Keep going or reset!
+                They met at {posA}, but is that the smallest? Keep going or reset!
               </p>
             )}
           </div>
@@ -831,19 +1015,18 @@ export default function InteractiveLcmHcfApp({ onBack }) {
     );
   };
 
-  // 5. HCF Activity: Venn Diagram sorting of factors of 12 and 18
+  // 5. HCF Activity: Venn Diagram sorting of factors
   const renderHcfActivity = () => {
-    // Factors of 12: 1, 2, 3, 4, 6, 12
-    // Factors of 18: 1, 2, 3, 6, 9, 18
-    // Intersection: 1, 2, 3, 6 -> HCF is 6
-    const leftOnly = [4, 12];
-    const rightOnly = [9, 18];
-    const both = [1, 2, 3, 6];
+    const numA = activityState.numA || 12;
+    const numB = activityState.numB || 18;
+    const leftOnly = activityState.leftOnly || [4, 12];
+    const rightOnly = activityState.rightOnly || [9, 18];
+    const both = activityState.both || [1, 2, 3, 6];
+    const allNums = activityState.allNums || [1, 2, 3, 4, 6, 9, 12, 18];
 
     const currentPlacements = activityState.placements || {}; // { num: 'pool' | 'left' | 'right' | 'both' }
     
     // Initialize placements if not set
-    const allNums = [1, 2, 3, 4, 6, 9, 12, 18];
     if (Object.keys(currentPlacements).length === 0) {
       const initial = {};
       allNums.forEach(n => { initial[n] = 'pool'; });
@@ -866,11 +1049,11 @@ export default function InteractiveLcmHcfApp({ onBack }) {
       if (place !== correctPlace) {
         let text = '';
         if (correctPlace === 'left') {
-          text = `${num} is only a factor of 12, not 18, so it belongs only in the Factors of 12 circle.`;
+          text = `${num} is only a factor of ${numA}, not ${numB}, so it belongs only in the Factors of ${numA} circle.`;
         } else if (correctPlace === 'right') {
-          text = `${num} is only a factor of 18, not 12, so it belongs only in the Factors of 18 circle.`;
+          text = `${num} is only a factor of ${numB}, not ${numA}, so it belongs only in the Factors of ${numB} circle.`;
         } else if (correctPlace === 'both') {
-          text = `${num} is a factor of both 12 and 18, so it must go in the shared 'Both' section.`;
+          text = `${num} is a factor of both ${numA} and ${numB}, so it must go in the shared 'Both' section.`;
         }
         setActivityPopup({
           title: 'Incorrect Placement',
@@ -881,9 +1064,10 @@ export default function InteractiveLcmHcfApp({ onBack }) {
       }
 
       if (place === 'both') {
+        const hcfVal = Math.max(...both);
         setActivityPopup({
           title: 'Common Factor Found!',
-          text: `${num} is a factor of both 12 and 18. All numbers in this middle section are common factors, and the highest of them (6) is the HCF!`,
+          text: `${num} is a factor of both ${numA} and ${numB}. All numbers in this middle section are common factors, and the highest of them (${hcfVal}) is the HCF!`,
           type: 'success'
         });
       }
@@ -902,35 +1086,37 @@ export default function InteractiveLcmHcfApp({ onBack }) {
     });
 
     const getItems = (place) => allNums.filter(n => currentPlacements[n] === place);
+    const hcfVal = Math.max(...both);
 
     return (
       <div className="activity-box" style={{ minHeight: '380px' }}>
-        <p style={{ fontWeight: 'bold', marginBottom: '4px' }}>
-          Sort factors into the Venn Diagram:
+        <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+          Fill the Venn Diagram:
         </p>
-        <p style={{ fontSize: '0.82rem', color: 'var(--clr-text-soft)', marginBottom: '12px' }}>
-          Left: Factors of 12 only. Right: Factors of 18 only. Middle: Shared factors of both.
+        <p style={{ fontSize: '0.9rem', color: 'var(--clr-text-soft)', marginBottom: '16px' }}>
+          Click the buttons inside each factor's box in the pool below to place it correctly.
+          (Left circle: Factors of {numA} only. Right circle: Factors of {numB} only. Middle: Shared factors of both).
         </p>
 
         <div className="venn-container">
           <div className="venn-circle left">
-            <div className="venn-title">Factors of 12</div>
+            <div className="venn-title">Factors of {numA}</div>
             {getItems('left').map(n => (
-              <span key={n} style={{ cursor: 'pointer', margin: '2px', fontWeight: 'bold' }} onClick={() => setPlacement(n, 'pool')}>{n}</span>
+              <span key={n} className="venn-placed-item" onClick={() => setPlacement(n, 'pool')}>{n}</span>
             ))}
           </div>
 
           <div className="venn-circle right">
-            <div className="venn-title">Factors of 18</div>
+            <div className="venn-title">Factors of {numB}</div>
             {getItems('right').map(n => (
-              <span key={n} style={{ cursor: 'pointer', margin: '2px', fontWeight: 'bold' }} onClick={() => setPlacement(n, 'pool')}>{n}</span>
+              <span key={n} className="venn-placed-item" onClick={() => setPlacement(n, 'pool')}>{n}</span>
             ))}
           </div>
 
           <div className="venn-overlap">
             <div className="venn-title" style={{ top: '-16px', color: 'var(--clr-accent)' }}>Both</div>
             {getItems('both').map(n => (
-              <span key={n} style={{ cursor: 'pointer', margin: '2px', fontWeight: 'bold', color: 'var(--clr-accent)' }} onClick={() => setPlacement(n, 'pool')}>{n}</span>
+              <span key={n} className="venn-placed-item both-item" onClick={() => setPlacement(n, 'pool')}>{n}</span>
             ))}
           </div>
         </div>
@@ -938,12 +1124,12 @@ export default function InteractiveLcmHcfApp({ onBack }) {
         {/* Pool of items */}
         <div className="venn-factors-pool">
           {getItems('pool').map(n => (
-            <div key={n} style={{ display: 'flex', flexDirection: 'column', gap: '4px', border: '1px solid var(--clr-border)', padding: '6px', borderRadius: '6px' }}>
-              <span style={{ fontWeight: 'bold', textAlign: 'center' }}>{n}</span>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                <button style={{ padding: '2px 4px', fontSize: '0.7rem' }} onClick={() => setPlacement(n, 'left')}>12</button>
-                <button style={{ padding: '2px 4px', fontSize: '0.7rem' }} onClick={() => setPlacement(n, 'both')}>Both</button>
-                <button style={{ padding: '2px 4px', fontSize: '0.7rem' }} onClick={() => setPlacement(n, 'right')}>18</button>
+            <div key={n} className="venn-pool-box">
+              <span className="venn-pool-number">{n}</span>
+              <div className="venn-pool-actions">
+                <button onClick={() => setPlacement(n, 'left')}>{numA}</button>
+                <button onClick={() => setPlacement(n, 'both')}>Both</button>
+                <button onClick={() => setPlacement(n, 'right')}>{numB}</button>
               </div>
             </div>
           ))}
@@ -952,7 +1138,7 @@ export default function InteractiveLcmHcfApp({ onBack }) {
         {isCorrect && (
           <div style={{ marginTop: '20px', textAlign: 'center' }}>
             <p style={{ color: 'var(--clr-correct)', fontWeight: 'bold' }}>
-              🎉 Excellent! You sorted them perfectly. The HCF is 6 (the largest shared factor). Click "Next".
+              🎉 Excellent! You sorted them perfectly. The HCF is {hcfVal} (the largest shared factor). Click "Next".
             </p>
           </div>
         )}
@@ -962,9 +1148,12 @@ export default function InteractiveLcmHcfApp({ onBack }) {
 
   // 6. How to Find LCM Activity: Click common multiples
   const renderHowToFindLcmActivity = () => {
-    const listA = [3, 6, 9, 12, 15, 18, 21, 24];
-    const listB = [4, 8, 12, 16, 20, 24];
-    const common = [12, 24];
+    const numA = activityState.numA || 3;
+    const numB = activityState.numB || 4;
+    const listA = activityState.listA || [3, 6, 9, 12, 15, 18, 21, 24];
+    const listB = activityState.listB || [4, 8, 12, 16, 20, 24];
+    const common = activityState.common || [12, 24];
+    const lcmVal = activityState.lcmVal || 12;
 
     const selected = activityState.selectedLcmMults || [];
     const done = common.every(c => selected.includes(c)) && selected.length === common.length;
@@ -977,12 +1166,12 @@ export default function InteractiveLcmHcfApp({ onBack }) {
         }
       } else {
         let text = '';
-        if (val % 3 === 0 && val % 4 !== 0) {
-          text = `${val} is a multiple of 3, but not of 4 (multiples of 4 are 4, 8, 12, 16, 20, 24...).`;
-        } else if (val % 4 === 0 && val % 3 !== 0) {
-          text = `${val} is a multiple of 4, but not of 3 (multiples of 3 are 3, 6, 9, 12, 15, 18, 21, 24...).`;
+        if (val % numA === 0 && val % numB !== 0) {
+          text = `${val} is a multiple of ${numA}, but not of ${numB} (multiples of ${numB} are ${listB.join(', ')}...).`;
+        } else if (val % numB === 0 && val % numA !== 0) {
+          text = `${val} is a multiple of ${numB}, but not of ${numA} (multiples of ${numA} are ${listA.join(', ')}...).`;
         } else {
-          text = `${val} is not a multiple of 3 or 4.`;
+          text = `${val} is not a multiple of ${numA} or ${numB}.`;
         }
         setActivityPopup({
           title: 'Incorrect Selection',
@@ -999,7 +1188,7 @@ export default function InteractiveLcmHcfApp({ onBack }) {
         </p>
         <div style={{ textAlign: 'left', background: 'var(--clr-input)', padding: '12px', borderRadius: '8px' }}>
           <div style={{ marginBottom: '8px' }}>
-            <strong>Multiples of 3:</strong>{' '}
+            <strong>Multiples of {numA}:</strong>{' '}
             {listA.map(n => (
               <span 
                 key={n} 
@@ -1019,7 +1208,7 @@ export default function InteractiveLcmHcfApp({ onBack }) {
             ))}
           </div>
           <div>
-            <strong>Multiples of 4:</strong>{' '}
+            <strong>Multiples of {numB}:</strong>{' '}
             {listB.map(n => (
               <span 
                 key={n} 
@@ -1041,18 +1230,21 @@ export default function InteractiveLcmHcfApp({ onBack }) {
         </div>
         {done && (
           <p style={{ color: 'var(--clr-correct)', fontWeight: 'bold', marginTop: '16px' }}>
-            🎉 Yes! The shared multiples are 12 and 24. The Lowest Common Multiple is 12. Click "Next".
+            🎉 Yes! The shared multiples are {common.join(' and ')}. The Lowest Common Multiple is {lcmVal}. Click "Next".
           </p>
         )}
       </div>
     );
   };
 
-  // 7. How to Find HCF Activity: Find HCF of 8 and 20 by selecting factors
+  // 7. How to Find HCF Activity: Find HCF by selecting factors
   const renderHowToFindHcfActivity = () => {
-    const factors8 = [1, 2, 4, 8];
-    const factors20 = [1, 2, 4, 5, 10, 20];
-    const common = [1, 2, 4];
+    const numA = activityState.numA || 8;
+    const numB = activityState.numB || 20;
+    const factorsA = activityState.factorsA || [1, 2, 4, 8];
+    const factorsB = activityState.factorsB || [1, 2, 4, 5, 10, 20];
+    const common = activityState.common || [1, 2, 4];
+    const hcfVal = activityState.hcfVal || 4;
 
     const selected = activityState.selectedHcfFacts || [];
     const done = common.every(c => selected.includes(c)) && selected.length === common.length;
@@ -1064,15 +1256,15 @@ export default function InteractiveLcmHcfApp({ onBack }) {
           setActivityState({ ...activityState, selectedHcfFacts: [...selected, val] });
         }
       } else {
-        const isFact8 = 8 % val === 0;
-        const isFact20 = 20 % val === 0;
+        const isFactA = numA % val === 0;
+        const isFactB = numB % val === 0;
         let text = '';
-        if (isFact8 && !isFact20) {
-          text = `${val} is a factor of 8, but it does not divide 20 perfectly (20 ÷ ${val} leaves a remainder of ${20 % val}).`;
-        } else if (isFact20 && !isFact8) {
-          text = `${val} is a factor of 20, but it does not divide 8 perfectly (8 ÷ ${val} leaves a remainder of ${8 % val}).`;
+        if (isFactA && !isFactB) {
+          text = `${val} is a factor of ${numA}, but it does not divide ${numB} perfectly (${numB} ÷ ${val} leaves a remainder of ${numB % val}).`;
+        } else if (isFactB && !isFactA) {
+          text = `${val} is a factor of ${numB}, but it does not divide ${numA} perfectly (${numA} ÷ ${val} leaves a remainder of ${numA % val}).`;
         } else {
-          text = `${val} is not a factor of 8 or 20.`;
+          text = `${val} is not a factor of ${numA} or ${numB}.`;
         }
         setActivityPopup({
           title: 'Incorrect Selection',
@@ -1089,8 +1281,8 @@ export default function InteractiveLcmHcfApp({ onBack }) {
         </p>
         <div style={{ textAlign: 'left', background: 'var(--clr-input)', padding: '12px', borderRadius: '8px' }}>
           <div style={{ marginBottom: '8px' }}>
-            <strong>Factors of 8:</strong>{' '}
-            {factors8.map(n => (
+            <strong>Factors of {numA}:</strong>{' '}
+            {factorsA.map(n => (
               <span 
                 key={n} 
                 onClick={() => select(n)}
@@ -1109,8 +1301,8 @@ export default function InteractiveLcmHcfApp({ onBack }) {
             ))}
           </div>
           <div>
-            <strong>Factors of 20:</strong>{' '}
-            {factors20.map(n => (
+            <strong>Factors of {numB}:</strong>{' '}
+            {factorsB.map(n => (
               <span 
                 key={n} 
                 onClick={() => select(n)}
@@ -1131,7 +1323,7 @@ export default function InteractiveLcmHcfApp({ onBack }) {
         </div>
         {done && (
           <p style={{ color: 'var(--clr-correct)', fontWeight: 'bold', marginTop: '16px' }}>
-            🎉 Great! The common factors are 1, 2, and 4. The Highest Common Factor is 4. Click "Next".
+            🎉 Great! The common factors are {common.join(', ')}. The Highest Common Factor is {hcfVal}. Click "Next".
           </p>
         )}
       </div>
@@ -1158,10 +1350,12 @@ export default function InteractiveLcmHcfApp({ onBack }) {
 
     if (level === 2) {
       // Prime Factorization method simulation
-      // Find HCF of 12 and 18.
-      // 12 = 2 × 2 × 3
+      // Find HCF of 18 and 30.
       // 18 = 2 × 3 × 3
+      // 30 = 2 × 3 × 5
       // Intersecting: 2, 3 -> HCF = 2 × 3 = 6
+      const numA = activityState.numA || 18;
+      const numB = activityState.numB || 30;
       const currentSelection = activityState.primePairs || []; // items: index of selected pairs
       const isDone = currentSelection.includes('2') && currentSelection.includes('3');
 
@@ -1177,14 +1371,14 @@ export default function InteractiveLcmHcfApp({ onBack }) {
       return (
         <div className="activity-box">
           <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>
-            Find the HCF of 12 and 18 using their Prime Factor DNA:
+            Find the HCF of {numA} and {numB} using their Prime Factor DNA:
           </p>
           <div style={{ textAlign: 'left', background: 'var(--clr-input)', padding: '12px', borderRadius: '8px' }}>
             <div style={{ marginBottom: '8px' }}>
-              <strong>12 DNA:</strong> <span style={{ color: '#4facfe' }}>2</span> × 2 × <span style={{ color: '#e29ffb' }}>3</span>
+              <strong>{numA} DNA:</strong> <span style={{ color: '#e8864a' }}>2</span> × <span style={{ color: '#a89e94' }}>3</span> × 3
             </div>
             <div>
-              <strong>18 DNA:</strong> <span style={{ color: '#4facfe' }}>2</span> × <span style={{ color: '#e29ffb' }}>3</span> × 3
+              <strong>{numB} DNA:</strong> <span style={{ color: '#e8864a' }}>2</span> × <span style={{ color: '#a89e94' }}>3</span> × 5
             </div>
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--clr-text-soft)', marginTop: '8px', marginBottom: '12px' }}>
@@ -1215,24 +1409,26 @@ export default function InteractiveLcmHcfApp({ onBack }) {
 
     if (level === 3) {
       // Long division steps simulation
-      // Find HCF of 45 and 60.
-      // 60 ÷ 45 = 1 rem 15
+      // Find HCF of 45 and 105.
+      // 105 ÷ 45 = 2 rem 15
       // 45 ÷ 15 = 3 rem 0 -> HCF = 15
+      const numA = activityState.numA || 45;
+      const numB = activityState.numB || 105;
       const divisionStep = activityState.divStep || 0;
 
       return (
         <div className="activity-box">
           <p style={{ fontWeight: 'bold', marginBottom: '12px' }}>
-            Find the HCF of 45 and 60 using Long Division (Euclidean Method):
+            Find the HCF of {numA} and {numB} using Long Division (Euclidean Method):
           </p>
           <div style={{ background: 'var(--clr-input)', padding: '16px', borderRadius: '8px', textAlign: 'left', fontFamily: 'monospace' }}>
-            <div>Step 1: Divide 60 by 45</div>
-            <div style={{ color: 'var(--clr-accent)' }}>60 = 45 × 1 + Remainder 15</div>
+            <div>Step 1: Divide {numB} by {numA}</div>
+            <div style={{ color: 'var(--clr-accent)' }}>{numB} = {numA} × 2 + Remainder 15</div>
             
             {divisionStep >= 1 && (
               <div style={{ marginTop: '10px' }}>
-                <div>Step 2: Divide old divisor (45) by new remainder (15)</div>
-                <div style={{ color: 'var(--clr-correct)' }}>45 = 15 × 3 + Remainder 0!</div>
+                <div>Step 2: Divide old divisor ({numA}) by new remainder (15)</div>
+                <div style={{ color: 'var(--clr-correct)' }}>{numA} = 15 × 3 + Remainder 0!</div>
               </div>
             )}
           </div>
@@ -1277,7 +1473,113 @@ export default function InteractiveLcmHcfApp({ onBack }) {
   // ADAPTIVE QUIZ GENERATION & HANDLERS
   // ==========================================================================
 
-  const startQuiz = async () => {
+  const generateClientQuestion = (diff) => {
+    const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+    const lcm = (a, b) => Math.abs(a * b) / gcd(a, b);
+    
+    let prompt, answer, display;
+    const type = randInt(1, 3);
+    
+    if (diff === 'easy') {
+      if (type === 1) {
+        const g = randInt(2, 8);
+        const a = g * randInt(2, 5);
+        const b = g * randInt(2, 5);
+        answer = gcd(a, b);
+        display = String(answer);
+        prompt = `Find the HCF (Highest Common Factor) of ${a} and ${b}.`;
+      } else if (type === 2) {
+        const g = randInt(3, 10);
+        const a = g * 2;
+        const b = g * 3;
+        answer = gcd(a, b);
+        display = String(answer);
+        prompt = `What is the Highest Common Factor (HCF) of ${a} and ${b}?`;
+      } else {
+        const a = randInt(3, 9);
+        const b = a * randInt(2, 4);
+        answer = a;
+        display = String(answer);
+        prompt = `Find the HCF of ${a} and ${b}.`;
+      }
+    } else if (diff === 'medium') {
+      if (type === 1) {
+        const a = randInt(4, 12);
+        const b = randInt(4, 12);
+        answer = lcm(a, b);
+        display = String(answer);
+        prompt = `Find the LCM (Lowest Common Multiple) of ${a} and ${b}.`;
+      } else if (type === 2) {
+        const primes = [3, 5, 7];
+        const a = primes[randInt(0, 2)];
+        const b = randInt(4, 8);
+        answer = lcm(a, b);
+        display = String(answer);
+        prompt = `What is the Lowest Common Multiple (LCM) of ${a} and ${b}?`;
+      } else {
+        const g = randInt(4, 15);
+        const a = g * randInt(2, 5);
+        const b = g * randInt(2, 5);
+        answer = gcd(a, b);
+        display = String(answer);
+        prompt = `Find the Highest Common Factor (HCF) of ${a} and ${b}.`;
+      }
+    } else if (diff === 'hard') {
+      if (type === 1) {
+        const a = randInt(3, 8);
+        const b = randInt(3, 8);
+        const c = randInt(3, 8);
+        answer = lcm(lcm(a, b), c);
+        display = String(answer);
+        prompt = `Find the LCM of ${a}, ${b}, and ${c}.`;
+      } else if (type === 2) {
+        const base = [
+          { h: 4, l: 24, a: 8, b: 12 },
+          { h: 6, l: 36, a: 12, b: 18 },
+          { h: 5, l: 30, a: 10, b: 15 },
+          { h: 3, l: 18, a: 6, b: 9 }
+        ][randInt(0, 3)];
+        answer = base.b;
+        display = String(answer);
+        prompt = `The HCF of two numbers is ${base.h} and their LCM is ${base.l}. If one of the numbers is ${base.a}, what is the other number?`;
+      } else {
+        const g = randInt(3, 10);
+        const a = g * 2;
+        const b = g * 3;
+        const c = g * 5;
+        answer = g;
+        display = String(answer);
+        prompt = `Find the Highest Common Factor (HCF) of ${a}, ${b}, and ${c}.`;
+      }
+    } else { // extrahard
+      if (type === 1) {
+        const a = randInt(6, 12);
+        const b = randInt(8, 15);
+        answer = lcm(a, b);
+        display = String(answer);
+        prompt = `Two neon signs blink at different rates. Sign A blinks every ${a} seconds, and Sign B blinks every ${b} seconds. If they both blink together now, after how many seconds will they next blink together?`;
+      } else if (type === 2) {
+        const a = [24, 36, 48][randInt(0, 2)];
+        const b = [30, 45, 60][randInt(0, 2)];
+        answer = gcd(a, b);
+        display = String(answer);
+        prompt = `A florist has ${a} roses and ${b} tulips. She wants to create identical bouquets with the same number of flowers of each kind, using all flowers. What is the maximum number of bouquets she can make?`;
+      } else {
+        const a = randInt(4, 9);
+        const b = randInt(5, 10);
+        answer = lcm(a, b);
+        display = String(answer);
+        prompt = `Three bells toll at intervals of ${a}, ${b}, and ${a+b} minutes. If they toll together now, after how many minutes will they next toll together?`;
+      }
+    }
+    
+    return { q: prompt, a: String(answer), display, difficulty: diff, originalAnswer: answer };
+  };
+
+  const startQuiz = async (chosenConfidence) => {
+    const activeConfidence = chosenConfidence || confidence || 'mod';
+    setConfidence(activeConfidence);
     setQuizLoading(true);
     setCurrentStep(10);
     setQuizQuestions([]);
@@ -1287,16 +1589,35 @@ export default function InteractiveLcmHcfApp({ onBack }) {
     setQuizIndex(0);
     setQuizAnswer('');
     setQuizFeedback(null);
-    try {
-      let diffs = [];
-      if (level === 1) {
+    
+    let diffs = [];
+    if (level === 1) {
+      if (activeConfidence === 'not') {
+        diffs = ['easy', 'easy', 'easy', 'easy', 'easy'];
+      } else if (activeConfidence === 'mod') {
         diffs = ['easy', 'easy', 'medium', 'easy', 'medium'];
-      } else if (level === 2) {
+      } else {
+        diffs = ['easy', 'medium', 'medium', 'medium', 'medium'];
+      }
+    } else if (level === 2) {
+      if (activeConfidence === 'not') {
+        diffs = ['easy', 'medium', 'easy', 'medium', 'medium'];
+      } else if (activeConfidence === 'mod') {
         diffs = ['easy', 'medium', 'medium', 'hard', 'medium'];
       } else {
-        diffs = ['medium', 'hard', 'hard', 'extrahard', 'extrahard'];
+        diffs = ['medium', 'medium', 'hard', 'hard', 'hard'];
       }
-      
+    } else { // Level 3
+      if (activeConfidence === 'not') {
+        diffs = ['easy', 'medium', 'medium', 'hard', 'hard'];
+      } else if (activeConfidence === 'mod') {
+        diffs = ['medium', 'hard', 'hard', 'extrahard', 'extrahard'];
+      } else {
+        diffs = ['hard', 'hard', 'extrahard', 'extrahard', 'extrahard'];
+      }
+    }
+    
+    try {
       const fetchedQs = await Promise.all(diffs.map(async (diff) => {
         const res = await fetch(`/hcflcm-api/question?difficulty=${diff}`);
         if (!res.ok) throw new Error('Failed to fetch question');
@@ -1312,15 +1633,9 @@ export default function InteractiveLcmHcfApp({ onBack }) {
 
       setQuizQuestions(fetchedQs);
     } catch (e) {
-      console.error("Failed to load quiz from backend: ", e);
-      // Fallback
-      setQuizQuestions([
-        { q: 'Find the HCF of 4 and 6.', a: '2', display: '2', difficulty: 'easy', originalAnswer: 2 },
-        { q: 'Find the LCM of 3 and 5.', a: '15', display: '15', difficulty: 'medium', originalAnswer: 15 },
-        { q: 'Find the LCM of 4 and 6.', a: '12', display: '12', difficulty: 'medium', originalAnswer: 12 },
-        { q: 'Find the HCF of 8 and 12.', a: '4', display: '4', difficulty: 'easy', originalAnswer: 4 },
-        { q: 'Find the LCM of 6 and 9.', a: '18', display: '18', difficulty: 'medium', originalAnswer: 18 }
-      ]);
+      console.error("Failed to load quiz from backend, generating client-side: ", e);
+      const fallbackQs = diffs.map((diff) => generateClientQuestion(diff));
+      setQuizQuestions(fallbackQs);
     } finally {
       setQuizLoading(false);
     }
@@ -1405,12 +1720,7 @@ export default function InteractiveLcmHcfApp({ onBack }) {
 
   const handleConfidenceSelect = (rating) => {
     setConfidence(rating);
-    if (rating === 'very') {
-      startQuiz();
-    } else {
-      setShowRevisionModal(true);
-      setRevisionOption(rating);
-    }
+    startQuiz(rating);
   };
 
   // ==========================================================================
@@ -1869,16 +2179,6 @@ export default function InteractiveLcmHcfApp({ onBack }) {
 
   // Step 9: Confidence Meter
   const renderConfidenceMeter = () => {
-    const handleRevisionConfirm = () => {
-      setShowRevisionModal(false);
-      setCurrentStep(1); // Go back to start of concepts
-    };
-
-    const handleRevisionSkip = () => {
-      setShowRevisionModal(false);
-      startQuiz();
-    };
-
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
         <h2 className="confidence-prompt">How confident are you with this topic?</h2>
@@ -1900,32 +2200,6 @@ export default function InteractiveLcmHcfApp({ onBack }) {
             <span className="confidence-label">Not Confident</span>
           </div>
         </div>
-
-        {showRevisionModal && (
-          <div className="revision-modal-overlay">
-            <div className="revision-modal">
-              {revisionOption === 'mod' ? (
-                <>
-                  <h3>Revision Recommendation</h3>
-                  <p>You seem fairly comfortable. Would you like to revise once before attempting the quiz?</p>
-                  <div className="revision-modal-buttons">
-                    <button className="btn-revise-go" onClick={handleRevisionConfirm}>Revise</button>
-                    <button className="btn-revise-skip" onClick={handleRevisionSkip}>Continue to Quiz</button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <h3>Let's review!</h3>
-                  <p>It looks like you'd benefit from another quick revision. Let's go through the concepts once more!</p>
-                  <div className="revision-modal-buttons">
-                    <button className="btn-revise-go" onClick={handleRevisionConfirm}>Go Back to Module</button>
-                    <button className="btn-revise-skip" onClick={handleRevisionSkip}>Continue to Quiz Anyway</button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        )}
 
         <button 
           className="btn-back"
@@ -2032,8 +2306,26 @@ export default function InteractiveLcmHcfApp({ onBack }) {
           )}
 
           <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-            <button className="btn-back" onClick={startQuiz}>Retry Quiz</button>
-            <button className="btn-next" onClick={() => setCurrentStep(11)}>View Rewards Bank ➡</button>
+            {quizScore === 5 && confidence === 'not' ? (
+              <>
+                <button className="btn-back" onClick={() => setCurrentStep(11)}>Skip to Rewards ➡</button>
+                <button className="btn-next" onClick={() => { setConfidence('mod'); startQuiz('mod'); }}>
+                  Take Moderately Confident Quiz ➡
+                </button>
+              </>
+            ) : quizScore === 5 && confidence === 'mod' ? (
+              <>
+                <button className="btn-back" onClick={() => setCurrentStep(11)}>Skip to Rewards ➡</button>
+                <button className="btn-next" onClick={() => { setConfidence('very'); startQuiz('very'); }}>
+                  Take Very Confident Quiz ➡
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="btn-back" onClick={() => startQuiz(confidence)}>Retry Quiz</button>
+                <button className="btn-next" onClick={() => setCurrentStep(11)}>View Rewards Bank ➡</button>
+              </>
+            )}
           </div>
         </div>
       );

@@ -6175,36 +6175,157 @@ app.get('/hcflcm-api/question', (req, res) => {
   const diff = req.query.difficulty || 'easy';
   let prompt, answer, display;
 
+  const type = randInt(1, 4);
+
   if (diff === 'easy') {
-    // HCF of two numbers
-    const g = randInt(2, 12);
-    const a = g * randInt(2, 7);
-    const b = g * randInt(2, 7);
-    answer = gcd(a, b);
-    display = String(answer);
-    prompt = `Find the HCF of ${a} and ${b}.`;
+    if (type === 1) {
+      // HCF of two numbers
+      const g = randInt(2, 8);
+      const a = g * randInt(2, 5);
+      const b = g * randInt(2, 5);
+      answer = gcd(a, b);
+      display = String(answer);
+      prompt = `Find the HCF (Highest Common Factor) of ${a} and ${b}.`;
+    } else if (type === 2) {
+      // HCF of two coprime numbers
+      const a = [9, 14, 15, 21, 25, 27][randInt(0, 5)];
+      const b = [8, 11, 16, 22, 26, 29][randInt(0, 5)];
+      answer = gcd(a, b);
+      display = String(answer);
+      prompt = `What is the Highest Common Factor (HCF) of ${a} and ${b}?`;
+    } else if (type === 3) {
+      // Simple word problem
+      const factors = [
+        { a: 12, b: 18, g: 6, fruit1: 'apples', fruit2: 'oranges' },
+        { a: 16, b: 24, g: 8, fruit1: 'stickers', fruit2: 'stamps' },
+        { a: 15, b: 20, g: 5, fruit1: 'pens', fruit2: 'pencils' },
+        { a: 8, b: 12, g: 4, fruit1: 'blue beads', fruit2: 'red beads' }
+      ][randInt(0, 3)];
+      answer = factors.g;
+      display = String(answer);
+      prompt = `A teacher has ${factors.a} ${factors.fruit1} and ${factors.b} ${factors.fruit2}. She wants to divide them equally among her students without leftovers. What is the maximum number of students who can get an equal share?`;
+    } else {
+      // HCF of a and b where a divides b
+      const a = randInt(3, 9);
+      const b = a * randInt(2, 4);
+      answer = a;
+      display = String(answer);
+      prompt = `Find the HCF of ${a} and ${b}.`;
+    }
   } else if (diff === 'medium') {
-    // LCM of two numbers
-    const a = randInt(4, 20);
-    const b = randInt(4, 20);
-    answer = lcm(a, b);
-    display = String(answer);
-    prompt = `Find the LCM of ${a} and ${b}.`;
+    if (type === 1) {
+      // LCM of two numbers
+      const a = randInt(4, 12);
+      const b = randInt(4, 12);
+      answer = lcm(a, b);
+      display = String(answer);
+      prompt = `Find the LCM (Lowest Common Multiple) of ${a} and ${b}.`;
+    } else if (type === 2) {
+      // LCM of prime numbers
+      const primes = [3, 5, 7, 11];
+      const a = primes[randInt(0, 3)];
+      let b = primes[randInt(0, 3)];
+      while (a === b) { b = primes[randInt(0, 3)]; }
+      answer = lcm(a, b);
+      display = String(answer);
+      prompt = `What is the Lowest Common Multiple (LCM) of ${a} and ${b}?`;
+    } else if (type === 3) {
+      // Simple LCM word problem
+      const p = [
+        { a: 6, b: 8, l: 24, thing: 'neon signs blink', unit: 'seconds' },
+        { a: 10, b: 15, l: 30, thing: 'bus schedules align', unit: 'minutes' },
+        { a: 4, b: 6, l: 12, thing: 'alarms beep', unit: 'minutes' }
+      ][randInt(0, 2)];
+      answer = p.l;
+      display = String(answer);
+      prompt = `Two ${p.thing} at intervals of ${p.a} and ${p.b} ${p.unit}. If they align now, after how many ${p.unit} will they next align?`;
+    } else {
+      // LCM of a and b where a divides b
+      const a = randInt(3, 8);
+      const b = a * randInt(2, 4);
+      answer = b;
+      display = String(answer);
+      prompt = `Find the LCM of ${a} and ${b}.`;
+    }
   } else if (diff === 'hard') {
-    // HCF and LCM of three numbers — ask for LCM
-    const a = randInt(4, 15);
-    const b = randInt(4, 15);
-    const c = randInt(4, 15);
-    answer = lcm(lcm(a, b), c);
-    display = String(answer);
-    prompt = `Find the LCM of ${a}, ${b}, and ${c}.`;
+    if (type === 1) {
+      // LCM of three numbers
+      const a = randInt(3, 8);
+      const b = randInt(3, 8);
+      const c = randInt(3, 8);
+      answer = lcm(lcm(a, b), c);
+      display = String(answer);
+      prompt = `Find the LCM of ${a}, ${b}, and ${c}.`;
+    } else if (type === 2) {
+      // HCF of three numbers
+      const g = randInt(2, 6);
+      const a = g * randInt(2, 4);
+      const b = g * randInt(2, 4);
+      const c = g * randInt(2, 4);
+      answer = gcd(gcd(a, b), c);
+      display = String(answer);
+      prompt = `Find the Highest Common Factor (HCF) of ${a}, ${b}, and ${c}.`;
+    } else if (type === 3) {
+      // Product formula problem
+      const base = [
+        { h: 4, l: 24, a: 8, b: 12 },
+        { h: 6, l: 36, a: 12, b: 18 },
+        { h: 5, l: 30, a: 10, b: 15 },
+        { h: 3, l: 18, a: 6, b: 9 }
+      ][randInt(0, 3)];
+      answer = base.b;
+      display = String(answer);
+      prompt = `The HCF of two numbers is ${base.h} and their LCM is ${base.l}. If one of the numbers is ${base.a}, what is the other number?`;
+    } else {
+      // Word problem with three runners
+      const a = [3, 4, 6][randInt(0, 2)];
+      const b = [4, 5, 8][randInt(0, 2)];
+      const c = [6, 8, 12][randInt(0, 2)];
+      answer = lcm(lcm(a, b), c);
+      display = String(answer);
+      prompt = `Three runners start running a lap together. Runner A completes a lap in ${a} minutes, Runner B in ${b} minutes, and Runner C in ${c} minutes. After how many minutes will they next meet at the starting point?`;
+    }
   } else {
-    // Word problem: Two buses leave at same time, intervals A and B min, when next together?
-    const a = randInt(8, 20);
-    const b = randInt(10, 25);
-    answer = lcm(a, b);
-    display = answer + ' minutes';
-    prompt = `Bus A departs every ${a} minutes and Bus B every ${b} minutes. They both leave at 9:00. After how many minutes will they next depart together?`;
+    // extrahard
+    if (type === 1) {
+      // HCF with remainder: largest number dividing a and b with remainder r
+      const r = randInt(2, 5);
+      const g = randInt(4, 10);
+      const f1 = randInt(2, 4);
+      const f2 = randInt(2, 4);
+      const a = g * f1 + r;
+      const b = g * f2 + r;
+      // answer is g
+      answer = gcd(a - r, b - r);
+      display = String(answer);
+      prompt = `Find the largest number that divides ${a} and ${b} leaving a remainder of ${r} in each case.`;
+    } else if (type === 2) {
+      // LCM with remainder: smallest number divided by a and b leaving remainder r
+      const r = randInt(2, 5);
+      const a = randInt(5, 10);
+      const b = randInt(5, 10);
+      answer = lcm(a, b) + r;
+      display = String(answer);
+      prompt = `What is the smallest positive integer which when divided by ${a} and ${b} leaves a remainder of ${r} in each case?`;
+    } else if (type === 3) {
+      // Merchant ribbon piece division
+      const lengths = [
+        { a: 48, b: 72, c: 96, g: 24 },
+        { a: 30, b: 45, c: 75, g: 15 },
+        { a: 36, b: 54, c: 90, g: 18 },
+        { a: 40, b: 60, c: 80, g: 20 }
+      ][randInt(0, 3)];
+      answer = lengths.g;
+      display = String(answer);
+      prompt = `A merchant has three pieces of ribbon of lengths ${lengths.a} cm, ${lengths.b} cm, and ${lengths.c} cm. He wants to cut them into equal pieces of the maximum possible length. What should be the length of each piece (in cm)?`;
+    } else {
+      // Neon lights word problem
+      const a = randInt(6, 12);
+      const b = randInt(8, 15);
+      answer = lcm(a, b);
+      display = String(answer);
+      prompt = `Two neon signs blink at different rates. Sign A blinks every ${a} seconds, and Sign B blinks every ${b} seconds. If they both blink together now, after how many seconds will they next blink together?`;
+    }
   }
 
   res.json({ prompt, answer, display, difficulty: diff });
