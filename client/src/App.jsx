@@ -36096,13 +36096,16 @@ function App() {
       <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
         {theme === 'dark' ? '☀️' : '🌙'}
       </button>
-      <button 
+      <button
         className={`worksheet-toggle-main ${mode === 'worksheet' ? 'active' : ''}`}
-        onClick={() => setMode(mode === 'worksheet' ? null : 'worksheet')} 
+        onClick={() => setMode(mode === 'worksheet' ? null : 'worksheet')}
         title={mode === 'worksheet' ? 'Go back to puzzles' : 'Open Worksheet Generator'}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
       </button>
+      {/* Mistake Journal — floating top-right chip. Fades in when there are
+          unreviewed mistakes; click opens the journal screen via modeMap. */}
+      <MistakeJournalWidget onOpen={() => setMode('mistakeJournal')} />
       <div className="card">
         {!mode ? (
           <Home onSelect={setMode} />
@@ -36113,6 +36116,27 @@ function App() {
         )}
       </div>
     </div>
+  )
+}
+
+// ─── Mistake Journal Widget ────────────────────────────────────────────────────
+// Floating top-right chip showing the count of unreviewed mistakes.
+// Click → opens the fullscreen MistakeJournal page (mode='mistakeJournal').
+// Fades in when count > 0, hides entirely when zero (or auth loading).
+function MistakeJournalWidget({ onOpen }) {
+  const { count, loading } = useMistakeBadge()
+  if (loading) return null
+  return (
+    <button
+      type="button"
+      className={`mj-widget mj-sage ${count > 0 ? 'mj-widget--active' : ''}`}
+      onClick={onOpen}
+      title={count > 0 ? `Review your ${count} unreviewed mistakes` : 'Open Mistake Journal'}
+      aria-label="Open Mistake Journal"
+    >
+      <span className="mj-widget-icon" aria-hidden="true">📝</span>
+      {count > 0 && <span className="mj-widget-count">{count > 99 ? '99+' : count}</span>}
+    </button>
   )
 }
 

@@ -373,10 +373,10 @@ export function MistakeJournal({ onBack }) {
   }, [stats.byType]);
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: '20px 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+    <div className="mj-screen-soft" style={{ maxWidth: 960, margin: '0 auto', padding: '20px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid var(--mj-line-soft)' }}>
         <button className="back-button" onClick={onBack}>← Home</button>
-        <h1 style={{ margin: 0 }}>📝 Mistake Journal</h1>
+        <h1 style={{ margin: 0, fontWeight: 600, letterSpacing: '-0.01em' }}>📝 Mistake Journal</h1>
       </div>
 
       {/* Stats strip */}
