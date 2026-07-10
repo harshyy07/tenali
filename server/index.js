@@ -72,6 +72,18 @@ auth.connectMongo()
   .then(() => auth.seedUsers())
   .catch(err => console.error('[auth] Mongo connect failed — using in-memory auth:', err.message));
 
+// ─── Mistake Journal (independent of hints/auth) ──────────────────────────────
+// Adds /api/mistakes/* (POST log, GET list, GET stats, PATCH review, DELETE, merge-guest).
+// Falls back to in-memory store when Mongo is offline. Mounts cleanly even if the
+// mistakes module fails to load — server still serves everything else.
+try {
+  const mistakes = require('./mistakes');
+  app.use('/api/mistakes', mistakes.router);
+  console.log('[mistakes] mounted at /api/mistakes');
+} catch (e) {
+  console.error('[mistakes] failed to mount:', e.message);
+}
+
 /**
  * EXPLANATION SUPPORT MIDDLEWARE
  * ═══════════════════════════════════════════════════════════════════════════

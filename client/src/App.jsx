@@ -23,6 +23,7 @@
 
 import { useEffect, useState, useRef, useMemo } from 'react'
 import './App.css'
+import MistakeJournal, { logMistake, useMistakeBadge } from './mistakeJournal'
 
 // API base URL from environment variables (Vite)
 const API = import.meta.env.VITE_API_BASE_URL || '';
@@ -119,7 +120,7 @@ function AuthMenu() {
         aria-label="Menu"
         onClick={() => setOpen(o => !o)}
         style={{
-          position: 'fixed', top: 16, right: 64, zIndex: 101,
+          position: 'fixed', top: 16, right: 112, zIndex: 101,
           width: 40, height: 40, borderRadius: '50%',
           background: 'var(--clr-surface, #1c1c1f)',
           border: '1px solid var(--clr-border, #444)',
@@ -141,7 +142,7 @@ function AuthMenu() {
         <>
           <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'transparent' }} />
           <div style={{
-            position: 'fixed', top: 64, right: 16, zIndex: 102,
+            position: 'fixed', top: 64, right: 112, zIndex: 102,
             minWidth: 200, padding: 6,
             background: 'var(--clr-surface, #1c1c1f)',
             border: '1px solid var(--clr-border, #444)',
@@ -35963,6 +35964,25 @@ function App() {
     )
   }
 
+  // Route: /worksheet → customized offline worksheets
+  if (pathname === '/worksheet') {
+    return (
+      <>
+        <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
+        <button 
+          className="worksheet-toggle-main active" 
+          onClick={() => { window.location.href = '/' }} 
+          title="Go back to puzzles"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        </button>
+
+      </>
+    )
+  }
+
   // ========== ROUTING: MODE-BASED (HOME MENU + QUIZZES) ==========
   // Map quiz mode keys to their component classes
   const modeMap = {
@@ -36047,15 +36067,41 @@ function App() {
     lineqgym: LinEqGymApp,         // LinearEquations-Gym — solve linear equations (MCQ)
     indicesgym: IndicesGymApp,     // Indices-Gym — index laws (MCQ)
     polygym: PolyGymApp,           // Polynomials Gym — arithmetic → monomial algebra (MCQ)
+    mistakeJournal: MistakeJournal, // Mistake Journal (searchable workbook of wrong answers)
   }
 
   // Get the component to render (or null if mode not set)
   const ActiveApp = mode ? modeMap[mode] : null
 
+  if (mode === 'worksheet') {
+    return (
+      <>
+        <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
+        <button 
+          className="worksheet-toggle-main active" 
+          onClick={() => setMode(null)} 
+          title="Go back to puzzles"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        </button>
+
+      </>
+    )
+  }
+
   return (
     <div className="app-shell">
       <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
         {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
+      <button 
+        className={`worksheet-toggle-main ${mode === 'worksheet' ? 'active' : ''}`}
+        onClick={() => setMode(mode === 'worksheet' ? null : 'worksheet')} 
+        title={mode === 'worksheet' ? 'Go back to puzzles' : 'Open Worksheet Generator'}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
       </button>
       <div className="card">
         {!mode ? (
@@ -36084,10 +36130,12 @@ function Home({ onSelect }) {
     { key: 'randommix', name: 'Random Mix', subtitle: 'Adaptive cross-topic quiz', color: 'featured' },
     { key: 'custom', name: 'Custom Lesson', subtitle: 'Build your own mixed quiz', color: 'featured' },
     { key: 'gym', name: 'Gym', subtitle: 'Adaptive workout across all 7 gym puzzles', color: 'featured' },
+    { key: 'worksheet', name: 'Worksheet Gen', subtitle: 'Customized offline worksheets', color: 'featured' },
   ]
 
   // All regular quiz apps sorted alphabetically by name
   const regularApps = [
+    { key: 'mistakeJournal', name: 'Mistake Journal', subtitle: 'Searchable workbook of wrong answers', color: 'red', icon: '📝' },
     { key: 'addition', name: 'Addition', subtitle: '20-question addition practice', color: 'blue' },
     { key: 'angles', name: 'Angles', subtitle: 'Lines, points, parallel lines', color: 'green' },
     { key: 'basicarith', name: 'Arithmetic', subtitle: '+, −, ×, ÷ with positive & negative', color: 'purple' },
@@ -36195,6 +36243,10 @@ function Home({ onSelect }) {
 
   // Grid layout tracking (for responsive display)
   const gridRef = useRef(null)
+
+  // Mistake Journal home-tile badge (unreviewed count).
+  // Auto-refreshes on auth change + custom invalidate event from capture hooks.
+  const mistakeBadge = useMistakeBadge()
   // Number of columns currently displayed (responsive)
   const [cols, setCols] = useState(4)
 
@@ -36264,12 +36316,27 @@ function Home({ onSelect }) {
         />
       </div>
       <div className="menu-grid" ref={gridRef}>
-        {filteredRegular.map((app) => (
-          <button key={app.key} className={`menu-card ${app.color}`} onClick={() => onSelect(app.key)}>
-            <span className="menu-title">{app.name}</span>
-            <span className="menu-subtitle">{app.subtitle}</span>
-          </button>
-        ))}
+        {filteredRegular.map((app) => {
+          const showBadge = app.key === 'mistakeJournal' && mistakeBadge.unreviewed > 0
+          return (
+            <button key={app.key} className={`menu-card ${app.color}`} onClick={() => onSelect(app.key)} style={{ position: 'relative' }}>
+              <span className="menu-title">{app.icon ? `${app.icon} ${app.name}` : app.name}</span>
+              <span className="menu-subtitle">{app.subtitle}</span>
+              {showBadge && (
+                <span style={{
+                  position: 'absolute', top: 8, right: 8,
+                  minWidth: 24, height: 24, padding: '0 8px',
+                  borderRadius: 999, background: 'var(--clr-wrong, #ff6b6b)', color: '#fff',
+                  fontSize: '0.8rem', fontWeight: 600,
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                }} title={`${mistakeBadge.unreviewed} unreviewed mistake${mistakeBadge.unreviewed === 1 ? '' : 's'}`}>
+                  {mistakeBadge.unreviewed > 99 ? '99+' : mistakeBadge.unreviewed}
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
       <div className="grid-dimension">{rows} × {cols}</div>
     </>
@@ -36402,6 +36469,17 @@ function GKApp({ onBack }) {
       correct: data.correct,
       time: timeTaken,
     }])
+    // Capture wrong answer for Mistake Journal
+    if (!data.correct) {
+      logMistake({
+        quizType: 'gk',
+        prompt: String(question.question || ''),
+        userAnswer: `${option}) ${question.options ? (question.options.find(function(o){return o && o[0] === option;}) || ['',''])[1] : ''}`.trim(),
+        correctAnswer: `${data.correctAnswer}) ${data.correctAnswerText || ''}`.trim(),
+        timeMs: timeTaken,
+        questionId: String(question.id || ''),
+      })
+    }
     setRevealed(true)
   }
 
@@ -36659,6 +36737,16 @@ function AdditionApp({ onBack }) {
         correct: data.correct,
         time: timeTaken,
       }])
+      if (!data.correct) {
+        logMistake({
+          quizType: 'addition',
+          prompt: `${question.a} + ${question.b}`,
+          userAnswer: answer,
+          correctAnswer: String(data.correctAnswer),
+          timeMs: timeTaken,
+          questionId: `add-${question.a}-${question.b}`,
+        })
+      }
       if (isAdaptive) {
         setAdaptScore(prev => { const next = data.correct ? Math.min(3, prev + 0.25) : Math.max(0, prev - 0.35); adaptScoreRef.current = next; return next })
       }
@@ -37799,6 +37887,16 @@ function BasicArithApp({ onBack }) {
         correct: data.correct,
         time: timeTaken,
       }])
+      if (!data.correct) {
+        logMistake({
+          quizType: 'basicarith',
+          prompt: String(question.prompt || `${question.a} ${question.op} ${question.b}`),
+          userAnswer: answer,
+          correctAnswer: String(data.correctAnswer),
+          timeMs: timeTaken,
+          questionId: `ba-${question.a}-${question.op}-${question.b}`,
+        })
+      }
       if (isAdaptive) {
         setAdaptScore(prev => { const next = data.correct ? Math.min(3, prev + 0.25) : Math.max(0, prev - 0.35); adaptScoreRef.current = next; return next })
       }
@@ -38040,6 +38138,17 @@ function QuadraticApp({ onBack }) {
         correct: data.correct,
         time: timeTaken,
       }])
+      if (!data.correct) {
+        const { a, b, c, x } = question
+        logMistake({
+          quizType: 'quadratic',
+          prompt: `y = ${a}x² ${b >= 0 ? '+' : '−'} ${Math.abs(b)}x ${c >= 0 ? '+' : '−'} ${Math.abs(c)}, x=${x}`,
+          userAnswer: answer,
+          correctAnswer: String(data.correctAnswer),
+          timeMs: timeTaken,
+          questionId: `quad-${a}-${b}-${c}-${x}`,
+        })
+      }
       if (isAdaptive) {
         setAdaptScore(prev => { const next = data.correct ? Math.min(3, prev + 0.25) : Math.max(0, prev - 0.35); adaptScoreRef.current = next; return next })
       }

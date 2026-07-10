@@ -1335,7 +1335,7 @@ button:disabled {
   /* Fixed position button in top-right corner */
   position: fixed;
   top: 16px;
-  right: 16px;
+  right: 64px;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -1360,6 +1360,41 @@ button:disabled {
   transform: scale(1.1);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
+
+.worksheet-toggle-main {
+  position: fixed !important;
+  top: 16px !important;
+  right: 16px !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  border: 1px solid var(--clr-border) !important;
+  background: var(--clr-surface) !important;
+  color: var(--clr-text) !important;
+  font-size: 1.2rem !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  transition: background var(--transition), color var(--transition), transform var(--transition) !important;
+  z-index: 10000 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+.worksheet-toggle-main:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
+}
+
+.worksheet-toggle-main.active {
+  background: var(--clr-accent) !important;
+  color: #fff !important;
+}
+
+
+
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 /* CUSTOM PUZZLE - Quiz customization (select & order questions) */
@@ -2517,4 +2552,183 @@ button:disabled {
     font-size: 1.15rem;
     margin: 0 3px;
   }
+}
+
+/* ==========================================
+   PRINT MEDIA RULES (Worksheet Generator)
+   ========================================== */
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+  /* Set light background, dark text for printing */
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: "Lexend", "Inter", -apple-system, BlinkMacSystemFont, sans-serif !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .no-print,
+  .theme-toggle,
+  .worksheet-toggle-main,
+  .app-shell,
+  header,
+  footer,
+  nav,
+  button,
+  .menu-btn,
+  .auth-menu-btn {
+    display: none !important;
+  }
+
+  /* Reset outer shell formatting */
+  .app-shell, .card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Show and expand the worksheet print container */
+  .worksheet-preview-container {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .worksheet-print-layout {
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    page-break-after: avoid;
+    page-break-inside: auto;
+  }
+
+  /* Force page break for Answer Key or long sections */
+  .page-break {
+    page-break-before: always !important;
+    break-before: page !important;
+    margin-top: 50px !important;
+  }
+
+  /* Avoid splitting individual question blocks across pages */
+  .question-item {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-bottom: 24px !important;
+  }
+
+  /* Adjust grid layouts for two-column worksheets */
+  .worksheet-print-layout > div {
+    color: #000000 !important;
+  }
+
+  /* Prevent standard color styles from showing in black & white printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+
+/* Spinner Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 1.2s linear infinite;
+}
+
+
+/* ─── Mistake Journal ─────────────────────────────────────────────────────────── */
+
+/* Home tile badge (red pill in top-right corner) — rendered inline by App.jsx,
+   but a few utilities: */
+
+.menu-card { position: relative; overflow: hidden; }
+
+/* Journal screen container */
+.mj-screen { padding: 20px; max-width: 900px; margin: 0 auto; font-family: var(--font-body); }
+.mj-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+.mj-header h1 { margin: 0; font-size: 1.6rem; color: var(--clr-accent); }
+.mj-header .mj-subtitle { color: var(--clr-text-soft); font-size: 0.9rem; margin: 4px 0 0; }
+
+/* Stats strip */
+.mj-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.mj-stat-card { background: var(--clr-card); border: 1.5px solid var(--clr-border); border-radius: var(--radius-sm); padding: 14px; text-align: center; box-shadow: var(--shadow-card); }
+.mj-stat-card .mj-stat-num { font-size: 1.8rem; font-weight: 700; color: var(--clr-accent); line-height: 1; }
+.mj-stat-card .mj-stat-label { font-size: 0.8rem; color: var(--clr-text-soft); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+.mj-stat-card.warm .mj-stat-num { color: var(--clr-wrong, #ff6b6b); }
+.mj-stat-card.cool .mj-stat-num { color: var(--clr-correct, #4caf50); }
+
+/* Controls (search, filter, type selector) */
+.mj-controls { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.mj-controls input[type="search"], .mj-controls input[type="text"], .mj-controls select {
+  padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--clr-border); background: var(--clr-bg-soft);
+  font-family: var(--font-body); font-size: 0.95rem; color: var(--clr-text);
+}
+.mj-controls input[type="search"] { flex: 1 1 240px; }
+.mj-controls select { flex: 0 0 auto; }
+
+/* Mistake rows */
+.mj-row { background: var(--clr-card); border: 1.5px solid var(--clr-border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow-card); transition: border-color var(--transition); }
+.mj-row:hover { border-color: var(--clr-accent); }
+.mj-row.reviewed { opacity: 0.7; }
+.mj-row.reviewed .mj-prompt { text-decoration: line-through; }
+
+.mj-row-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.mj-type-chip { display: inline-block; padding: 2px 10px; border-radius: 999px; background: var(--clr-bg-soft); color: var(--clr-accent); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.mj-time { color: var(--clr-text-soft); font-size: 0.78rem; white-space: nowrap; }
+
+.mj-prompt { font-size: 1rem; color: var(--clr-text); margin: 8px 0 6px; line-height: 1.4; word-break: break-word; }
+.mj-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; font-size: 0.9rem; }
+.mj-answers > div { background: var(--clr-bg-soft); border-radius: var(--radius-sm); padding: 8px 10px; }
+.mj-answers .mj-label { color: var(--clr-text-soft); font-size: 0.78rem; display: block; margin-bottom: 2px; }
+.mj-answers .mj-you { color: var(--clr-wrong, #ff6b6b); font-weight: 600; }
+.mj-answers .mj-correct { color: var(--clr-correct, #4caf50); font-weight: 600; }
+
+.mj-row-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.mj-row-actions button { padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--clr-border); background: var(--clr-card); color: var(--clr-text); font-family: var(--font-body); font-size: 0.85rem; cursor: pointer; transition: all var(--transition); }
+.mj-row-actions button:hover { background: var(--clr-hover-strong); }
+.mj-row-actions button.primary { background: var(--clr-accent); color: #fff; border-color: var(--clr-accent); }
+.mj-row-actions button.primary:hover { filter: brightness(1.05); }
+.mj-row-actions button.danger { color: var(--clr-wrong, #ff6b6b); border-color: var(--clr-wrong, #ff6b6b); }
+.mj-row-actions button.danger:hover { background: var(--clr-wrong, #ff6b6b); color: #fff; }
+
+.mj-notes { width: 100%; margin-top: 8px; min-height: 56px; padding: 8px; border-radius: var(--radius-sm); border: 1.5px solid var(--clr-border); background: var(--clr-bg-soft); color: var(--clr-text); font-family: var(--font-body); font-size: 0.9rem; resize: vertical; }
+
+/* Empty state */
+.mj-empty { text-align: center; padding: 48px 16px; color: var(--clr-text-soft); }
+.mj-empty .mj-empty-icon { font-size: 3rem; display: block; margin-bottom: 12px; opacity: 0.6; }
+.mj-empty .mj-empty-text { font-size: 1.1rem; font-weight: 500; }
+.mj-empty .mj-empty-hint { margin-top: 8px; font-size: 0.88rem; }
+
+/* Pagination */
+.mj-pager { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; font-size: 0.9rem; color: var(--clr-text-soft); }
+.mj-pager button { padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--clr-border); background: var(--clr-card); color: var(--clr-text); cursor: pointer; font-family: var(--font-body); }
+.mj-pager button:disabled { opacity: 0.4; cursor: not-allowed; }
+.mj-pager button:not(:disabled):hover { background: var(--clr-hover-strong); }
+
+/* Responsive — stack everything on small screens */
+@media (max-width: 600px) {
+  .mj-answers { grid-template-columns: 1fr; }
+  .mj-row-top { flex-direction: column; }
+  .mj-time { align-self: flex-start; }
 }
