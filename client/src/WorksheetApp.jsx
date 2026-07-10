@@ -351,9 +351,22 @@ export default function WorksheetApp({ onBack }) {
   }, {});
 
   return (
-    <div className="worksheet-app" style={{ color: 'var(--clr-text)' }}>
+    <div className="worksheet-app" style={{
+      color: 'var(--clr-text)',
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '40px 20px',
+      boxSizing: 'border-box',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
       {/* Configuration Header / Controls */}
-      <div className="no-print" style={{ marginBottom: 24 }}>
+      <div className="no-print" style={{
+        marginBottom: 24,
+        paddingRight: '160px', // Prevent overlap with fixed top-right toggles on screen
+        boxSizing: 'border-box'
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button
@@ -610,9 +623,25 @@ export default function WorksheetApp({ onBack }) {
 
       {/* Loading progress / preview mode */}
       {viewMode === 'preview' && (
-        <div className="worksheet-preview-container">
+        <div className="worksheet-preview-container" style={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          boxSizing: 'border-box'
+        }}>
           {isGenerating ? (
-            <div className="no-print" style={{ textAlign: 'center', padding: '60px 20px', background: 'var(--clr-surface, #1c1c1f)', borderRadius: 12, border: '1px solid var(--clr-border, #444)' }}>
+            <div className="no-print" style={{
+              textAlign: 'center',
+              padding: '60px 20px',
+              background: 'var(--clr-surface, #1c1c1f)',
+              borderRadius: 12,
+              border: '1px solid var(--clr-border, #444)',
+              width: '100%',
+              maxWidth: '600px',
+              boxSizing: 'border-box',
+              margin: '40px auto'
+            }}>
               <svg className="spin" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 16px auto', display: 'block' }}><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
               <h3 style={{ margin: '0 0 10px 0' }}>Generating customized questions…</h3>
               <p style={{ opacity: 0.7, margin: '0 0 20px 0' }}>Fetching live algorithmic questions from Tenali APIs</p>
