@@ -23,6 +23,7 @@
 
 import { useEffect, useState, useRef, useMemo } from 'react'
 import './App.css'
+import WorksheetApp from './WorksheetApp'
 
 // API base URL from environment variables (Vite)
 const API = import.meta.env.VITE_API_BASE_URL || '';
@@ -119,7 +120,7 @@ function AuthMenu() {
         aria-label="Menu"
         onClick={() => setOpen(o => !o)}
         style={{
-          position: 'fixed', top: 16, right: 64, zIndex: 101,
+          position: 'fixed', top: 16, right: 112, zIndex: 101,
           width: 40, height: 40, borderRadius: '50%',
           background: 'var(--clr-surface, #1c1c1f)',
           border: '1px solid var(--clr-border, #444)',
@@ -141,7 +142,7 @@ function AuthMenu() {
         <>
           <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'transparent' }} />
           <div style={{
-            position: 'fixed', top: 64, right: 16, zIndex: 102,
+            position: 'fixed', top: 64, right: 112, zIndex: 102,
             minWidth: 200, padding: 6,
             background: 'var(--clr-surface, #1c1c1f)',
             border: '1px solid var(--clr-border, #444)',
@@ -35963,6 +35964,25 @@ function App() {
     )
   }
 
+  // Route: /worksheet → customized offline worksheets
+  if (pathname === '/worksheet') {
+    return (
+      <>
+        <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
+        <button 
+          className="worksheet-toggle-main active" 
+          onClick={() => { window.location.href = '/' }} 
+          title="Go back to puzzles"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        </button>
+        <WorksheetApp onBack={() => { window.location.href = '/' }} />
+      </>
+    )
+  }
+
   // ========== ROUTING: MODE-BASED (HOME MENU + QUIZZES) ==========
   // Map quiz mode keys to their component classes
   const modeMap = {
@@ -36047,15 +36067,41 @@ function App() {
     lineqgym: LinEqGymApp,         // LinearEquations-Gym — solve linear equations (MCQ)
     indicesgym: IndicesGymApp,     // Indices-Gym — index laws (MCQ)
     polygym: PolyGymApp,           // Polynomials Gym — arithmetic → monomial algebra (MCQ)
+    worksheet: WorksheetApp,       // Worksheet Generator
   }
 
   // Get the component to render (or null if mode not set)
   const ActiveApp = mode ? modeMap[mode] : null
 
+  if (mode === 'worksheet') {
+    return (
+      <>
+        <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
+        <button 
+          className="worksheet-toggle-main active" 
+          onClick={() => setMode(null)} 
+          title="Go back to puzzles"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        </button>
+        <WorksheetApp onBack={() => setMode(null)} />
+      </>
+    )
+  }
+
   return (
     <div className="app-shell">
       <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
         {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
+      <button 
+        className={`worksheet-toggle-main ${mode === 'worksheet' ? 'active' : ''}`}
+        onClick={() => setMode(mode === 'worksheet' ? null : 'worksheet')} 
+        title={mode === 'worksheet' ? 'Go back to puzzles' : 'Open Worksheet Generator'}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
       </button>
       <div className="card">
         {!mode ? (
@@ -36084,6 +36130,7 @@ function Home({ onSelect }) {
     { key: 'randommix', name: 'Random Mix', subtitle: 'Adaptive cross-topic quiz', color: 'featured' },
     { key: 'custom', name: 'Custom Lesson', subtitle: 'Build your own mixed quiz', color: 'featured' },
     { key: 'gym', name: 'Gym', subtitle: 'Adaptive workout across all 7 gym puzzles', color: 'featured' },
+    { key: 'worksheet', name: 'Worksheet Gen', subtitle: 'Customized offline worksheets', color: 'featured' },
   ]
 
   // All regular quiz apps sorted alphabetically by name

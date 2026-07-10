@@ -1335,7 +1335,7 @@ button:disabled {
   /* Fixed position button in top-right corner */
   position: fixed;
   top: 16px;
-  right: 16px;
+  right: 64px;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -1360,6 +1360,41 @@ button:disabled {
   transform: scale(1.1);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
+
+.worksheet-toggle-main {
+  position: fixed !important;
+  top: 16px !important;
+  right: 16px !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  border: 1px solid var(--clr-border) !important;
+  background: var(--clr-surface) !important;
+  color: var(--clr-text) !important;
+  font-size: 1.2rem !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  transition: background var(--transition), color var(--transition), transform var(--transition) !important;
+  z-index: 10000 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+.worksheet-toggle-main:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
+}
+
+.worksheet-toggle-main.active {
+  background: var(--clr-accent) !important;
+  color: #fff !important;
+}
+
+
+
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 /* CUSTOM PUZZLE - Quiz customization (select & order questions) */
@@ -2518,3 +2553,101 @@ button:disabled {
     margin: 0 3px;
   }
 }
+
+/* ==========================================
+   PRINT MEDIA RULES (Worksheet Generator)
+   ========================================== */
+@media print {
+  /* Set light background, dark text for printing */
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: "Lexend", "Inter", -apple-system, BlinkMacSystemFont, sans-serif !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .no-print,
+  .theme-toggle,
+  .worksheet-toggle-main,
+  .app-shell,
+  header,
+  footer,
+  nav,
+  button,
+  .menu-btn,
+  .auth-menu-btn {
+    display: none !important;
+  }
+
+  /* Reset outer shell formatting */
+  .app-shell, .card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Show and expand the worksheet print container */
+  .worksheet-preview-container {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .worksheet-print-layout {
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    page-break-after: avoid;
+    page-break-inside: auto;
+  }
+
+  /* Force page break for Answer Key or long sections */
+  .page-break {
+    page-break-before: always !important;
+    break-before: page !important;
+    margin-top: 50px !important;
+  }
+
+  /* Avoid splitting individual question blocks across pages */
+  .question-item {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-bottom: 24px !important;
+  }
+
+  /* Adjust grid layouts for two-column worksheets */
+  .worksheet-print-layout > div {
+    color: #000000 !important;
+  }
+
+  /* Prevent standard color styles from showing in black & white printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+
+/* Spinner Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 1.2s linear infinite;
+}
+
