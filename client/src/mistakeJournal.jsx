@@ -712,14 +712,36 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
   //   - "next right" = the new rightItem (appears on the right after the flip)
   // For simplicity we just animate the whole .mj-right-leaf.
 
+  const jumpToCover = () => { setOpened(false); setSpreadIdx(0); };
+  const jumpToEnd = () => {
+    setOpened(true);
+    setSpreadIdx(Math.max(0, totalSpreads - 1));
+  };
+
   return (
     <div className="mj-book-wrap">
+      {/* Slim meta strip — always visible above the book */}
+      <div className="mj-meta-strip">
+        <button className="mj-meta-back" onClick={onBack}>← Back</button>
+        <span className="mj-meta-pill">
+          <strong>{N}</strong> {N === 1 ? 'mistake' : 'mistakes'}
+        </span>
+        <span className="mj-meta-divider" />
+        <span className="mj-meta-pill">
+          <strong>{stats.unreviewed || 0}</strong> to review
+        </span>
+        <span className="mj-meta-divider" />
+        <span className="mj-meta-pill">
+          <strong>{Object.keys(stats.byType || {}).length}</strong> topics
+        </span>
+      </div>
+
       <div className={`mj-book-stage ${opened ? 'is-open' : 'is-closed'}`}>
         {/* COVER (visible only when closed) */}
         {!opened && (
-          <div className="mj-cover">
+          <div className={`mj-cover ${N === 0 ? 'is-empty' : ''}`}>
             <BookCover stats={stats} totalCount={N} />
-            <div className="mj-cover-hint">click → to open</div>
+            <div className="mj-cover-hint">{N === 0 ? 'click → to peek inside' : 'click the right edge to open →'}</div>
           </div>
         )}
 
@@ -729,16 +751,19 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
             {/* Static LEFT page */}
             <div className="mj-page mj-page-left">
               {leftItem ? (
-                <BookPage
-                  item={leftItem}
-                  pageNum={2 * spreadIdx + 1}
-                  notes={editingNotes[leftItem._id] !== undefined ? editingNotes[leftItem._id] : (leftItem.notes || '')}
-                  onNotesChange={(v) => onNotesChange(leftItem._id, v)}
-                  onNotesSave={(v) => onNotesSave(leftItem, v)}
-                  onNotesCancel={() => onNotesCancel(leftItem)}
-                  onToggle={() => onToggleReviewed(leftItem)}
-                  onDelete={() => onDelete(leftItem)}
-                />
+                <>
+                  <BookPage
+                    item={leftItem}
+                    pageNum={2 * spreadIdx + 1}
+                    notes={editingNotes[leftItem._id] !== undefined ? editingNotes[leftItem._id] : (leftItem.notes || '')}
+                    onNotesChange={(v) => onNotesChange(leftItem._id, v)}
+                    onNotesSave={(v) => onNotesSave(leftItem, v)}
+                    onNotesCancel={() => onNotesCancel(leftItem)}
+                    onToggle={() => onToggleReviewed(leftItem)}
+                    onDelete={() => onDelete(leftItem)}
+                  />
+                  <div className="mj-page-corner">— {2 * spreadIdx + 1} —</div>
+                </>
               ) : (
                 <div className="mj-page-blank">End of journal</div>
               )}
@@ -753,16 +778,19 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
             <div className={`mj-page mj-page-right mj-flip-leaf ${flipping ? 'is-flipping' : ''}`}>
               <div className="mj-leaf-face mj-leaf-face-front">
                 {rightItem ? (
-                  <BookPage
-                    item={rightItem}
-                    pageNum={2 * spreadIdx + 2}
-                    notes={editingNotes[rightItem._id] !== undefined ? editingNotes[rightItem._id] : (rightItem.notes || '')}
-                    onNotesChange={(v) => onNotesChange(rightItem._id, v)}
-                    onNotesSave={(v) => onNotesSave(rightItem, v)}
-                    onNotesCancel={() => onNotesCancel(rightItem)}
-                    onToggle={() => onToggleReviewed(rightItem)}
-                    onDelete={() => onDelete(rightItem)}
-                  />
+                  <>
+                    <BookPage
+                      item={rightItem}
+                      pageNum={2 * spreadIdx + 2}
+                      notes={editingNotes[rightItem._id] !== undefined ? editingNotes[rightItem._id] : (rightItem.notes || '')}
+                      onNotesChange={(v) => onNotesChange(rightItem._id, v)}
+                      onNotesSave={(v) => onNotesSave(rightItem, v)}
+                      onNotesCancel={() => onNotesCancel(rightItem)}
+                      onToggle={() => onToggleReviewed(rightItem)}
+                      onDelete={() => onDelete(rightItem)}
+                    />
+                    <div className="mj-page-corner">— {2 * spreadIdx + 2} —</div>
+                  </>
                 ) : (
                   <BookBackCover items={items} stats={stats} />
                 )}
@@ -775,16 +803,19 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
                   const nextItem = items[2 * spreadIdx + 2];
                   if (!nextItem) return <BookBackCover items={items} stats={stats} />;
                   return (
-                    <BookPage
-                      item={nextItem}
-                      pageNum={2 * spreadIdx + 3}
-                      notes={editingNotes[nextItem._id] !== undefined ? editingNotes[nextItem._id] : (nextItem.notes || '')}
-                      onNotesChange={(v) => onNotesChange(nextItem._id, v)}
-                      onNotesSave={(v) => onNotesSave(nextItem, v)}
-                      onNotesCancel={() => onNotesCancel(nextItem)}
-                      onToggle={() => onToggleReviewed(nextItem)}
-                      onDelete={() => onDelete(nextItem)}
-                    />
+                    <>
+                      <BookPage
+                        item={nextItem}
+                        pageNum={2 * spreadIdx + 3}
+                        notes={editingNotes[nextItem._id] !== undefined ? editingNotes[nextItem._id] : (nextItem.notes || '')}
+                        onNotesChange={(v) => onNotesChange(nextItem._id, v)}
+                        onNotesSave={(v) => onNotesSave(nextItem, v)}
+                        onNotesCancel={() => onNotesCancel(nextItem)}
+                        onToggle={() => onToggleReviewed(nextItem)}
+                        onDelete={() => onDelete(nextItem)}
+                      />
+                      <div className="mj-page-corner">— {2 * spreadIdx + 3} —</div>
+                    </>
                   );
                 })()}
               </div>
@@ -818,6 +849,7 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
 
       {/* Toolbar */}
       <div className="mj-book-toolbar">
+        <button className="mj-toolbar-jump" disabled={isAtStart} onClick={jumpToCover}>« Cover</button>
         <button className="mj-book-nav-btn" disabled={isAtStart} onClick={flipBack}>
           ← Previous
         </button>
@@ -825,12 +857,13 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
         <button className="mj-book-nav-btn" disabled={isAtEnd} onClick={flipForward}>
           Next →
         </button>
+        <button className="mj-toolbar-jump" disabled={N === 0 || (opened && spreadIdx >= totalSpreads - 1)} onClick={jumpToEnd}>Back »</button>
       </div>
       <div className="mj-kbd-hints">
         <span><kbd className="mj-kbd">←</kbd> prev</span>
         <span><kbd className="mj-kbd">→</kbd> next</span>
         <span><kbd className="mj-kbd">Home</kbd> cover</span>
-        <span><kbd className="mj-kbd">End</kbd> back</span>
+        <span><kbd className="mj-kbd">End</kbd> back cover</span>
       </div>
     </div>
   );

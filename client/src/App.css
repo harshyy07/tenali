@@ -3658,3 +3658,332 @@ button:disabled {
   }
   .mj-spine { width: 100%; height: 10px; }
 }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   MISTAKE JOURNAL — UI POLISH (appended last so it wins cascade)
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* --- Sage-gradient COVER (matches the home tile book-cover) --- */
+.mj-cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 36px 40px;
+  border-radius: 4px;
+  color: #fafaf7;
+  background:
+    radial-gradient(ellipse at 30% 18%, rgba(255, 255, 255, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 90%, rgba(0, 0, 0, 0.12) 0%, transparent 50%),
+    linear-gradient(155deg, #6f9c7e 0%, #7eaf8b 55%, #8ebc9b 100%);
+  box-shadow:
+    inset 14px 0 30px -10px rgba(0, 0, 0, 0.22),
+    inset -6px 0 16px -8px rgba(0, 0, 0, 0.14),
+    0 14px 32px -10px rgba(60, 60, 55, 0.32);
+  overflow: hidden;
+}
+.mj-cover::before {
+  /* inner gold frame, like a hardcover */
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.mj-cover-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  font-family: var(--font-body);
+  max-width: 460px;
+}
+.mj-cover-mark {
+  font-size: 3.2rem;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.20));
+  margin-top: 6px;
+  line-height: 1;
+}
+.mj-cover-title {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin: 14px 0 4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.mj-cover-sub {
+  font-size: 0.92rem;
+  opacity: 0.88;
+  margin: 0 0 22px;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+.mj-cover-stats {
+  display: flex;
+  gap: 22px;
+  margin-bottom: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.mj-cover-stats > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  min-width: 64px;
+}
+.mj-cover-stats strong {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.05;
+}
+.mj-cover-stats span {
+  font-size: 0.66rem;
+  opacity: 0.82;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-top: 4px;
+}
+.mj-cover-empty-hint {
+  margin-top: 14px;
+  font-size: 0.85rem;
+  opacity: 0.85;
+  line-height: 1.4;
+  max-width: 80%;
+  font-style: italic;
+}
+.mj-cover-hint {
+  font-size: 0.84rem;
+  opacity: 0.82;
+  margin-top: 14px;
+  letter-spacing: 0.04em;
+  animation: mj-pulse 2.4s ease-in-out infinite;
+}
+
+/* --- Slim meta strip ABOVE book (replaces the 4-card dashboard when open) --- */
+.mj-meta-strip {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 4px 12px 16px;
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 0.86rem;
+  color: var(--mj-ink-soft, #6b6b66);
+  letter-spacing: 0.02em;
+}
+.mj-meta-strip .mj-meta-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 14px;
+  background: var(--mj-cream, #fafaf7);
+  border: 1px solid var(--mj-line, #e3dfd6);
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+.mj-meta-strip .mj-meta-pill strong {
+  color: var(--mj-sage, #7eaf8b);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.mj-meta-strip .mj-meta-divider {
+  width: 1px;
+  height: 12px;
+  background: var(--mj-line, #e3dfd6);
+}
+.mj-meta-strip .mj-meta-back {
+  background: transparent;
+  border: 1px solid var(--mj-line, #e3dfd6);
+  color: var(--mj-ink-soft, #6b6b66);
+  padding: 5px 14px;
+  font-family: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+.mj-meta-strip .mj-meta-back:hover {
+  background: var(--mj-cream, #fafaf7);
+  color: var(--mj-ink, #3a3a36);
+  border-color: var(--mj-sage-soft, #a8c8b0);
+}
+
+/* --- Page header: tiny sage accent underline --- */
+.mj-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--mj-line-soft, #ebe8df);
+  font-family: var(--font-body);
+  position: relative;
+}
+.mj-page-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 28px;
+  height: 2px;
+  background: var(--mj-sage, #7eaf8b);
+  border-radius: 1px;
+}
+.mj-page-num {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.78rem;
+  color: var(--mj-ink-soft, #6b6b66);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  font-style: italic;
+}
+.mj-page-topic {
+  font-size: 0.68rem;
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: var(--mj-paper, #f4f1ea);
+  color: var(--mj-ink-soft, #6b6b66);
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+/* --- Subtle vertical margin guide line on each page --- */
+.mj-page-left::before,
+.mj-page-right::before {
+  content: '';
+  position: absolute;
+  top: 22px;
+  bottom: 22px;
+  pointer-events: none;
+  z-index: 0;
+}
+.mj-page-left::before {
+  left: 38px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent 0%, rgba(199, 157, 138, 0.20) 14%, rgba(199, 157, 138, 0.20) 86%, transparent 100%);
+}
+.mj-page-right::before {
+  right: 38px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent 0%, rgba(199, 157, 138, 0.20) 14%, rgba(199, 157, 138, 0.20) 86%, transparent 100%);
+}
+
+/* --- Click zones: full halves, so left page click works for back-nav --- */
+.mj-click-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  cursor: pointer;
+  z-index: 5;
+}
+.mj-click-zone-left  { left: 0;  }
+.mj-click-zone-right { right: 0; }
+
+/* --- Page-turn shadow gradient (animates with rotation) --- */
+.mj-page-right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(60, 60, 55, 0.22) 0%,
+    rgba(60, 60, 55, 0.12) 16%,
+    rgba(60, 60, 55, 0.04) 34%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 780ms cubic-bezier(0.45, 0.05, 0.30, 1.00);
+  z-index: 2;
+  border-radius: inherit;
+}
+.mj-page-right.is-flipping::after {
+  opacity: 1;
+}
+
+/* --- Page-corner number (Georgia italic, bottom-outer corner of each page) --- */
+.mj-page-left .mj-page-corner,
+.mj-page-right .mj-page-corner {
+  position: absolute;
+  bottom: 14px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 0.78rem;
+  color: var(--mj-ink-soft, #6b6b66);
+  opacity: 0.55;
+  pointer-events: none;
+  letter-spacing: 0.04em;
+}
+.mj-page-left .mj-page-corner {
+  left: 16px;
+}
+.mj-page-right .mj-page-corner {
+  right: 16px;
+}
+
+/* --- Right page: remove padding since absolute faces carry their own --- */
+.mj-page-right {
+  padding: 0 !important;
+}
+
+/* --- Toolbar polish --- */
+.mj-book-toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  font-family: var(--font-body);
+}
+.mj-book-toolbar .mj-toolbar-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--mj-line, #e3dfd6);
+}
+.mj-toolbar-jump {
+  background: transparent;
+  border: 1px solid var(--mj-line, #e3dfd6);
+  color: var(--mj-ink-soft, #6b6b66);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+.mj-toolbar-jump:hover {
+  background: var(--mj-cream, #fafaf7);
+  border-color: var(--mj-sage-soft, #a8c8b0);
+  color: var(--mj-ink, #3a3a36);
+}
+.mj-toolbar-jump:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* --- Empty-state cover (when journal is empty) --- */
+.mj-cover.is-empty {
+  /* Slightly softer palette for the empty case */
+  background:
+    radial-gradient(ellipse at 30% 18%, rgba(255, 255, 255, 0.10) 0%, transparent 55%),
+    linear-gradient(155deg, #8ebc9b 0%, #a8c8b0 60%, #c1d4c4 100%);
+}
