@@ -3929,9 +3929,11 @@ button:disabled {
 
 .mj-widget {
   position: fixed;
-  top: 12px;
+  /* Sits BELOW the top-right hamburger + theme-toggle row
+     (theme-toggle occupies y=16\u201356; we add a 12px breathing gap). */
+  top: 64px;
   right: 12px;
-  z-index: 100;
+  z-index: 99;        /* one below the toggles' 100, so dropdowns can overlap if needed */
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -4013,10 +4015,10 @@ button:disabled {
   outline-offset: 2px;
 }
 
-/* Mobile: even tighter */
+/* Mobile: even tighter, still below the top-right toggles row */
 @media (max-width: 640px) {
   .mj-widget {
-    top: 10px;
+    top: 62px;
     right: 10px;
     padding: 3px 7px 3px 5px;
   }
@@ -4026,7 +4028,7 @@ button:disabled {
 
 @media (max-width: 400px) {
   .mj-widget {
-    top: 8px;
+    top: 60px;
     right: 8px;
   }
 }
