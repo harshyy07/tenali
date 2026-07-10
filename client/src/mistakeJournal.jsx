@@ -438,22 +438,24 @@ export function MistakeJournal({ onBack }) {
         />
       )}
 
-      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {items.map(item => (
-          <MistakeRow
-            key={item._id}
-            item={item}
-            notes={editingNotes[item._id] !== undefined ? editingNotes[item._id] : (item.notes || '')}
-            onNotesChange={(v) => setEditingNotes(prev => ({ ...prev, [item._id]: v }))}
-            onNotesSave={(v) => { onSaveNote(item, v); setEditingNotes(prev => { const n = { ...prev }; delete n[item._id]; return n; }); }}
-            onNotesCancel={() => setEditingNotes(prev => { const n = { ...prev }; delete n[item._id]; return n; })}
-            onToggle={() => onToggleReviewed(item)}
-            onDelete={() => onDelete(item)}
-          />
-        ))}
-      </ul>
+      {/* Mistake Book — 3D page-flip metaphor. Each "leaf" is a two-sided
+          page: front = mistake N, back = mistake N+1. Leaf 0 front = cover;
+          last leaf back = back cover. Click right edge to flip forward,
+          left edge to flip back. Keyboard arrows also work. */}
+      {!loading && !error && items.length > 0 && (
+        <MistakeBook
+          items={items}
+          editingNotes={editingNotes}
+          onNotesChange={(id, v) => setEditingNotes(prev => ({ ...prev, [id]: v }))}
+          onNotesSave={(item, v) => { onSaveNote(item, v); setEditingNotes(prev => { const n = { ...prev }; delete n[item._id]; return n; }); }}
+          onNotesCancel={(item) => setEditingNotes(prev => { const n = { ...prev }; delete n[item._id]; return n; })}
+          onToggleReviewed={onToggleReviewed}
+          onDelete={onDelete}
+          stats={stats}
+          onBack={onBack}
+        />
+      )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, marginTop: 18 }}>
           <button disabled={page === 0} onClick={() => setPage(p => Math.max(0, p - 1))} style={pageBtn}>← Prev</button>
@@ -615,4 +617,328 @@ const pageBtn = {
   border: '1px solid var(--clr-border)', cursor: 'pointer',
 };
 
+// ─── MISTAKE BOOK ─────────────────────────────────────────────────────────────
+// A 3D book metaphor for browsing mistakes. Each "leaf" is a two-sided page.
+// Leaf N front = mistake items[N]; leaf N back = items[N+1]. Leaf 0 front is
+// the cover; the last leaf's back is the back cover. Click right edge to flip
+// forward (rotateY 0 → -180), left edge to flip back. Keyboard arrows + Home/End.
+// Reduced motion: back-face-visibility swap becomes a simple visibility fade.
+
+function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesCancel, onToggleReviewed, onDelete, stats, onBack }) {
+  // flipped[i] = true means leaf i has been flipped forward.
+  // Cover (i=0) starts unflipped; we use `flipped[0]` to mean "book opened".
+  const N = items.length;
+  const leaves = N + 1; // N mistake leaves + 1 back-cover leaf
+  const [flipped, setFlipped] = useState(() => new Array(leaves).fill(false));
+
+  // Helper: given current flipped state, what's the topmost right-page index?
+  // The "current right page" is the one whose front face is currently visible
+  // on the right side of the book. Leaf 0 front = cover (only on the right
+  // when not flipped). Once leaf 0 is flipped, its back (= mistake 0) is on
+  // the left; then leaf 1 front (= mistake 1) is on the right.
+  const currentRightIndex = useMemo(() => {
+    // Find the lowest-index leaf that is NOT flipped.
+    for (let i = 0; i < leaves; i++) {
+      if (!flipped[i]) return i;
+    }
+    return leaves - 1;
+  }, [flipped, leaves]);
+
+  const currentMistakeIndex = currentRightIndex - 1; // 0-based mistake index on right page
+  // -1 means cover, N-1 means back cover (if last leaf flipped)
+
+  const flipForward = useCallback(() => {
+    setFlipped(prev => {
+      const next = prev.slice();
+      const i = prev.findIndex(f => !f);
+      if (i === -1) return prev; // all flipped; at the end
+      next[i] = true;
+      return next;
+    });
+  }, []);
+
+  const flipBack = useCallback(() => {
+    setFlipped(prev => {
+      const next = prev.slice();
+      // Find highest-index flipped leaf
+      for (let i = prev.length - 1; i >= 0; i--) {
+        if (prev[i]) { next[i] = false; return next; }
+      }
+      return prev; // none flipped
+    });
+  }, []);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.target && /input|textarea|select/i.test(e.target.tagName)) return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault(); flipForward();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault(); flipBack();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        setFlipped(new Array(leaves).fill(false));
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        setFlipped(new Array(leaves).fill(true));
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [flipForward, flipBack, leaves]);
+
+  const isAtStart = currentRightIndex === 0;
+  const isAtEnd = currentRightIndex === leaves - 1;
+  const pageLabel = currentMistakeIndex === -1
+    ? 'Cover'
+    : currentMistakeIndex >= N
+      ? 'Back cover'
+      : `Page ${currentMistakeIndex + 1} of ${N}`;
+
+  return (
+    <div className="mj-book-wrap">
+      <div className="mj-book-stage">
+        {/* Click zones (rendered behind the leaves so leaf clicks still work) */}
+        <div className="mj-click-zone mj-click-zone-left" onClick={flipBack} aria-label="Previous page" role="button" tabIndex={-1}>
+          <div className="mj-click-zone-glow" />
+        </div>
+        <div className="mj-click-zone mj-click-zone-right" onClick={flipForward} aria-label="Next page" role="button" tabIndex={-1}>
+          <div className="mj-click-zone-glow" />
+        </div>
+
+        {/* Leaves: stack from left to right. Each leaf N is rendered with
+            z-index = (leaves - N) so later leaves sit on top — when they flip
+            they reveal the leaves behind them. */}
+        {Array.from({ length: leaves }).map((_, i) => {
+          const isCover = i === 0;
+          const isBackCover = i === leaves - 1;
+          // Front face shows: mistake items[i-1] (i.e. items[i-1] if i >= 1)
+          // When i=0, front = cover (no mistake). When i=leaves-1, back = back cover.
+          const frontItem = isCover ? null : items[i - 1];
+          const backItem = isBackCover ? null : items[i];
+          const isFlipped = flipped[i];
+          const isTopRight = i === currentRightIndex;
+
+          return (
+            <div
+              key={i}
+              className={[
+                'mj-leaf',
+                isCover ? 'is-cover' : '',
+                isBackCover ? 'is-back-cover' : '',
+                isFlipped ? 'flipped' : '',
+              ].filter(Boolean).join(' ')}
+              style={{ zIndex: leaves - i }}
+              onClick={(e) => {
+                // Don't flip when clicking inside an interactive element
+                if (e.target.closest('button, input, textarea, select, a')) return;
+                // Right half flips forward; left half flips back
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                if (x > rect.width / 2) flipForward();
+                else flipBack();
+              }}
+            >
+              <div className="mj-leaf-face mj-leaf-face-front">
+                {isCover ? (
+                  <BookCover stats={stats} totalCount={N} />
+                ) : frontItem ? (
+                  <BookPage
+                    item={frontItem}
+                    pageNum={i} /* 1-based mistake position in book */
+                    notes={editingNotes[frontItem._id] !== undefined ? editingNotes[frontItem._id] : (frontItem.notes || '')}
+                    onNotesChange={(v) => onNotesChange(frontItem._id, v)}
+                    onNotesSave={(v) => onNotesSave(frontItem, v)}
+                    onNotesCancel={() => onNotesCancel(frontItem)}
+                    onToggle={() => onToggleReviewed(frontItem)}
+                    onDelete={() => onDelete(frontItem)}
+                  />
+                ) : null}
+              </div>
+              <div className="mj-leaf-face mj-leaf-face-back">
+                {isBackCover ? (
+                  <BookBackCover items={items} stats={stats} />
+                ) : backItem ? (
+                  <BookPage
+                    item={backItem}
+                    pageNum={i + 1} /* back of leaf shows next mistake */
+                    notes={editingNotes[backItem._id] !== undefined ? editingNotes[backItem._id] : (backItem.notes || '')}
+                    onNotesChange={(v) => onNotesChange(backItem._id, v)}
+                    onNotesSave={(v) => onNotesSave(backItem, v)}
+                    onNotesCancel={() => onNotesCancel(backItem)}
+                    onToggle={() => onToggleReviewed(backItem)}
+                    onDelete={() => onDelete(backItem)}
+                  />
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
+
+        <div className="mj-book-shadow" />
+      </div>
+
+      {/* Toolbar */}
+      <div className="mj-book-toolbar">
+        <button className="mj-book-nav-btn" disabled={isAtStart} onClick={flipBack}>
+          ← Previous
+        </button>
+        <span className="mj-page-counter">{pageLabel}</span>
+        <button className="mj-book-nav-btn" disabled={isAtEnd} onClick={flipForward}>
+          Next →
+        </button>
+      </div>
+      <div className="mj-kbd-hints">
+        <span><kbd className="mj-kbd">←</kbd> prev</span>
+        <span><kbd className="mj-kbd">→</kbd> next</span>
+        <span><kbd className="mj-kbd">Home</kbd> cover</span>
+        <span><kbd className="mj-kbd">End</kbd> back</span>
+      </div>
+    </div>
+  );
+}
+
+function BookCover({ stats, totalCount }) {
+  return (
+    <div className="mj-cover-content">
+      <div className="mj-cover-mark">📖</div>
+      <div>
+        <h1 className="mj-cover-title">Mistake Journal</h1>
+        <p className="mj-cover-sub">A workbook of lessons learned</p>
+        <div className="mj-cover-stats">
+          <div>
+            <strong>{totalCount}</strong>
+            <span>pages</span>
+          </div>
+          <div>
+            <strong>{stats.unreviewed || 0}</strong>
+            <span>to review</span>
+          </div>
+          <div>
+            <strong>{Object.keys(stats.byType || {}).length}</strong>
+            <span>topics</span>
+          </div>
+        </div>
+      </div>
+      <div className="mj-cover-hint">click the right edge to open →</div>
+    </div>
+  );
+}
+
+function BookBackCover({ items, stats }) {
+  const topics = Object.keys(stats.byType || {}).sort();
+  return (
+    <div className="mj-back-content">
+      <h3>End of book</h3>
+      <div className="mj-back-topics">
+        {topics.length === 0 ? (
+          <span style={{ opacity: 0.7, fontSize: '0.85rem' }}>No topics yet</span>
+        ) : (
+          topics.map(t => (
+            <span key={t} className="mj-back-topic-chip">
+              {TYPE_LABELS[t] || defaultLabel(t)} · {stats.byType[t] || 0}
+            </span>
+          ))
+        )}
+      </div>
+      <p className="mj-back-quote">
+        “Every mistake is a page turned toward understanding.”
+      </p>
+    </div>
+  );
+}
+
+function BookPage({ item, pageNum, notes, onNotesChange, onNotesSave, onNotesCancel, onToggle, onDelete }) {
+  const [editingNote, setEditingNote] = useState(false);
+  const isReviewed = Boolean(item.reviewedAt);
+  const typeLabel = TYPE_LABELS[item.quizType] || defaultLabel(item.quizType);
+  const when = formatDate(item.ts);
+  const userAns = item.userAnswer || '∅';
+  const correctAns = item.correctAnswer || '—';
+
+  return (
+    <>
+      <div className="mj-page-header">
+        <span className="mj-page-num">Page {pageNum} · {when}</span>
+        <span className="mj-page-topic">{typeLabel}</span>
+      </div>
+
+      <div className="mj-prompt">{item.prompt}</div>
+
+      <div className="mj-page-answers">
+        <div className="mj-page-ans is-wrong">
+          <span className="mj-page-ans-l">Your answer</span>
+          <span className="mj-page-ans-v">{userAns}</span>
+        </div>
+        <div className="mj-page-ans is-right">
+          <span className="mj-page-ans-l">Correct</span>
+          <span className="mj-page-ans-v">{correctAns}</span>
+        </div>
+      </div>
+
+      <div className="mj-page-note-section">
+        <span className="mj-page-note-label">Reflection</span>
+        {!editingNote ? (
+          <>
+            <div
+              style={{
+                minHeight: 40,
+                padding: '6px 8px',
+                color: notes ? 'var(--mj-ink)' : 'var(--mj-ink-soft)',
+                fontStyle: notes ? 'normal' : 'italic',
+                fontSize: '0.88rem',
+                lineHeight: 1.5,
+                whiteSpace: 'pre-wrap',
+                cursor: 'text',
+              }}
+              onClick={(e) => { e.stopPropagation(); setEditingNote(true); }}
+            >
+              {notes || 'Tap to add a note about what you learned…'}
+            </div>
+            <div className="mj-page-mark" style={{ visibility: isReviewed ? 'visible' : 'hidden' }}>
+              ✓ marked reviewed
+            </div>
+          </>
+        ) : (
+          <>
+            <textarea
+              className="mj-page-note"
+              autoFocus
+              value={notes}
+              onChange={(e) => onNotesChange(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+              placeholder="What did you learn? What pattern did you spot?"
+            />
+            <div className="mj-page-note-actions">
+              <button className="mj-page-btn" onClick={(e) => { e.stopPropagation(); setEditingNote(false); }}>Close</button>
+              <button
+                className="mj-page-btn sage"
+                onClick={(e) => { e.stopPropagation(); onNotesSave(notes); setEditingNote(false); }}
+              >Save</button>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Page footer with action buttons — tucked bottom-right */}
+      <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', marginTop: 10 }}>
+        {!editingNote && (
+          <button
+            className={`mj-page-btn ${isReviewed ? '' : 'sage'}`}
+            onClick={(e) => { e.stopPropagation(); onToggle(); }}
+          >
+            {isReviewed ? 'Mark unreviewed' : 'Mark reviewed'}
+          </button>
+        )}
+        {!editingNote && (
+          <button
+            className="mj-page-btn warm"
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          >Delete</button>
+        )}
+      </div>
+    </>
+  );
+}
 export default MistakeJournal;
