@@ -622,49 +622,62 @@ const pageBtn = {
 // forward (rotateY 0 → -180), left edge to flip back. Keyboard arrows + Home/End.
 // Reduced motion: back-face-visibility swap becomes a simple visibility fade.
 
+// ─── MISTAKE BOOK (SPREAD VIEW) ────────────────────────────────────────────────
+// A 3D book metaphor showing TWO pages at once (left + right, like an open book).
+//
+// Model:
+//   - "spreadIdx" = current 0-based pair index. left = items[2*spreadIdx].
+//   - When spreadIdx = 0 and book is closed, we show the COVER (full stage).
+//   - When the cover is "opened" (first flip), we land on spreadIdx = 0 with
+//     left = items[0] and right = items[1].
+//   - Each subsequent flip advances spreadIdx by 1 (advances the right page).
+//   - Click right edge → flip forward; left edge → flip back.
+//   - Right page is the ONLY leaf that flips (rotateY around the spine/center).
+//   - Left page is static; it displays whatever items[2*spreadIdx] is.
+//
+// Reduced motion: crossfade instead of 3D rotate.
+
 function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesCancel, onToggleReviewed, onDelete, stats, onBack }) {
-  // flipped[i] = true means leaf i has been flipped forward.
-  // Cover (i=0) starts unflipped; we use `flipped[0]` to mean "book opened".
   const N = items.length;
-  const leaves = N + 1; // N mistake leaves + 1 back-cover leaf
-  const [flipped, setFlipped] = useState(() => new Array(leaves).fill(false));
+  const totalSpreads = Math.max(1, Math.ceil(N / 2));   // pairs + at least 1 (cover)
+  const [opened, setOpened] = useState(false);          // cover closed at first
+  const [spreadIdx, setSpreadIdx] = useState(0);        // current pair index
+  const [flipping, setFlipping] = useState(false);      // mid-flip guard
 
-  // Helper: given current flipped state, what's the topmost right-page index?
-  // The "current right page" is the one whose front face is currently visible
-  // on the right side of the book. Leaf 0 front = cover (only on the right
-  // when not flipped). Once leaf 0 is flipped, its back (= mistake 0) is on
-  // the left; then leaf 1 front (= mistake 1) is on the right.
-  const currentRightIndex = useMemo(() => {
-    // Find the lowest-index leaf that is NOT flipped.
-    for (let i = 0; i < leaves; i++) {
-      if (!flipped[i]) return i;
-    }
-    return leaves - 1;
-  }, [flipped, leaves]);
-
-  const currentMistakeIndex = currentRightIndex - 1; // 0-based mistake index on right page
-  // -1 means cover, N-1 means back cover (if last leaf flipped)
+  const leftItem  = N === 0 ? null : items[2 * spreadIdx];
+  const rightItem = N === 0 ? null : items[2 * spreadIdx + 1];
+  const isFirstSpread = spreadIdx === 0;
+  const isLastSpread  = spreadIdx === totalSpreads - 1;
 
   const flipForward = useCallback(() => {
-    setFlipped(prev => {
-      const next = prev.slice();
-      const i = prev.findIndex(f => !f);
-      if (i === -1) return prev; // all flipped; at the end
-      next[i] = true;
-      return next;
-    });
-  }, []);
+    if (flipping) return;
+    if (!opened) {
+      // Cover → open the book to spread 0
+      setFlipping(true);
+      setOpened(true);
+      setTimeout(() => setFlipping(false), 780);
+      return;
+    }
+    if (isLastSpread) return;
+    setFlipping(true);
+    setSpreadIdx(i => Math.min(totalSpreads - 1, i + 1));
+    setTimeout(() => setFlipping(false), 780);
+  }, [flipping, opened, isLastSpread, totalSpreads]);
 
   const flipBack = useCallback(() => {
-    setFlipped(prev => {
-      const next = prev.slice();
-      // Find highest-index flipped leaf
-      for (let i = prev.length - 1; i >= 0; i--) {
-        if (prev[i]) { next[i] = false; return next; }
-      }
-      return prev; // none flipped
-    });
-  }, []);
+    if (flipping) return;
+    if (!opened) return;                  // already on cover
+    if (isFirstSpread) {
+      // Going back from spread 0 → close back to cover
+      setFlipping(true);
+      setOpened(false);
+      setTimeout(() => setFlipping(false), 780);
+      return;
+    }
+    setFlipping(true);
+    setSpreadIdx(i => Math.max(0, i - 1));
+    setTimeout(() => setFlipping(false), 780);
+  }, [flipping, opened, isFirstSpread]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -676,103 +689,129 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
         e.preventDefault(); flipBack();
       } else if (e.key === 'Home') {
         e.preventDefault();
-        setFlipped(new Array(leaves).fill(false));
+        setOpened(false); setSpreadIdx(0);
       } else if (e.key === 'End') {
         e.preventDefault();
-        setFlipped(new Array(leaves).fill(true));
+        setOpened(true);
+        setSpreadIdx(Math.max(0, totalSpreads - 1));
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [flipForward, flipBack, leaves]);
+  }, [flipForward, flipBack, totalSpreads]);
 
-  const isAtStart = currentRightIndex === 0;
-  const isAtEnd = currentRightIndex === leaves - 1;
-  const pageLabel = currentMistakeIndex === -1
+  const isAtStart = !opened;
+  const isAtEnd = opened && isLastSpread;
+  const pageLabel = !opened
     ? 'Cover'
-    : currentMistakeIndex >= N
-      ? 'Back cover'
-      : `Page ${currentMistakeIndex + 1} of ${N}`;
+    : `Spread ${spreadIdx + 1} of ${totalSpreads} · ${N} ${N === 1 ? 'mistake' : 'mistakes'}`;
+
+  // For the flipping-right-page animation: we render two layers:
+  //   - "prev right" = rightItem as it was BEFORE the flip (sticks to the right
+  //     side and rotates -180° around the spine/center during a forward flip)
+  //   - "next right" = the new rightItem (appears on the right after the flip)
+  // For simplicity we just animate the whole .mj-right-leaf.
 
   return (
     <div className="mj-book-wrap">
-      <div className="mj-book-stage">
-        {/* Click zones (rendered behind the leaves so leaf clicks still work) */}
-        <div className="mj-click-zone mj-click-zone-left" onClick={flipBack} aria-label="Previous page" role="button" tabIndex={-1}>
-          <div className="mj-click-zone-glow" />
-        </div>
-        <div className="mj-click-zone mj-click-zone-right" onClick={flipForward} aria-label="Next page" role="button" tabIndex={-1}>
-          <div className="mj-click-zone-glow" />
-        </div>
+      <div className={`mj-book-stage ${opened ? 'is-open' : 'is-closed'}`}>
+        {/* COVER (visible only when closed) */}
+        {!opened && (
+          <div className="mj-cover">
+            <BookCover stats={stats} totalCount={N} />
+            <div className="mj-cover-hint">click → to open</div>
+          </div>
+        )}
 
-        {/* Leaves: stack from left to right. Each leaf N is rendered with
-            z-index = (leaves - N) so later leaves sit on top — when they flip
-            they reveal the leaves behind them. */}
-        {Array.from({ length: leaves }).map((_, i) => {
-          const isCover = i === 0;
-          const isBackCover = i === leaves - 1;
-          // Front face shows: mistake items[i-1] (i.e. items[i-1] if i >= 1)
-          // When i=0, front = cover (no mistake). When i=leaves-1, back = back cover.
-          const frontItem = isCover ? null : items[i - 1];
-          const backItem = isBackCover ? null : items[i];
-          const isFlipped = flipped[i];
-          const isTopRight = i === currentRightIndex;
+        {/* SPREAD (visible only when opened) */}
+        {opened && (
+          <>
+            {/* Static LEFT page */}
+            <div className="mj-page mj-page-left">
+              {leftItem ? (
+                <BookPage
+                  item={leftItem}
+                  pageNum={2 * spreadIdx + 1}
+                  notes={editingNotes[leftItem._id] !== undefined ? editingNotes[leftItem._id] : (leftItem.notes || '')}
+                  onNotesChange={(v) => onNotesChange(leftItem._id, v)}
+                  onNotesSave={(v) => onNotesSave(leftItem, v)}
+                  onNotesCancel={() => onNotesCancel(leftItem)}
+                  onToggle={() => onToggleReviewed(leftItem)}
+                  onDelete={() => onDelete(leftItem)}
+                />
+              ) : (
+                <div className="mj-page-blank">End of journal</div>
+              )}
+            </div>
 
-          return (
-            <div
-              key={i}
-              className={[
-                'mj-leaf',
-                isCover ? 'is-cover' : '',
-                isBackCover ? 'is-back-cover' : '',
-                isFlipped ? 'flipped' : '',
-              ].filter(Boolean).join(' ')}
-              style={{ zIndex: leaves - i }}
-              onClick={(e) => {
-                // Don't flip when clicking inside an interactive element
-                if (e.target.closest('button, input, textarea, select, a')) return;
-                // Right half flips forward; left half flips back
-                const rect = e.currentTarget.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                if (x > rect.width / 2) flipForward();
-                else flipBack();
-              }}
-            >
+            {/* Spine divider */}
+            <div className="mj-spine" />
+
+            {/* RIGHT page: this is the flipping leaf. Renders TWO layers (front
+                of current rightItem + back of nextItem) so when it rotates we
+                see the next mistake appear. */}
+            <div className={`mj-page mj-page-right mj-flip-leaf ${flipping ? 'is-flipping' : ''}`}>
               <div className="mj-leaf-face mj-leaf-face-front">
-                {isCover ? (
-                  <BookCover stats={stats} totalCount={N} />
-                ) : frontItem ? (
+                {rightItem ? (
                   <BookPage
-                    item={frontItem}
-                    pageNum={i} /* 1-based mistake position in book */
-                    notes={editingNotes[frontItem._id] !== undefined ? editingNotes[frontItem._id] : (frontItem.notes || '')}
-                    onNotesChange={(v) => onNotesChange(frontItem._id, v)}
-                    onNotesSave={(v) => onNotesSave(frontItem, v)}
-                    onNotesCancel={() => onNotesCancel(frontItem)}
-                    onToggle={() => onToggleReviewed(frontItem)}
-                    onDelete={() => onDelete(frontItem)}
+                    item={rightItem}
+                    pageNum={2 * spreadIdx + 2}
+                    notes={editingNotes[rightItem._id] !== undefined ? editingNotes[rightItem._id] : (rightItem.notes || '')}
+                    onNotesChange={(v) => onNotesChange(rightItem._id, v)}
+                    onNotesSave={(v) => onNotesSave(rightItem, v)}
+                    onNotesCancel={() => onNotesCancel(rightItem)}
+                    onToggle={() => onToggleReviewed(rightItem)}
+                    onDelete={() => onDelete(rightItem)}
                   />
-                ) : null}
+                ) : (
+                  <BookBackCover items={items} stats={stats} />
+                )}
               </div>
               <div className="mj-leaf-face mj-leaf-face-back">
-                {isBackCover ? (
-                  <BookBackCover items={items} stats={stats} />
-                ) : backItem ? (
-                  <BookPage
-                    item={backItem}
-                    pageNum={i + 1} /* back of leaf shows next mistake */
-                    notes={editingNotes[backItem._id] !== undefined ? editingNotes[backItem._id] : (backItem.notes || '')}
-                    onNotesChange={(v) => onNotesChange(backItem._id, v)}
-                    onNotesSave={(v) => onNotesSave(backItem, v)}
-                    onNotesCancel={() => onNotesCancel(backItem)}
-                    onToggle={() => onToggleReviewed(backItem)}
-                    onDelete={() => onDelete(backItem)}
-                  />
-                ) : null}
+                {/* The back of the right leaf shows the NEXT mistake. We
+                    pre-render items[2*spreadIdx+2] here so when the leaf
+                    rotates past -90° we reveal the next page. */}
+                {(() => {
+                  const nextItem = items[2 * spreadIdx + 2];
+                  if (!nextItem) return <BookBackCover items={items} stats={stats} />;
+                  return (
+                    <BookPage
+                      item={nextItem}
+                      pageNum={2 * spreadIdx + 3}
+                      notes={editingNotes[nextItem._id] !== undefined ? editingNotes[nextItem._id] : (nextItem.notes || '')}
+                      onNotesChange={(v) => onNotesChange(nextItem._id, v)}
+                      onNotesSave={(v) => onNotesSave(nextItem, v)}
+                      onNotesCancel={() => onNotesCancel(nextItem)}
+                      onToggle={() => onToggleReviewed(nextItem)}
+                      onDelete={() => onDelete(nextItem)}
+                    />
+                  );
+                })()}
               </div>
             </div>
-          );
-        })}
+          </>
+        )}
+
+        {/* Click zones — left half = back, right half = forward. Cover mode uses
+            the whole stage as "forward". */}
+        <div
+          className="mj-click-zone mj-click-zone-left"
+          onClick={flipBack}
+          aria-label="Previous page"
+          role="button"
+          tabIndex={-1}
+        >
+          <div className="mj-click-zone-glow" />
+        </div>
+        <div
+          className="mj-click-zone mj-click-zone-right"
+          onClick={flipForward}
+          aria-label="Next page"
+          role="button"
+          tabIndex={-1}
+        >
+          <div className="mj-click-zone-glow" />
+        </div>
 
         <div className="mj-book-shadow" />
       </div>
@@ -796,7 +835,6 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
     </div>
   );
 }
-
 function BookCover({ stats, totalCount }) {
   const isEmpty = totalCount === 0;
   return (
