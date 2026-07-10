@@ -700,23 +700,11 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
     return () => window.removeEventListener('keydown', onKey);
   }, [flipForward, flipBack, totalSpreads]);
 
-  const isAtStart = !opened;
-  const isAtEnd = opened && isLastSpread;
-  const pageLabel = !opened
-    ? 'Cover'
-    : `Spread ${spreadIdx + 1} of ${totalSpreads} · ${N} ${N === 1 ? 'mistake' : 'mistakes'}`;
-
   // For the flipping-right-page animation: we render two layers:
   //   - "prev right" = rightItem as it was BEFORE the flip (sticks to the right
   //     side and rotates -180° around the spine/center during a forward flip)
   //   - "next right" = the new rightItem (appears on the right after the flip)
   // For simplicity we just animate the whole .mj-right-leaf.
-
-  const jumpToCover = () => { setOpened(false); setSpreadIdx(0); };
-  const jumpToEnd = () => {
-    setOpened(true);
-    setSpreadIdx(Math.max(0, totalSpreads - 1));
-  };
 
   return (
     <div className="mj-book-wrap">
@@ -847,18 +835,6 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
         <div className="mj-book-shadow" />
       </div>
 
-      {/* Toolbar */}
-      <div className="mj-book-toolbar">
-        <button className="mj-toolbar-jump" disabled={isAtStart} onClick={jumpToCover}>« Cover</button>
-        <button className="mj-book-nav-btn" disabled={isAtStart} onClick={flipBack}>
-          ← Previous
-        </button>
-        <span className="mj-page-counter">{pageLabel}</span>
-        <button className="mj-book-nav-btn" disabled={isAtEnd} onClick={flipForward}>
-          Next →
-        </button>
-        <button className="mj-toolbar-jump" disabled={N === 0 || (opened && spreadIdx >= totalSpreads - 1)} onClick={jumpToEnd}>Back »</button>
-      </div>
       <div className="mj-kbd-hints">
         <span><kbd className="mj-kbd">←</kbd> prev</span>
         <span><kbd className="mj-kbd">→</kbd> next</span>

@@ -3377,26 +3377,6 @@ button:disabled {
 .mj-click-zone-left  .mj-click-zone-glow { --dir: right; }
 .mj-click-zone-right .mj-click-zone-glow { --dir: left; }
 
-/* Toolbar */
-.mj-book-toolbar { display: flex; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; align-items: center; font-family: var(--font-body); }
-.mj-book-progress { flex: 1 1 auto; text-align: center; font-size: 0.86rem; color: var(--mj-ink-soft); font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
-.mj-page-counter { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: var(--mj-cream); border: 1px solid var(--mj-line); border-radius: 999px; font-size: 0.84rem; color: var(--mj-ink-soft); }
-.mj-book-nav-btn {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--mj-line);
-  background: var(--mj-cream);
-  color: var(--mj-ink);
-  font-family: inherit;
-  font-size: 0.88rem;
-  cursor: pointer;
-  transition: all 200ms ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.mj-book-nav-btn:hover:not(:disabled) { background: var(--mj-paper); border-color: var(--mj-sage-soft); }
-.mj-book-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .mj-kbd-hints { display: flex; justify-content: center; gap: 8px; margin-top: 6px; font-size: 0.74rem; color: var(--mj-ink-soft); flex-wrap: wrap; }
 .mj-kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; background: var(--mj-cream); border: 1px solid var(--mj-line); border-bottom-width: 2px; }
@@ -3877,41 +3857,7 @@ button:disabled {
   padding: 0 !important;
 }
 
-/* --- Toolbar polish --- */
-.mj-book-toolbar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin-top: 16px;
-  flex-wrap: wrap;
-  font-family: var(--font-body);
-}
-.mj-book-toolbar .mj-toolbar-sep {
-  width: 1px;
-  height: 18px;
-  background: var(--mj-line, #e3dfd6);
-}
-.mj-toolbar-jump {
-  background: transparent;
-  border: 1px solid var(--mj-line, #e3dfd6);
-  color: var(--mj-ink-soft, #6b6b66);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-family: inherit;
-  font-size: 0.82rem;
-  cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
-}
-.mj-toolbar-jump:hover {
-  background: var(--mj-cream, #fafaf7);
-  border-color: var(--mj-sage-soft, #a8c8b0);
-  color: var(--mj-ink, #3a3a36);
-}
-.mj-toolbar-jump:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
+
 
 /* --- Empty-state cover (when journal is empty) --- */
 .mj-cover.is-empty {
