@@ -495,7 +495,46 @@ export default function WorksheetApp({ onBack }) {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, borderBottom: '1px solid var(--clr-border, #444)', paddingBottom: 8 }}>
                 <h3 style={{ margin: 0 }}>Topic Catalog</h3>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <select
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (!val) return;
+                      setTopicSelection(prev => {
+                        const copy = { ...prev };
+                        Object.keys(copy).forEach(k => {
+                          if (copy[k].selected) {
+                            if (val === 'random') {
+                              const diffs = ['easy', 'medium', 'hard'];
+                              copy[k].difficulty = diffs[Math.floor(Math.random() * diffs.length)];
+                            } else {
+                              copy[k].difficulty = val;
+                            }
+                          }
+                        });
+                        return copy;
+                      });
+                      e.target.value = ''; // Reset select
+                    }}
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid var(--clr-border, #444)',
+                      borderRadius: 4,
+                      color: 'var(--clr-accent, #58a6ff)',
+                      fontSize: '0.85rem',
+                      padding: '2px 8px',
+                      cursor: 'pointer',
+                      outline: 'none'
+                    }}
+                  >
+                    <option value="" disabled selected hidden>Set Difficulty</option>
+                    <option value="random">🎲 Shuffle / Random</option>
+                    <option value="easy">🟢 Easy</option>
+                    <option value="medium">🟡 Medium</option>
+                    <option value="hard">🔴 Hard</option>
+                    <option value="extrahard">🔥 Extra Hard</option>
+                  </select>
+                  <span style={{ opacity: 0.4 }}>|</span>
                   <button onClick={() => selectAll(true)} style={{ background: 'transparent', border: 'none', color: 'var(--clr-accent, #58a6ff)', cursor: 'pointer', fontSize: '0.85rem' }}>Select All</button>
                   <span style={{ opacity: 0.4 }}>|</span>
                   <button onClick={() => selectAll(false)} style={{ background: 'transparent', border: 'none', color: 'var(--clr-accent, #58a6ff)', cursor: 'pointer', fontSize: '0.85rem' }}>Clear All</button>
