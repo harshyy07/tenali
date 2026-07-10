@@ -36126,8 +36126,11 @@ function App() {
 function MistakeJournalWidget({ onOpen }) {
   // LocalStorage merge sync — runs ONCE per page load (post-mount) to merge
   // any guest mistakes the user logged in before signing in.
-  const { count, loading } = useMistakeBadge()
+  // useMistakeBadge() returns { unreviewed, total, loading, refresh }
+  // — we treat the unreviewed count as the badge number.
+  const { unreviewed, loading } = useMistakeBadge()
   if (loading) return null
+  const count = Number(unreviewed) || 0
   return (
     <button
       type="button"
@@ -36276,9 +36279,6 @@ function Home({ onSelect }) {
   // Grid layout tracking (for responsive display)
   const gridRef = useRef(null)
 
-  // Mistake Journal home-tile badge (unreviewed count).
-  // Auto-refreshes on auth change + custom invalidate event from capture hooks.
-  const mistakeBadge = useMistakeBadge()
   // Number of columns currently displayed (responsive)
   const [cols, setCols] = useState(4)
 
