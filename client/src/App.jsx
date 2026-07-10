@@ -36124,6 +36124,8 @@ function App() {
 // Click → opens the fullscreen MistakeJournal page (mode='mistakeJournal').
 // Fades in when count > 0, hides entirely when zero (or auth loading).
 function MistakeJournalWidget({ onOpen }) {
+  // LocalStorage merge sync — runs ONCE per page load (post-mount) to merge
+  // any guest mistakes the user logged in before signing in.
   const { count, loading } = useMistakeBadge()
   if (loading) return null
   return (
@@ -36131,11 +36133,16 @@ function MistakeJournalWidget({ onOpen }) {
       type="button"
       className={`mj-widget mj-sage ${count > 0 ? 'mj-widget--active' : ''}`}
       onClick={onOpen}
-      title={count > 0 ? `Review your ${count} unreviewed mistakes` : 'Open Mistake Journal'}
+      title={count > 0 ? `Review your ${count} unreviewed mistake${count === 1 ? '' : 's'}` : 'Open Mistake Journal'}
       aria-label="Open Mistake Journal"
     >
-      <span className="mj-widget-icon" aria-hidden="true">📝</span>
-      {count > 0 && <span className="mj-widget-count">{count > 99 ? '99+' : count}</span>}
+      <span className="mj-widget-icon" aria-hidden="true">📖</span>
+      <span className="mj-widget-label">Mistake Journal</span>
+      {count > 0 && (
+        <span className="mj-widget-badge">
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
     </button>
   )
 }
@@ -36157,9 +36164,10 @@ function Home({ onSelect }) {
     { key: 'worksheet', name: 'Worksheet Gen', subtitle: 'Customized offline worksheets', color: 'featured' },
   ]
 
-  // All regular quiz apps sorted alphabetically by name
+  // All regular quiz apps sorted alphabetically by name.
+  // (Mistake Journal is intentionally NOT a tile — it's a floating widget
+  // only, so the home grid stays focused on quiz apps.)
   const regularApps = [
-    { key: 'mistakeJournal', name: 'Mistake Journal', subtitle: 'Searchable workbook of wrong answers', color: 'red', icon: '📝' },
     { key: 'addition', name: 'Addition', subtitle: '20-question addition practice', color: 'blue' },
     { key: 'angles', name: 'Angles', subtitle: 'Lines, points, parallel lines', color: 'green' },
     { key: 'basicarith', name: 'Arithmetic', subtitle: '+, −, ×, ÷ with positive & negative', color: 'purple' },
@@ -36341,48 +36349,15 @@ function Home({ onSelect }) {
       </div>
       <div className="menu-grid" ref={gridRef}>
         {filteredRegular.map((app) => {
-          const showBadge = app.key === 'mistakeJournal' && mistakeBadge.unreviewed > 0
-          const isBookTile = app.key === 'mistakeJournal'
           return (
             <button
               key={app.key}
-              className={`menu-card ${app.color}${isBookTile ? ' menu-card--book' : ''}`}
+              className={`menu-card ${app.color}`}
               onClick={() => onSelect(app.key)}
-              style={isBookTile ? { position: 'relative', overflow: 'hidden' } : { position: 'relative' }}
+              style={{ position: 'relative' }}
             >
-              {isBookTile ? (
-                <div className="menu-book-tile">
-                  <div className="menu-book-spine" aria-hidden="true" />
-                  <div className="menu-book-cover">
-                    <div className="menu-book-mark">📖</div>
-                    <span className="menu-book-title">{app.name}</span>
-                    <span className="menu-book-sub">{app.subtitle}</span>
-                    <div className="menu-book-stats">
-                      <span><strong>{mistakeBadge.total || 0}</strong> pages</span>
-                      <span><strong>{mistakeBadge.unreviewed || 0}</strong> to review</span>
-                    </div>
-                    <div className="menu-book-cta">tap to open →</div>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <span className="menu-title">{app.icon ? `${app.icon} ${app.name}` : app.name}</span>
-                  <span className="menu-subtitle">{app.subtitle}</span>
-                </>
-              )}
-              {showBadge && (
-                <span style={{
-                  position: 'absolute', top: 8, right: 8,
-                  minWidth: 24, height: 24, padding: '0 8px',
-                  borderRadius: 999, background: 'var(--clr-wrong, #ff6b6b)', color: '#fff',
-                  fontSize: '0.8rem', fontWeight: 600,
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-                  zIndex: 2,
-                }} title={`${mistakeBadge.unreviewed} unreviewed mistake${mistakeBadge.unreviewed === 1 ? '' : 's'}`}>
-                  {mistakeBadge.unreviewed > 99 ? '99+' : mistakeBadge.unreviewed}
-                </span>
-              )}
+              <span className="menu-title">{app.icon ? `${app.icon} ${app.name}` : app.name}</span>
+              <span className="menu-subtitle">{app.subtitle}</span>
             </button>
           )
         })}
