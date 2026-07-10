@@ -35482,6 +35482,28 @@ function App() {
    */
   const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
 
+  // Global keyboard shortcut: press `M` anywhere on the home menu (or when
+  // the journal is already open) to toggle the Mistake Journal widget. This
+  // makes the top-right pill accessible without tabbing — useful for power
+  // users and screen-reader users.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.defaultPrevented) return;
+      // Skip when typing in inputs/textareas/selects/contenteditable
+      const tag = e.target && e.target.tagName;
+      if (tag && /input|textarea|select/i.test(tag)) return;
+      if (e.target && e.target.isContentEditable) return;
+      // Skip when modifier keys are held (Ctrl/Meta/Alt) — those are real shortcuts
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        setMode(prev => prev === 'mistakeJournal' ? null : 'mistakeJournal');
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [])
+
   // ========== ROUTING: URL-BASED (STUDENT PAGES) ==========
   // Check if current URL matches a specific student page
   const pathname = window.location.pathname.replace(/\/$/, '').toLowerCase()
@@ -36138,7 +36160,7 @@ function MistakeJournalWidget({ onOpen }) {
       type="button"
       className={`mj-widget mj-sage ${count > 0 ? 'mj-widget--active' : ''}`}
       onClick={onOpen}
-      title={count > 0 ? `Mistake Journal — ${count} unreviewed` : 'Mistake Journal'}
+      title={count > 0 ? `Mistake Journal — ${count} unreviewed  (press M)` : 'Mistake Journal  (press M)'}
       aria-label="Open Mistake Journal"
     >
       <span className="mj-widget-icon" aria-hidden="true">📖</span>

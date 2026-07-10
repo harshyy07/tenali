@@ -659,8 +659,13 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
       return;
     }
     if (isLastSpread) return;
+    // Two-phase flip: rotate from 0° to -180° over 780ms. We swap content
+    // (advance spreadIdx) at the half-way mark when the leaf is edge-on
+    // (~390ms in, content invisible) so the user never sees a content jump.
     setFlipping(true);
-    setSpreadIdx(i => Math.min(totalSpreads - 1, i + 1));
+    setTimeout(() => {
+      setSpreadIdx(i => Math.min(totalSpreads - 1, i + 1));
+    }, 390);
     setTimeout(() => setFlipping(false), 780);
   }, [flipping, opened, isLastSpread, totalSpreads]);
 
@@ -674,8 +679,12 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
       setTimeout(() => setFlipping(false), 780);
       return;
     }
+    // Two-phase flip (see flipForward): advance spreadIdx at the mid-point
+    // when the leaf is rotated to ~-90° and visually invisible.
     setFlipping(true);
-    setSpreadIdx(i => Math.max(0, i - 1));
+    setTimeout(() => {
+      setSpreadIdx(i => Math.max(0, i - 1));
+    }, 390);
     setTimeout(() => setFlipping(false), 780);
   }, [flipping, opened, isFirstSpread]);
 
@@ -824,6 +833,7 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
         <span><kbd className="mj-kbd">→</kbd> next</span>
         <span><kbd className="mj-kbd">Home</kbd> cover</span>
         <span><kbd className="mj-kbd">End</kbd> back cover</span>
+        <span><kbd className="mj-kbd">M</kbd> close</span>
       </div>
     </div>
   );
