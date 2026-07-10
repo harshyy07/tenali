@@ -784,28 +784,12 @@ function MistakeBook({ items, editingNotes, onNotesChange, onNotesSave, onNotesC
                 )}
               </div>
               <div className="mj-leaf-face mj-leaf-face-back">
-                {/* The back of the right leaf shows the NEXT mistake. We
-                    pre-render items[2*spreadIdx+2] here so when the leaf
-                    rotates past -90° we reveal the next page. */}
-                {(() => {
-                  const nextItem = items[2 * spreadIdx + 2];
-                  if (!nextItem) return <BookBackCover items={items} stats={stats} />;
-                  return (
-                    <>
-                      <BookPage
-                        item={nextItem}
-                        pageNum={2 * spreadIdx + 3}
-                        notes={editingNotes[nextItem._id] !== undefined ? editingNotes[nextItem._id] : (nextItem.notes || '')}
-                        onNotesChange={(v) => onNotesChange(nextItem._id, v)}
-                        onNotesSave={(v) => onNotesSave(nextItem, v)}
-                        onNotesCancel={() => onNotesCancel(nextItem)}
-                        onToggle={() => onToggleReviewed(nextItem)}
-                        onDelete={() => onDelete(nextItem)}
-                      />
-                      <div className="mj-page-corner">— {2 * spreadIdx + 3} —</div>
-                    </>
-                  );
-                })()}
+                {/* The back of the right leaf is intentionally BLANK.
+                    Each mistake lives on ONE side only — the front.
+                    The leaf still rotates for the 3D flip animation, but
+                    the back face shows plain paper so you never see a
+                    "next mistake" you haven't reached yet. */}
+                <div className="mj-leaf-back-blank" aria-hidden="true" />
               </div>
             </div>
           </>

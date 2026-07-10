@@ -3978,3 +3978,16 @@ button:disabled {
     right: 8px;
   }
 }
+/* Blank paper on the back of a flipped leaf — the leaf still rotates
+   for the 3D flip animation, but you never see another mistake you haven't
+   reached yet. The parent .mj-page-right .mj-leaf-face-back already has
+   cream paper background + spine-side inset shadow, so this just ensures
+   the inner area is fully transparent (no border, no content). */
+.mj-leaf-back-blank {
+  flex: 1 1 auto;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+
