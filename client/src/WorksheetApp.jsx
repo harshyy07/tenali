@@ -4,18 +4,29 @@ const API = import.meta.env.VITE_API_BASE_URL || '';
 
 // Catalog of topics supported by Tenali that generate print-friendly prompts
 const TOPIC_CATALOG = [
+  // Arithmetic
   { key: 'addition', name: 'Addition', category: 'Arithmetic', defaultCount: 5, defaultDifficulty: 'easy' },
-  { key: 'basicarith', name: 'Basic Arithmetic (+, −, ×)', category: 'Arithmetic', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'basicarith', name: 'Basic Arithmetic (+, −, ×, ÷)', category: 'Arithmetic', defaultCount: 5, defaultDifficulty: 'medium' },
   { key: 'multiply', name: 'Multiplication Tables', category: 'Arithmetic', defaultCount: 5, defaultDifficulty: 'easy' },
   { key: 'decimals', name: 'Decimals Arithmetic', category: 'Arithmetic', defaultCount: 5, defaultDifficulty: 'medium' },
-  { key: 'fractionadd', name: 'Fraction Addition', category: 'Fractions & Ratios', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'hcflcm', name: 'HCF & LCM', category: 'Arithmetic', defaultCount: 3, defaultDifficulty: 'easy' },
+  { key: 'primefactor', name: 'Prime Factorisation', category: 'Arithmetic', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'bases', name: 'Number Bases', category: 'Arithmetic', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'rounding', name: 'Rounding (D.P., Sig Figs)', category: 'Arithmetic', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'sdt', name: 'Speed, Distance, Time', category: 'Arithmetic', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'bounds', name: 'Upper & Lower Bounds', category: 'Arithmetic', defaultCount: 5, defaultDifficulty: 'medium' },
+
+  // Fractions & Ratios
+  { key: 'fractionadd', name: 'Fraction Addition & Ops', category: 'Fractions & Ratios', defaultCount: 5, defaultDifficulty: 'medium' },
   { key: 'ratio', name: 'Ratio & Proportion', category: 'Fractions & Ratios', defaultCount: 3, defaultDifficulty: 'medium' },
   { key: 'percent', name: 'Percentages', category: 'Fractions & Ratios', defaultCount: 3, defaultDifficulty: 'medium' },
-  { key: 'hcflcm', name: 'HCF & LCM', category: 'Arithmetic', defaultCount: 3, defaultDifficulty: 'easy' },
+  { key: 'variation', name: 'Direct & Inverse Variation', category: 'Fractions & Ratios', defaultCount: 3, defaultDifficulty: 'medium' },
+
+  // Algebra
   { key: 'sqrt', name: 'Square Roots', category: 'Algebra', defaultCount: 5, defaultDifficulty: 'medium' },
-  { key: 'primefactor', name: 'Prime Factorisation', category: 'Arithmetic', defaultCount: 3, defaultDifficulty: 'medium' },
   { key: 'lineareq', name: 'Linear Equations', category: 'Algebra', defaultCount: 5, defaultDifficulty: 'medium' },
   { key: 'quadratic', name: 'Quadratic Substitution', category: 'Algebra', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'qformula', name: 'Quadratic Formula Solver', category: 'Algebra', defaultCount: 3, defaultDifficulty: 'medium' },
   { key: 'polyfactor', name: 'Polynomial Factoring', category: 'Algebra', defaultCount: 3, defaultDifficulty: 'medium' },
   { key: 'polymul', name: 'Polynomial Expansion', category: 'Algebra', defaultCount: 3, defaultDifficulty: 'medium' },
   { key: 'simul', name: 'Simultaneous Equations', category: 'Algebra', defaultCount: 2, defaultDifficulty: 'medium' },
@@ -23,11 +34,56 @@ const TOPIC_CATALOG = [
   { key: 'surds', name: 'Surds Simplification', category: 'Algebra', defaultCount: 5, defaultDifficulty: 'medium' },
   { key: 'log', name: 'Logarithms', category: 'Algebra', defaultCount: 5, defaultDifficulty: 'medium' },
   { key: 'stdform', name: 'Standard Form (Sci. Notation)', category: 'Algebra', defaultCount: 5, defaultDifficulty: 'medium' },
-  { key: 'angles', name: 'Angles', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'binomial', name: 'Binomial Theorem', category: 'Algebra', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'complex', name: 'Complex Numbers', category: 'Algebra', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'ineq', name: 'Inequalities (Linear/Quad)', category: 'Algebra', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'matrix', name: 'Matrices Operations', category: 'Algebra', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'vectors', name: 'Vectors (Add, Scale)', category: 'Algebra', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'dotprod', name: 'Vector Dot Products', category: 'Algebra', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'sequences', name: 'Sequences & Series', category: 'Algebra', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'sets', name: 'Sets & Venn Diagrams', category: 'Algebra', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'squaring', name: 'Squaring (a+b)²', category: 'Algebra', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'remfactor', name: 'Remainder & Factor Theorem', category: 'Algebra', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'tatsavit', name: 'Tatsavit algebraic drill', category: 'Algebra', defaultCount: 5, defaultDifficulty: 'easy' },
+
+  // Geometry
+  { key: 'angles', name: 'Angles (Lines, Parallel)', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
   { key: 'pythag', name: 'Pythagoras\' Theorem', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
   { key: 'mensur', name: 'Mensuration (Area & Volume)', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
-  { key: 'gk', name: 'General Knowledge', category: 'Trivia', defaultCount: 5, defaultDifficulty: 'medium' },
-  { key: 'vocab', name: 'Vocabulary', category: 'Trivia', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'circleth', name: 'Circle Theorems', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'congruence', name: 'Triangle Congruence', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'similarity', name: 'Similarity Scale Factors', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'coordgeom', name: 'Coordinate Geometry', category: 'Geometry', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'lineq', name: 'Line Equation (y=mx+c)', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'bearings', name: 'Three-Figure Bearings', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'transform', name: 'Transformations', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'triangles', name: 'Triangle Properties', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'conics', name: 'Conic Sections', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'section', name: 'Section Formula', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'circmeasure', name: 'Circular Measure (Radians)', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'trig', name: 'Trigonometry (SOHCAHTOA)', category: 'Geometry', defaultCount: 3, defaultDifficulty: 'medium' },
+
+  // Calculus
+  { key: 'diff', name: 'Differentiation Basics', category: 'Calculus', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'integ', name: 'Integration Basics', category: 'Calculus', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'diffeq', name: 'Differential Equations', category: 'Calculus', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'limits', name: 'Limits Evaluation', category: 'Calculus', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'invtrig', name: 'Inverse Trigonometry', category: 'Calculus', defaultCount: 3, defaultDifficulty: 'medium' },
+
+  // Finance
+  { key: 'banking', name: 'Banking (RD Interest)', category: 'Finance', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'gst', name: 'GST Calculations', category: 'Finance', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'shares', name: 'Shares & Dividends', category: 'Finance', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'profitloss', name: 'Profit, Loss & Markup', category: 'Finance', defaultCount: 3, defaultDifficulty: 'medium' },
+
+  // Probability & Stats
+  { key: 'prob', name: 'Probability Events', category: 'Probability & Stats', defaultCount: 3, defaultDifficulty: 'medium' },
+  { key: 'stats', name: 'Statistics (Mean, Med, Mode)', category: 'Probability & Stats', defaultCount: 3, defaultDifficulty: 'medium' },
+
+  // Trivia & Games
+  { key: 'gk', name: 'General Knowledge', category: 'Trivia & Games', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'vocab', name: 'Vocabulary Builder', category: 'Trivia & Games', defaultCount: 5, defaultDifficulty: 'medium' },
+  { key: 'guess', name: 'Guess the Number Magic', category: 'Trivia & Games', defaultCount: 1, defaultDifficulty: 'medium' },
 ];
 
 function fetchQuestionForWorksheet(type, difficulty, qIndex = 0) {
@@ -235,7 +291,7 @@ export default function WorksheetApp({ onBack }) {
   const [settings, setSettings] = useState({
     title: 'Practice Worksheet',
     subtitle: 'Tenali Adaptive Learning',
-    layout: 'standard', // compact, standard, spacious
+    layout: 'compact', // compact, standard, spacious
     columns: '2', // 1 or 2
     showAnswerKey: true,
   });
@@ -294,45 +350,65 @@ export default function WorksheetApp({ onBack }) {
     setGenerationProgress(0);
     setViewMode('preview');
 
-    const totalQuestionsToFetch = selected.reduce((sum, item) => sum + Number(item.count), 0);
-    let fetchedCount = 0;
-    const allQuestions = [];
+    // Build a flat list of every individual question task
+    const tasks = [];
+    for (const item of selected) {
+      for (let i = 0; i < item.count; i++) {
+        tasks.push({ key: item.key, difficulty: item.difficulty, idx: i });
+      }
+    }
+
+    const total = tasks.length;
+    let completed = 0;
+
+    // Fetch all questions in parallel
+    const fetchTask = async (task) => {
+      const { key, difficulty, idx } = task;
+      try {
+        const qData = await fetchQuestionForWorksheet(key, difficulty, idx);
+
+        let answerVal = '';
+        try {
+          const checkRes = await fetch(`${API}/${key}-api/check`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...qData, solve: true })
+          });
+          if (checkRes.ok) {
+            const checkData = await checkRes.json();
+            answerVal = getAnswerValue(checkData);
+          }
+        } catch (err) {
+          console.error(`Error solving ${key}:`, err);
+        }
+
+        completed++;
+        setGenerationProgress(Math.round((completed / total) * 100));
+
+        return {
+          id: `${key}-${idx}-${Date.now()}-${Math.random()}`,
+          type: key,
+          topicName: TOPIC_CATALOG.find(t => t.key === key)?.name || key,
+          difficulty,
+          data: qData,
+          answer: answerVal,
+          _order: tasks.indexOf(task), // preserve original order
+        };
+      } catch (e) {
+        console.error(`Error fetching ${key}:`, e);
+        completed++;
+        setGenerationProgress(Math.round((completed / total) * 100));
+        return null;
+      }
+    };
 
     try {
-      for (const item of selected) {
-        for (let i = 0; i < item.count; i++) {
-          try {
-            const qData = await fetchQuestionForWorksheet(item.key, item.difficulty, i);
-            let answerVal = '';
-            try {
-              const checkRes = await fetch(`${API}/${item.key}-api/check`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...qData, solve: true })
-              });
-              if (checkRes.ok) {
-                const checkData = await checkRes.json();
-                answerVal = getAnswerValue(checkData);
-              }
-            } catch (err) {
-              console.error(`Error solving ${item.key}:`, err);
-            }
+      const results = await Promise.allSettled(tasks.map(fetchTask));
+      const allQuestions = results
+        .filter(r => r.status === 'fulfilled' && r.value !== null)
+        .map(r => r.value)
+        .sort((a, b) => a._order - b._order); // keep original topic ordering
 
-            allQuestions.push({
-              id: `${item.key}-${i}-${Date.now()}-${Math.random()}`,
-              type: item.key,
-              topicName: TOPIC_CATALOG.find(t => t.key === item.key)?.name || item.key,
-              difficulty: item.difficulty,
-              data: qData,
-              answer: answerVal,
-            });
-          } catch (e) {
-            console.error(`Error fetching ${item.key}:`, e);
-          }
-          fetchedCount++;
-          setGenerationProgress(Math.round((fetchedCount / totalQuestionsToFetch) * 100));
-        }
-      }
       setQuestions(allQuestions);
     } catch (err) {
       console.error('Worksheet generation failed:', err);
@@ -341,6 +417,7 @@ export default function WorksheetApp({ onBack }) {
       setIsGenerating(false);
     }
   };
+
 
 
   // Group selection by category
@@ -353,9 +430,15 @@ export default function WorksheetApp({ onBack }) {
   return (
     <div className="worksheet-app" style={{
       color: 'var(--clr-text)',
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '40px 20px',
+      ...(viewMode === 'preview' ? {
+        maxWidth: '100%',
+        margin: 0,
+        padding: 0,
+      } : {
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '40px 20px',
+      }),
       boxSizing: 'border-box',
       minHeight: '100vh',
       display: 'flex',
@@ -467,6 +550,19 @@ export default function WorksheetApp({ onBack }) {
                 </select>
               </div>
 
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: 6, opacity: 0.85 }}>Workspace Density</label>
+                <select
+                  value={settings.layout}
+                  onChange={e => setSettings(prev => ({ ...prev, layout: e.target.value }))}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid var(--clr-border, #444)', background: 'var(--clr-surface, #1c1c1f)', color: 'inherit' }}
+                >
+                  <option value="compact">Compact (1 Answer Line)</option>
+                  <option value="standard">Standard (2 Blank Lines)</option>
+                  <option value="spacious">Spacious (Grid Box)</option>
+                </select>
+              </div>
+
               <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <input
                   type="checkbox"
@@ -545,7 +641,6 @@ export default function WorksheetApp({ onBack }) {
                     <option value="easy">🟢 Easy</option>
                     <option value="medium">🟡 Medium</option>
                     <option value="hard">🔴 Hard</option>
-                    <option value="extrahard">🔥 Extra Hard</option>
                   </select>
                   <span style={{ opacity: 0.4 }}>|</span>
                   <button onClick={() => selectAll(true)} style={{ background: 'transparent', border: 'none', color: 'var(--clr-accent, #58a6ff)', cursor: 'pointer', fontSize: '0.85rem' }}>Select All</button>
@@ -555,9 +650,30 @@ export default function WorksheetApp({ onBack }) {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxHeight: '60vh', overflowY: 'auto', paddingRight: 8 }}>
-                {Object.entries(categories).map(([category, topics]) => (
+                {Object.entries(categories).map(([category, topics]) => {
+                  const allSelected = topics.every(t => topicSelection[t.key]?.selected);
+                  const someSelected = topics.some(t => topicSelection[t.key]?.selected);
+                  const catCheckRef = el => { if (el) el.indeterminate = someSelected && !allSelected; };
+                  const toggleCategory = () => {
+                    const newVal = !allSelected;
+                    setTopicSelection(prev => {
+                      const copy = { ...prev };
+                      topics.forEach(t => { copy[t.key] = { ...copy[t.key], selected: newVal }; });
+                      return copy;
+                    });
+                  };
+                  return (
                   <div key={category}>
-                    <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--clr-accent, #58a6ff)', opacity: 0.9 }}>{category}</h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 0 10px 0' }}>
+                      <input
+                        type="checkbox"
+                        ref={catCheckRef}
+                        checked={allSelected}
+                        onChange={toggleCategory}
+                        style={{ cursor: 'pointer', width: 16, height: 16 }}
+                      />
+                      <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--clr-accent, #58a6ff)', opacity: 0.9, cursor: 'pointer' }} onClick={toggleCategory}>{category}</h4>
+                    </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {topics.map(topic => {
                         const sel = topicSelection[topic.key];
@@ -614,7 +730,8 @@ export default function WorksheetApp({ onBack }) {
                       })}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -628,6 +745,9 @@ export default function WorksheetApp({ onBack }) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          background: '#525659',
+          minHeight: '100vh',
+          padding: '32px 24px',
           boxSizing: 'border-box'
         }}>
           {isGenerating ? (
@@ -652,22 +772,22 @@ export default function WorksheetApp({ onBack }) {
             </div>
           ) : (
             <div>
-              {/* PRINT CONTAINER (Will be styled differently in print stylesheet) */}
+              {/* PRINT CONTAINER — A4 paper appearance */}
               <div className="worksheet-print-layout" style={{
                 background: '#ffffff',
                 color: '#000000',
-                padding: '40px',
-                borderRadius: 8,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                padding: '15mm 15mm',
+                boxShadow: '0 0 24px rgba(0,0,0,0.55)',
                 fontFamily: '"Lexend", "Inter", sans-serif',
-                maxWidth: '800px',
+                width: '210mm',
+                minHeight: '297mm',
+                boxSizing: 'border-box',
                 margin: '0 auto',
               }}>
                 {/* Header */}
                 <div style={{ borderBottom: '2px solid #000000', paddingBottom: 16, marginBottom: 24 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#000000' }}>{settings.title}</h1>
-                    <span style={{ fontSize: '0.9rem', color: '#555555' }}>ID: {Math.random().toString(36).substring(2, 8).toUpperCase()}</span>
+                    <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 'bold', color: '#000000' }}>{settings.title}</h1>
                   </div>
                   <p style={{ margin: '4px 0 0 0', fontSize: '1rem', color: '#444444' }}>{settings.subtitle}</p>
                   
@@ -702,8 +822,7 @@ export default function WorksheetApp({ onBack }) {
                       }}
                     >
 
-
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                         <span style={{ fontWeight: 'bold', minWidth: 24 }}>{idx + 1}.</span>
                         <div style={{ flex: 1 }}>
                           <div style={{ whiteSpace: 'pre-line', fontSize: '1.05rem', fontWeight: 500, lineHeight: 1.4 }}>
@@ -711,6 +830,13 @@ export default function WorksheetApp({ onBack }) {
                           </div>
                           
                           {/* Workspace slots depending on density */}
+                          {settings.layout === 'compact' && (
+                            <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span style={{ fontSize: '0.9rem', color: '#555555', fontWeight: 'bold' }}>Answer:</span>
+                              <div style={{ borderBottom: '1px solid #888888', width: '140px', height: '14px' }} />
+                            </div>
+                          )}
+
                           {settings.layout === 'standard' && (
                             <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
                               <div style={{ borderBottom: '1px solid #e0e0e0', height: 20, width: '90%' }} />

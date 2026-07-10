@@ -2558,6 +2558,10 @@ button:disabled {
    PRINT MEDIA RULES (Worksheet Generator)
    ========================================== */
 @media print {
+  @page {
+    size: A4;
+    margin: 12mm 15mm !important;
+  }
   /* Set light background, dark text for printing */
   html, body {
     background: #ffffff !important;
@@ -2596,6 +2600,8 @@ button:disabled {
     max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: #ffffff !important;
+    min-height: unset !important;
   }
 
   .worksheet-print-layout {
@@ -2603,9 +2609,10 @@ button:disabled {
     color: #000000 !important;
     box-shadow: none !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 10mm 12mm !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-height: unset !important;
     page-break-after: avoid;
     page-break-inside: auto;
   }
@@ -2621,7 +2628,8 @@ button:disabled {
   .question-item {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    margin-bottom: 24px !important;
+    margin-bottom: 8px !important;
+    padding: 2px 0 !important;
   }
 
   /* Adjust grid layouts for two-column worksheets */
