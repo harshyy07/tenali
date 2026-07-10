@@ -140,6 +140,8 @@
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: hidden;            /* Prevent book-flip 3D bleeds from creating a horizontal scrollbar */
+  max-width: 100vw;
   background: var(--clr-bg);      /* Use theme variable for dynamic background */
   font-family: var(--font-body);
   color: var(--clr-text);
@@ -3158,18 +3160,22 @@ button:disabled {
 
 .mj-book-wrap {
   position: relative;
-  perspective: 2400px;
-  perspective-origin: 50% 60%;
+  perspective: 1800px;
+  perspective-origin: 60% 60%;
   margin: 8px auto 0;
-  padding: 4px 0 6px;
+  padding: 4px 8px 6px;
+  overflow: visible;
+  contain: layout style;
   user-select: none;
 }
 .mj-book-stage {
   position: relative;
-  width: min(520px, 88vw);
+  width: min(480px, 80vw);
   height: min(420px, 64vh);
   margin: 0 auto;
   transform-style: preserve-3d;
+  overflow: hidden;
+  border-radius: 4px;
 }
 .mj-book-shadow {
   position: absolute;
