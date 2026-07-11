@@ -579,10 +579,9 @@ button:disabled {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .question-box {
-  /* Main question text container */
+  /* Main question text container — matches Bearings question size */
   font-family: var(--font-body);
-  /* Responsive font size: minimum 1.4rem, preferred 3.5% of viewport width, maximum 1.8rem */
-  font-size: clamp(1.4rem, 3.5vw, 1.8rem);
+  font-size: 1.3rem;
   font-weight: 400;
   margin: 16px 0 28px;
   color: var(--clr-text);
@@ -718,7 +717,7 @@ button:disabled {
   margin-top: 20px;
   padding: 16px 20px;
   border-radius: var(--radius-sm);
-  font-size: 1.25rem;
+  font-size: 0.88rem;
   font-weight: 500;
   text-align: center;
   line-height: 1.75;
@@ -2582,23 +2581,27 @@ button:disabled {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 50px;
-  margin-bottom: 20px;
+  justify-content: flex-start;
+  margin: 75px auto 40px;
   position: relative;
-  height: 280px;
+  height: 380px;
   width: 100%;
+  max-width: 600px;
 }
 
 .scale-beam {
-  width: 80%;
-  max-width: 500px;
+  width: 90%;
+  max-width: 520px;
   height: 14px;
   background: linear-gradient(to bottom, #d35400, #e67e22);
   border-radius: 8px;
   position: relative;
+  margin: 0 auto;
   transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 4px 8px rgba(0,0,0,0.25);
   z-index: 2;
+  display: flex;
+  justify-content: space-between;
 }
 
 .scale-pan {
@@ -2611,23 +2614,24 @@ button:disabled {
   border-radius: 0 0 70px 70px;
   display: flex;
   flex-wrap: wrap-reverse;
-  align-content: flex-start;
+  align-content: flex-end; /* stack blocks neatly from the bottom up */
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
   padding: 12px;
-  padding-bottom: 24px;
+  padding-bottom: 20px;
   transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   transform-origin: top center;
   background: rgba(255, 255, 255, 0.04);
   box-shadow: inset 0 -10px 20px rgba(0,0,0,0.1);
+  overflow: visible; /* allow overflow to show at the top */
 }
 
 .scale-pan.left {
-  left: 10%;
+  left: 2%;
 }
 
 .scale-pan.right {
-  right: 10%;
+  right: 2%;
 }
 
 .scale-fulcrum {
@@ -2864,31 +2868,39 @@ button:disabled {
 /* Guide Button (Dynamic Tour) */
 .guide-toggle {
   position: fixed;
-  top: 20px;
-  right: 80px; /* position it to the left of the theme toggle */
-  background: var(--bg-card);
-  color: var(--text);
-  border: 1px solid var(--border);
+  top: 16px;
+  left: 16px;           /* anchored to LEFT — can never overlap the right-side theme toggle */
+  right: auto;
+  background: linear-gradient(135deg, #e8864a, #d4703a);
+  color: #fff;
+  border: none;
   border-radius: 20px;
   padding: 8px 16px;
   cursor: pointer;
   z-index: 1000;
-  font-weight: 600;
-  font-family: var(--font-primary);
+  font-weight: 700;
+  font-family: var(--font-body, 'DM Sans', sans-serif);
   display: flex;
   align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(232,134,74,0.35);
   transition: all 0.2s;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 .guide-toggle:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 20px rgba(232,134,74,0.45);
+  background: linear-gradient(135deg, #f09050, #e8864a);
 }
 @media (max-width: 700px) {
   .guide-toggle {
-    top: 60px; /* Move it down on mobile so it doesn't overlap header */
-    right: 20px;
+    top: 16px;
+    left: 12px;
+    right: auto;
+    font-size: 0.82rem;
+    padding: 6px 12px;
   }
 }
+

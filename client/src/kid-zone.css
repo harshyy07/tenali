@@ -9,7 +9,7 @@
   --kid-card-bg: var(--clr-card, #FFFFFF); /* Inherit global card */
   --kid-accent: var(--clr-accent, #FF7E67); /* Inherit global accent */
   --kid-accent-hover: var(--clr-accent-soft, #FF6B52);
-  --kid-secondary: var(--clr-text-soft, #6B46C1);
+  --kid-secondary: var(--clr-text-soft, #e8864a);
   --kid-success: var(--clr-correct, #48BB78); 
   --kid-error: var(--clr-wrong, #F6AD55);
 
@@ -349,14 +349,14 @@
   position: absolute;
   bottom: -16px;
   right: -16px;
-  background: linear-gradient(135deg, #6B46C1, #9F7AEA);
+  background: linear-gradient(135deg, #e8864a, #ff9f68);
   color: white;
   font-family: 'Quicksand', sans-serif;
   font-weight: 800;
   font-size: 1rem;
   padding: 6px 14px;
   border-radius: 50px;
-  box-shadow: 0 4px 12px rgba(107,70,193,0.4);
+  box-shadow: 0 4px 12px rgba(232,134,74,0.4);
   white-space: nowrap;
 }
 
@@ -385,16 +385,16 @@
   position: relative;
 }
 .men-choice-btn:hover:not(:disabled) {
-  background: #F7F3FF;
-  border-color: #9F7AEA;
+  background: #fffbf7;
+  border-color: #ff9f68;
   transform: translateY(-3px);
-  box-shadow: 0 7px 0 #9F7AEA44;
+  box-shadow: 0 7px 0 rgba(232,134,74,0.2);
 }
 .men-choice-btn.selected {
-  background: linear-gradient(135deg, #6B46C1, #9F7AEA);
+  background: linear-gradient(135deg, #e8864a, #ff9f68);
   color: white;
-  border-color: #6B46C1;
-  box-shadow: 0 4px 0 #553C9A;
+  border-color: #e8864a;
+  box-shadow: 0 4px 0 #cf6d2e;
   transform: translateY(-1px);
 }
 .men-choice-btn:disabled {
@@ -417,10 +417,10 @@
 .men-canvas-tip {
   font-family: 'Nunito', sans-serif;
   font-size: 1rem;
-  color: #6B46C1;
+  color: #e8864a;
   font-weight: 700;
   margin: 0;
-  background: rgba(107,70,193,0.08);
+  background: rgba(232,134,74,0.08);
   padding: 6px 16px;
   border-radius: 50px;
 }
@@ -476,14 +476,14 @@
 
 /* Count progress pill */
 .men-cell-count-pill {
-  background: linear-gradient(135deg, #6B46C1, #9F7AEA);
+  background: linear-gradient(135deg, #e8864a, #ff9f68);
   color: white;
   font-family: 'Quicksand', sans-serif;
   font-weight: 800;
   font-size: 1.1rem;
   padding: 10px 24px;
   border-radius: 50px;
-  box-shadow: 0 4px 12px rgba(107,70,193,0.3);
+  box-shadow: 0 4px 12px rgba(232,134,74,0.3);
 }
 
 /* Gently breathing pulse for rect/polygon */
@@ -826,11 +826,11 @@
   font-family: 'Quicksand', sans-serif;
   font-weight: 800;
   font-size: 3rem;
-  background: linear-gradient(135deg, #6B46C1, #4299E1);
+  background: linear-gradient(135deg, #e8864a, #ff9f68);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 0;
-  text-shadow: 0px 4px 10px rgba(107, 70, 193, 0.15);
+  text-shadow: 0px 4px 10px rgba(232, 134, 74, 0.15);
 }
 
 .welcome-back {

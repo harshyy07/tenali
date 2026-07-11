@@ -25,8 +25,8 @@ const tourData = {
   ],
   'visual-math-lab-redux': [
     {
-      title: 'Visual Math Lab',
-      message: 'Welcome to the Visual Math Lab! Here you will solve problems by seeing how math actually works.',
+      title: 'Multiplication and division',
+      message: 'Welcome to Multiplication and division! Here you will solve problems by seeing how math actually works.',
       mockup: null
     },
     {

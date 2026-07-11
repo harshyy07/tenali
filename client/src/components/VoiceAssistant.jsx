@@ -81,20 +81,8 @@ export default function VoiceAssistant({ progressData, onNavigate, onStartTour }
       {expanded && (
         <div className="va-menu">
           <h4>Tenali Guide</h4>
-          <button className="va-btn" onClick={handleGuideMe}>
-            🗣️ Suggest a topic
-          </button>
           <button className="va-btn" onClick={() => { if (onStartTour) onStartTour(); setSpeaking(false); window.speechSynthesis.cancel(); }}>
             🗺️ Take a tour
-          </button>
-          <button className="va-btn" onClick={() => speak('Please select a quiz from the grid. Each quiz will adapt to your skill level.')}>
-            ❓ What should I do?
-          </button>
-          <button className="va-btn" onClick={() => {
-            window.speechSynthesis.cancel();
-            setSpeaking(false);
-          }}>
-            🤫 Stop talking
           </button>
         </div>
       )}
