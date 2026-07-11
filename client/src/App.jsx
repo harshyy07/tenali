@@ -40662,7 +40662,7 @@ function App() {
   const [streak, setStreak] = useState(() => {
     try { return parseInt(localStorage.getItem('tenali-streak') || '0', 10) } catch { return 0 }
   })
-  const [newCollectionsCelebration, setNewCollectionsCelebration] = useState(null)
+  const [celebrationQueue, setCelebrationQueue] = useState([])
   const [transferTopic, setTransferTopic] = useState(null)
 
   // Sync progress with backend on mount & whenever user changes
@@ -40709,6 +40709,81 @@ function App() {
     localStorage.setItem('tenali-total-solved', String(activeSolved))
     localStorage.setItem('tenali-streak', String(activeStreak))
 
+    // Check for new unlocks locally
+    const enqueues = [];
+
+    // 1. Topic Badge unlocks/upgrades
+    const newlyUnlockedKeys = newCompleted.filter(k => !completedTopics.includes(k));
+    newlyUnlockedKeys.forEach(k => {
+      if (k.endsWith('-started')) {
+        const topicKey = k.replace('-started', '');
+        const displayName = topicKey.charAt(0).toUpperCase() + topicKey.slice(1);
+        enqueues.push({
+          title: "Badge Unlocked!",
+          badgeType: "topic",
+          level: "blue",
+          message: `Congratulations! You have unlocked the ${displayName} Blue badge for starting the ${displayName} learning module.`
+        });
+      } else if (k.endsWith('-easy')) {
+        const topicKey = k.replace('-easy', '');
+        const displayName = topicKey.charAt(0).toUpperCase() + topicKey.slice(1);
+        enqueues.push({
+          title: "Badge Upgraded!",
+          badgeType: "topic",
+          level: "bronze",
+          message: `Congratulations! You have unlocked the ${displayName} Bronze badge for completing the Easy difficulty in the ${displayName} quiz.`
+        });
+      } else if (k.endsWith('-medium')) {
+        const topicKey = k.replace('-medium', '');
+        const displayName = topicKey.charAt(0).toUpperCase() + topicKey.slice(1);
+        enqueues.push({
+          title: "Badge Upgraded!",
+          badgeType: "topic",
+          level: "silver",
+          message: `Congratulations! You have unlocked the ${displayName} Silver badge for completing the Medium difficulty in the ${displayName} quiz.`
+        });
+      } else if (k.endsWith('-hard') || k.endsWith('-gold')) {
+        const topicKey = k.replace(/-hard|-gold/, '');
+        const displayName = topicKey.charAt(0).toUpperCase() + topicKey.slice(1);
+        enqueues.push({
+          title: "Badge Upgraded!",
+          badgeType: "topic",
+          level: "gold",
+          message: `Congratulations! You have unlocked the ${displayName} Gold badge for completing the Hard difficulty in the ${displayName} quiz.`
+        });
+      }
+    });
+
+    // 2. Streak milestones
+    if (streak < 3 && activeStreak >= 3) {
+      enqueues.push({
+        title: "Streak Milestone!",
+        badgeType: "streak_3",
+        level: "",
+        message: "Congratulations! You have unlocked the 3-Day Streak badge for maintaining an active learning streak for 3 consecutive days."
+      });
+    }
+    if (streak < 7 && activeStreak >= 7) {
+      enqueues.push({
+        title: "Streak Milestone!",
+        badgeType: "streak_7",
+        level: "",
+        message: "Congratulations! You have unlocked the 7-Day Streak badge for maintaining an active learning streak for 7 consecutive days."
+      });
+    }
+    if (streak < 30 && activeStreak >= 30) {
+      enqueues.push({
+        title: "Streak Milestone!",
+        badgeType: "streak_30",
+        level: "",
+        message: "Congratulations! You have unlocked the 30-Day Streak badge for maintaining an active learning streak for 30 consecutive days."
+      });
+    }
+
+    if (enqueues.length > 0) {
+      setCelebrationQueue(prev => [...prev, ...enqueues]);
+    }
+
     const token = localStorage.getItem('tenali-auth-token')
     if (!token) return
 
@@ -40738,7 +40813,32 @@ function App() {
             localStorage.setItem('tenali-streak', String(data.streak))
           }
           if (data.newlyCompleted && data.newlyCompleted.length > 0) {
-            setNewCollectionsCelebration(data.newlyCompleted)
+            const serverEnqueues = [];
+            data.newlyCompleted.forEach(colId => {
+              const displayName = colId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+              const defaultBadgeTypes = {
+                'counting-critters': 'dino',
+                'arithmetic-basics': 'trophy',
+                'fraction-explorer': 'feast',
+                'geometry-master': 'wizard',
+                'division-detective': 'detective',
+                'time-traveler': 'rocket',
+                'data-detective': 'chest',
+                'algebra-alchemist': 'flask',
+                'pythagoras-path': 'shield',
+                'trig-treasure': 'crown'
+              };
+              const bType = defaultBadgeTypes[colId] || 'trophy';
+              serverEnqueues.push({
+                title: "Album Completed!",
+                badgeType: bType,
+                level: "gold",
+                message: `Congratulations! You have completed the ${displayName} Collection and unlocked the Gold Album Badge!`
+              });
+            });
+            if (serverEnqueues.length > 0) {
+              setCelebrationQueue(prev => [...prev, ...serverEnqueues]);
+            }
           }
         }
       }
@@ -40820,37 +40920,55 @@ function App() {
 
   // Helper to render celebration modal
   const renderCelebrationModal = () => {
-    if (!newCollectionsCelebration || newCollectionsCelebration.length === 0) return null;
-    const currentId = newCollectionsCelebration[0];
-    const displayName = currentId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    if (!celebrationQueue || celebrationQueue.length === 0) return null;
+    const active = celebrationQueue[0];
 
-    // Determine badge icon type
-    const defaultBadgeTypes = {
-      'counting-critters': 'dino',
-      'arithmetic-basics': 'trophy',
-      'fraction-explorer': 'feast',
-      'geometry-master': 'wizard',
-      'division-detective': 'detective',
-      'time-traveler': 'rocket',
-      'data-detective': 'chest',
-      'algebra-alchemist': 'flask',
-      'pythagoras-path': 'shield',
-      'trig-treasure': 'crown'
+    const dismissCelebration = () => {
+      setCelebrationQueue(prev => prev.slice(1));
     };
-    const bType = defaultBadgeTypes[currentId] || 'trophy';
+
+    // Confetti particles generator (40 random floating pieces)
+    const renderConfetti = () => {
+      return Array.from({ length: 40 }).map((_, idx) => {
+        const left = Math.random() * 100;
+        const delay = Math.random() * 2;
+        const duration = Math.random() * 2 + 1.5;
+        const size = Math.random() * 10 + 6;
+        const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6', '#ef4444'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        return (
+          <div
+            key={idx}
+            className="confetti-piece"
+            style={{
+              left: `${left}%`,
+              animationDelay: `${delay}s`,
+              animationDuration: `${duration}s`,
+              backgroundColor: color,
+              width: `${size}px`,
+              height: `${size}px`,
+              transform: `rotate(${Math.random() * 360}deg)`
+            }}
+          />
+        );
+      });
+    };
 
     return (
-      <div className="celebration-overlay" onClick={() => setNewCollectionsCelebration(prev => prev.slice(1))}>
+      <div className="celebration-overlay" onClick={dismissCelebration}>
+        {renderConfetti()}
         <div className="celebration-card" onClick={e => e.stopPropagation()}>
-          <div className="confetti-emitter"></div>
-          <h2 className="celebration-title">Album Completed!</h2>
+          <h2 className="celebration-title">{active.title}</h2>
           <div className="celebration-badge-container">
-            <BadgeIcon type={bType} size={150} />
+            <BadgeIcon type={active.badgeType} size={150} level={active.level} />
           </div>
           <p className="celebration-text">
-            Congratulations! You have completed the <strong>{displayName}</strong> Collection!
+            {active.message}
           </p>
-          <button className="celebration-btn" onClick={() => setNewCollectionsCelebration(prev => prev.slice(1))}>
+          <p className="celebration-subtext" style={{ fontSize: '0.85rem', opacity: 0.72, marginTop: '8px', color: 'var(--clr-text-soft)', fontWeight: '500', lineHeight: '1.4' }}>
+            Go to your profile to pin your new badge and showcase your achievement!
+          </p>
+          <button className="celebration-btn" onClick={dismissCelebration} style={{ marginTop: '16px' }}>
             Awesome!
           </button>
         </div>
@@ -42166,7 +42284,7 @@ function ProfileShowcase({ onSelectTopic }) {
     // Filter by search query
     if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase();
-      result = result.filter(item => 
+      result = result.filter(item =>
         (item.name && item.name.toLowerCase().includes(q)) ||
         (item.description && item.description.toLowerCase().includes(q)) ||
         (item.requirement && item.requirement.toLowerCase().includes(q))
@@ -42316,10 +42434,10 @@ function ProfileShowcase({ onSelectTopic }) {
             <div className="selector-controls-row">
               <div className="search-input-wrapper">
                 <span className="search-icon">🔍</span>
-                <input 
-                  type="text" 
-                  className="selector-search-input" 
-                  placeholder="Search badges by name, requirements..." 
+                <input
+                  type="text"
+                  className="selector-search-input"
+                  placeholder="Search badges by name, requirements..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -42327,10 +42445,10 @@ function ProfileShowcase({ onSelectTopic }) {
                   <button className="search-clear-btn" onClick={() => setSearchQuery('')}>✕</button>
                 )}
               </div>
-              
+
               <div className="sort-select-wrapper">
                 <span className="sort-label">Sort:</span>
-                <select 
+                <select
                   className="selector-sort-select"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -42346,13 +42464,13 @@ function ProfileShowcase({ onSelectTopic }) {
 
             {/* Mobile View Toggle */}
             <div className="selector-mobile-toggle">
-              <button 
+              <button
                 className={`mobile-toggle-btn ${mobileView === 'grid' ? 'active' : ''}`}
                 onClick={() => setMobileView('grid')}
               >
                 Grid View ({filteredInventory.length})
               </button>
-              <button 
+              <button
                 className={`mobile-toggle-btn ${mobileView === 'preview' ? 'active' : ''}`}
                 onClick={() => setMobileView('preview')}
               >

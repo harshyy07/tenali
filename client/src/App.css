@@ -4791,15 +4791,15 @@ body.modal-open-scroll-lock {
   .selector-mobile-toggle {
     display: flex;
   }
-  
+
   .selector-split-layout {
     margin-top: 8px;
   }
-  
+
   .badge-grid-half {
     max-height: 320px;
   }
-  
+
   .badge-preview-half {
     min-height: 320px;
   }
@@ -4807,21 +4807,21 @@ body.modal-open-scroll-lock {
   .mobile-hidden {
     display: none !important;
   }
-  
+
   .mobile-back-to-grid-btn {
     display: inline-block;
   }
-  
+
   .selector-controls-row {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
-  
+
   .sort-select-wrapper {
     width: 100%;
   }
-  
+
   .selector-sort-select {
     flex-grow: 1;
   }
@@ -4837,4 +4837,26 @@ body.modal-open-scroll-lock {
   cursor: not-allowed !important;
   transform: none !important;
   opacity: 1 !important;
+}
+
+/* Real-time celebration confetti styles */
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  border-radius: 4px;
+  opacity: 0.85;
+  z-index: 9998;
+  pointer-events: none;
+  animation: confetti-fall linear infinite;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) rotate(720deg);
+    opacity: 0;
+  }
 }
