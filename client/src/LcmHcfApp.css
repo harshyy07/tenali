@@ -902,35 +902,91 @@
   gap: 16px;
   margin: 20px 0;
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
 }
 
 .confidence-card {
   background: var(--clr-surface);
   border: 2px solid var(--clr-border);
   border-radius: var(--radius);
-  padding: 20px 10px;
+  padding: 24px 12px;
   cursor: pointer;
   transition: all var(--transition);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  justify-content: space-between;
+  min-height: 200px;
 }
 
 .confidence-card:hover {
   transform: translateY(-4px);
-  border-color: var(--clr-accent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.confidence-card.level-explorer {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, var(--clr-surface), rgba(59, 130, 246, 0.15));
+}
+.confidence-card.level-explorer:hover {
+  border-color: #60a5fa;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+}
+
+.confidence-card.level-champion:not(.locked) {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, var(--clr-surface), rgba(245, 158, 11, 0.15));
+}
+.confidence-card.level-champion:not(.locked):hover {
+  border-color: #fbbf24;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25);
+}
+
+.confidence-card.level-master:not(.locked) {
+  border-color: #ec4899;
+  background: linear-gradient(135deg, var(--clr-surface), rgba(236, 72, 153, 0.15));
+}
+.confidence-card.level-master:not(.locked):hover {
+  border-color: #f472b6;
+  box-shadow: 0 8px 24px rgba(236, 72, 153, 0.25);
+}
+
+.confidence-card.locked {
+  opacity: 0.55;
+  filter: grayscale(0.85);
+  cursor: not-allowed;
+  border-color: var(--clr-border);
+  background: var(--clr-input);
+}
+.confidence-card.locked:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .confidence-emoji {
-  font-size: 2.8rem;
-  margin-bottom: 10px;
+  font-size: 2.5rem;
+  margin-bottom: 8px;
 }
 
 .confidence-label {
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--clr-text);
+}
+
+.confidence-subtitle {
+  font-size: 0.8rem;
+  color: var(--clr-text-soft);
+  margin-top: 8px;
+  line-height: 1.35;
+}
+
+.lock-text {
+  font-size: 0.72rem;
+  color: var(--clr-wrong);
+  font-weight: bold;
+  margin-top: 8px;
 }
 
 .revision-modal-overlay {

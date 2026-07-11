@@ -83,8 +83,9 @@ export default function InteractiveLcmHcfApp({ onBack }) {
   const [whyFeedback, setWhyFeedback] = useState(null); // { correct: bool, text: string }
   const [unlockedCollectibles, setUnlockedCollectibles] = useState({}); // { level_stepIndex: bool }
 
-  // --- Confidence State ---
+  // --- Confidence State & Gamified Learning Levels ---
   const [confidence, setConfidence] = useState(null); // 'very', 'mod', 'not'
+  const [unlockedQuizLevels, setUnlockedQuizLevels] = useState({ explorer: true, champion: false, master: false });
 
 
   // --- Quiz State ---
@@ -302,8 +303,24 @@ export default function InteractiveLcmHcfApp({ onBack }) {
       setActivityState({});
       setUnlockedCollectibles({}); // RESET COLLECTIBLES!
       setConfidence(null);
+      setUnlockedQuizLevels({ explorer: true, champion: false, master: false });
     }
   }, [level]);
+
+  // Handle quiz level unlocking based on performance
+  useEffect(() => {
+    if (quizFinished) {
+      if (confidence === 'not') {
+        if (quizScore >= 4) {
+          setUnlockedQuizLevels(prev => ({ ...prev, champion: true }));
+        }
+      } else if (confidence === 'mod') {
+        if (quizScore >= 3) {
+          setUnlockedQuizLevels(prev => ({ ...prev, master: true }));
+        }
+      }
+    }
+  }, [quizFinished, quizScore, confidence]);
 
   const saveProgress = () => {
     // Keep it as a no-op to avoid breaking downstream references if any
@@ -2176,27 +2193,51 @@ export default function InteractiveLcmHcfApp({ onBack }) {
     );
   };
 
-  // Step 9: Confidence Meter
+  // Step 9: Confidence Meter (Gamified Learning Levels selection)
   const renderConfidenceMeter = () => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-        <h2 className="confidence-prompt">How confident are you with this topic?</h2>
+        <h2 className="confidence-prompt">Choose your Quiz Challenge Level!</h2>
         <p style={{ color: 'var(--clr-text-soft)', marginBottom: '24px' }}>
-          Evaluate your understanding before you begin the quiz.
+          Complete each level to unlock the next one!
         </p>
 
         <div className="confidence-row">
-          <div className="confidence-card" onClick={() => handleConfidenceSelect('very')}>
-            <span className="confidence-emoji">😊</span>
-            <span className="confidence-label">Very Confident</span>
+          {/* Explorer Card */}
+          <div className="confidence-card level-explorer" onClick={() => handleConfidenceSelect('not')}>
+            <span className="confidence-emoji">📘</span>
+            <span className="confidence-label">LCM & HCF Explorer</span>
+            <span className="confidence-subtitle">"Begin the journey"</span>
           </div>
-          <div className="confidence-card" onClick={() => handleConfidenceSelect('mod')}>
-            <span className="confidence-emoji">😐</span>
-            <span className="confidence-label">Moderately Confident</span>
+
+          {/* Scholar Card (Champion) */}
+          <div 
+            className={`confidence-card level-champion ${!unlockedQuizLevels.champion ? 'locked' : ''}`} 
+            onClick={() => {
+              if (unlockedQuizLevels.champion) {
+                handleConfidenceSelect('mod');
+              }
+            }}
+          >
+            <span className="confidence-emoji">{unlockedQuizLevels.champion ? '📗' : '🔒'}</span>
+            <span className="confidence-label">LCM & HCF Scholar</span>
+            <span className="confidence-subtitle">"You've learned the concepts well"</span>
+            {!unlockedQuizLevels.champion && <span className="lock-text">Score 4/5 in Explorer to Unlock</span>}
           </div>
-          <div className="confidence-card" onClick={() => handleConfidenceSelect('not')}>
-            <span className="confidence-emoji">😟</span>
-            <span className="confidence-label">Not Confident</span>
+
+          {/* Master Card */}
+          <div 
+            className={`confidence-card level-master ${!unlockedQuizLevels.master ? 'locked' : ''}`} 
+            onClick={() => {
+              if (unlockedQuizLevels.master) {
+                handleConfidenceSelect('very');
+              }
+            }}
+          >
+            <span className="confidence-emoji">{unlockedQuizLevels.master ? '👑' : '🔒'}</span>
+            <span className="confidence-label">LCM & HCF Master</span>
+            <span className="confidence-subtitle">"You've mastered LCM & HCF!"</span>
+            {!unlockedQuizLevels.master && <span className="lock-text">Score 3/5 in Scholar to Unlock</span>}
           </div>
         </div>
 
@@ -2250,10 +2291,17 @@ export default function InteractiveLcmHcfApp({ onBack }) {
         }
       });
 
+      const isExplorer = confidence === 'not';
+      const isChampion = confidence === 'mod';
+      const isMaster = confidence === 'very';
+
+      const explorerPassed = quizScore >= 4;
+      const championPassed = quizScore >= 3;
+
       return (
         <div className="quiz-results-summary">
           <h2 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px' }}>
-            {confidence === 'very' ? 'Final Results & Summary' : 'Quiz Completed!'}
+            {isMaster && quizScore === 5 ? '🏆 Mastery Achieved!' : 'Quiz Results'}
           </h2>
           
           <div className="quiz-score-circle">
@@ -2261,12 +2309,44 @@ export default function InteractiveLcmHcfApp({ onBack }) {
             <span className="score-total">/ 5 correct</span>
           </div>
 
-          <p style={{ color: 'var(--clr-text-soft)', marginBottom: '20px' }}>
-            {confidence === 'very'
-              ? (quizScore === 5 ? '🏆 Perfect final score! You are an HCF & LCM master!' : '🎉 Final quiz completed! Great job completing the full path!')
-              : `📚 Completed the ${confidence === 'not' ? 'Less' : 'Moderately'} Confident quiz. Let's move on to the next level!`
-            }
-          </p>
+          {/* Motivational Messages and Completion Status */}
+          <div className="quiz-motivational-message" style={{ marginBottom: '20px', maxWidth: '450px' }}>
+            {isExplorer && !explorerPassed && (
+              <p style={{ fontSize: '1.1rem', fontWeight: '500', color: 'var(--clr-accent)' }}>
+                Don't worry! 🌟<br />
+                Retry this module—you can do it!
+              </p>
+            )}
+            {isExplorer && explorerPassed && (
+              <p style={{ fontSize: '1.1rem', fontWeight: '500', color: 'var(--clr-correct)' }}>
+                Awesome job! 🎉 You have unlocked the LCM & HCF Scholar level!
+              </p>
+            )}
+            {isChampion && !championPassed && (
+              <p style={{ fontSize: '1.1rem', fontWeight: '500', color: 'var(--clr-accent)' }}>
+                Great effort! 🌟<br />
+                Practice once more and you'll become an LCM & HCF Master!
+              </p>
+            )}
+            {isChampion && championPassed && (
+              <p style={{ fontSize: '1.1rem', fontWeight: '500', color: 'var(--clr-correct)' }}>
+                Excellent! 🎉 You're ready for the final challenge: LCM & HCF Master!
+              </p>
+            )}
+            {isMaster && (
+              <div style={{ marginTop: '10px' }}>
+                <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--clr-correct)' }}>
+                  🎉 Congratulations!
+                </p>
+                <p style={{ fontSize: '1.05rem', color: 'var(--clr-text)', margin: '8px 0' }}>
+                  You have successfully completed the LCM & HCF learning journey!
+                </p>
+                <p style={{ fontSize: '1.05rem', fontWeight: 'bold', color: 'var(--clr-accent)' }}>
+                  Keep practicing to become a Number Genius!
+                </p>
+              </div>
+            )}
+          </div>
 
           <div className="results-list">
             {quizHistory.map((item, i) => (
@@ -2309,24 +2389,26 @@ export default function InteractiveLcmHcfApp({ onBack }) {
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-            {confidence === 'not' ? (
-              <>
-                <button className="btn-back" onClick={() => startQuiz('not')}>Retry Quiz</button>
-                <button className="btn-next" onClick={() => { setConfidence('mod'); startQuiz('mod'); }}>
-                  Continue to Moderately Confident Quiz ➡
+          <div style={{ display: 'flex', gap: '12px', marginTop: '16px', justifyContent: 'center', width: '100%' }}>
+            {isExplorer ? (
+              !explorerPassed ? (
+                <button className="quiz-btn-submit" style={{ maxWidth: '200px' }} onClick={() => startQuiz('not')}>🔄 Retry Quiz</button>
+              ) : (
+                <button className="quiz-btn-submit" style={{ maxWidth: '280px', background: 'var(--clr-correct)' }} onClick={() => { setConfidence('mod'); startQuiz('mod'); }}>
+                  ➡ Continue to LCM & HCF Scholar
                 </button>
-              </>
-            ) : confidence === 'mod' ? (
-              <>
-                <button className="btn-back" onClick={() => startQuiz('mod')}>Retry Quiz</button>
-                <button className="btn-next" onClick={() => { setConfidence('very'); startQuiz('very'); }}>
-                  Continue to Highly Confident Quiz ➡
+              )
+            ) : isChampion ? (
+              !championPassed ? (
+                <button className="quiz-btn-submit" style={{ maxWidth: '200px' }} onClick={() => startQuiz('mod')}>🔄 Retry Quiz</button>
+              ) : (
+                <button className="quiz-btn-submit" style={{ maxWidth: '280px', background: 'var(--clr-correct)' }} onClick={() => { setConfidence('very'); startQuiz('very'); }}>
+                  ➡ Continue to LCM & HCF Master
                 </button>
-              </>
+              )
             ) : (
               <>
-                <button className="btn-back" onClick={() => startQuiz('very')}>Retry Quiz</button>
+                <button className="btn-back" onClick={() => startQuiz('very')}>🔄 Retry Master Quiz</button>
                 <button className="btn-next" onClick={() => setCurrentStep(11)}>View Rewards Bank ➡</button>
               </>
             )}
