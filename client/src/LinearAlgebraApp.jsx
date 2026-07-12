@@ -23,14 +23,9 @@ const MISSIONS = [
     story: "Ram's pocket money is twice Lakshman's. They save everything. Plot their weekly savings (R, L) and spot the pattern!",
     goal: 'Understand direct proportion - points lie on a line through the origin.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What pattern do you observe in the points (R, L)?',
-    options: [
-      'They lie on a straight line through the origin',
-      'They are scattered randomly',
-      'They form a curve',
-      'They are all on the x-axis'
-    ],
+    answerType: 'yesno',
+    prompt: 'Do the points (R, L) all lie on a straight line passing through the origin?',
+    options: null,
     correct: 0,
     explanation: "Since Ram = 2 x Lakshman, points are (2L,L) = t(2,1). All scalar multiples lie on the same line through the origin!",
     ggbHint: 'Type coordinates like (10,20) and (20,40). Then type: Line((0,0),(10,20)).',
@@ -42,20 +37,20 @@ const MISSIONS = [
       'Both points lie on same line through origin!'
     ],
     quiz: [
-      { q: "If Ram's savings = 3x Lakshman's, points (L,R) will be...", options: ['On a line through origin', 'On a curve', 'Random', 'All on y-axis'], correct: 0 },
-      { q: 'For (6,3), the ratio R:L is...', options: ['2:1', '1:2', '3:1', '1:1'], correct: 0 },
-      { q: 'Will (4,2) lie on same line?', type: 'yesno', correct: 0 }
+      { q: "If Ram's savings = 3x Lakshman's, do points (L,R) still lie on a line through the origin?", type: 'yesno', correct: 0 },
+      { q: 'For (6,3), what is the ratio R:L and why?', _isText: true, _keywords: ['2:1', '2 to 1', '2/1', '2: 1'] },
+      { q: 'Explain why all scalar multiples t(2,1) lie on the same line through the origin.', _isText: true, _keywords: ['scalar', 'multiple', 'line', 'origin', 'constant', 'ratio', 'direction'] }
     ],
     realLife: [
-      { emoji: '\uD83D\uDE95', title: 'Taxi Fare', story: 'Base Rs25 + Rs12/km. Total=12x+25', question: 'Y-intercept?', answer: '25' },
-      { emoji: '\uD83D\uDCF1', title: 'Phone Plan', story: 'Rs199/mo + Rs1/min. Total=199+1x', question: 'Slope?', answer: '1' },
-      { emoji: '\uD83C\uDFAC', title: 'Netflix', story: 'Rs149 + Rs50/screen', question: 'Total for 2 screens?', answer: '249' },
-      { emoji: '\u26FD', title: 'Fuel Cost', story: 'Rs105/litre. Cost=105x', question: 'Why through origin?', answer: 'no base cost' },
-      { emoji: '\uD83D\uDCE6', title: 'Shipping', story: 'Rs40 + Rs20/kg', question: 'Cost for 3kg?', answer: '100' },
-      { emoji: '\u26A1', title: 'Electricity', story: 'Rs200 + Rs8/unit', question: 'Fixed charge?', answer: '200' },
-      { emoji: '\uD83C\uDF33', title: 'Tree Growth', story: '50cm + 20cm/yr', question: 'Height after 5yr?', answer: '150' },
-      { emoji: '\uD83C\uDF70', title: 'Bakery', story: 'Rs500 + Rs200/kg cake', question: 'Type of function?', answer: 'linear' },
-      { emoji: '\u2708\uFE0F', title: 'Flight', story: 'Rs2500 + Rs5/km', question: 'Distance for Rs3500?', answer: '200' },
+      { emoji: '🚕', title: 'Taxi Fare', equation: 'Total = 12x + 25', story: 'A taxi charges a base fare of Rs25 just for getting in, plus Rs12 for every kilometre you travel. So for 1 km you pay Rs37, for 2 km you pay Rs49, and so on. The total fare grows linearly with distance.', question: 'What does the base fare of Rs25 represent on the graph — where does the line start when the distance is zero?', answer: '25' },
+      { emoji: '📱', title: 'Phone Plan', equation: 'Total = 199 + 1x', story: 'Your phone plan costs Rs199 per month as a fixed rental, and then Rs1 for every minute you talk beyond the free minutes. If you talk for 10 minutes extra, you pay Rs209. The cost rises by Rs1 for each additional minute.', question: 'What is the rate of change — how much does the total bill increase for each extra minute you talk?', answer: '1' },
+      { emoji: '🎬', title: 'Netflix', equation: 'Total = 149 + 50x', story: 'Netflix charges a base subscription of Rs149 per month, and then Rs50 for each additional screen you want to use simultaneously. If your family wants to watch on 2 screens at once, the total monthly cost goes up accordingly.', question: 'Using the pricing structure above, what would be the total monthly cost if your family wants to watch on 2 screens simultaneously?', answer: '249' },
+      { emoji: '⛽', title: 'Fuel Cost', equation: 'Cost = 105x', story: 'Petrol costs Rs105 per litre. There is no fixed charge — you pay strictly for what you pump. If you buy 0 litres, you pay nothing. If you buy 3 litres, you pay Rs315. The line passes through the origin because there is no base cost.', question: 'Why does the cost line pass through the origin (0,0) in this scenario? What does that tell us about the pricing structure?', answer: 'no base cost' },
+      { emoji: '📦', title: 'Shipping', equation: 'Total = 40 + 20x', story: 'An online store charges a flat Rs40 handling fee plus Rs20 per kilogram of weight for shipping. A 1 kg parcel costs Rs60, a 3 kg parcel costs Rs100. The heavier the package, the more you pay, on top of the fixed handling charge.', question: 'Based on the graph, what is the total shipping cost for a package weighing 3 kilograms?', answer: '100' },
+      { emoji: '⚡', title: 'Electricity', equation: 'Total = 200 + 8x', story: 'Your electricity bill has two components: a fixed monthly charge of Rs200 regardless of how much electricity you use, plus Rs8 for every unit (kilowatt-hour) consumed. Even if you use zero units, you still owe Rs200.', question: 'What is the fixed monthly charge that you must pay even if you consume zero units of electricity?', answer: '200' },
+      { emoji: '🌳', title: 'Tree Growth', equation: 'Height = 50 + 20x', story: 'A sapling is planted at a height of 50 cm. Each year it grows by 20 cm. After 1 year it is 70 cm tall, after 2 years it is 90 cm, and the growth continues at this steady rate. The starting height is the y-intercept.', question: 'Using the growth rate shown in the graph, what will be the tree\'s height after 5 years of growth?', answer: '150' },
+      { emoji: '🎂', title: 'Bakery', equation: 'Total = 500 + 200x', story: 'A bakery charges Rs500 for a basic cake order (covering decoration and packaging) plus Rs200 per kilogram of cake. A 1 kg cake costs Rs700, a 2 kg cake costs Rs900. The relationship between weight and total cost is a straight line.', question: 'What type of mathematical function describes the relationship between cake weight and total cost — is it linear, quadratic, or something else?', answer: 'linear' },
+      { emoji: '✈️', title: 'Flight', equation: 'Total = 2500 + 5x', story: 'A airline charges Rs2500 as a base ticket price plus Rs5 per kilometre of distance travelled. A short 100 km hop costs Rs3000, while a longer 200 km flight costs Rs3500. The longer the route, the higher the fare.', question: 'Looking at the graph, what flight distance would give a total fare of Rs3500? Trace from the y-value to the line and down to the x-axis.', answer: '200' },
     ],
     solveExplanation: 'Ram = 2xLakshman. Points are (2L,L)=L(2,1). Scalar multiples lie on a line through the origin.'
   },
@@ -65,14 +60,9 @@ const MISSIONS = [
     story: 'Atul at (0,0). Walk: right 2, up 1 (Bala). right 1, up 1 (Chetan). right 1, up 1 (Divya). Are B,C,D on a line?',
     goal: 'Plot consecutive points and check collinearity.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'Are Bala, Chetan and Divya on a straight line?',
-    options: [
-      'Yes - on line y = x - 1',
-      'Yes - on line y = x + 1',
-      'No - not collinear',
-      'Yes - on line y = 2x'
-    ],
+    answerType: 'yesno',
+    prompt: 'Are Bala, Chetan and Divya collinear — do they lie on a single straight line?',
+    options: null,
     correct: 0,
     explanation: 'B=(2,1), C=(3,2), D=(4,3). Slope=(2-1)/(3-2)=1. Eqn: y-1=1(x-2) so y=x-1. All collinear!',
     ggbHint: 'Plot points using coordinates. Then type: Line((2,1),(3,2)).',
@@ -84,14 +74,14 @@ const MISSIONS = [
       'Type: Line((2,1),(3,2)). Does (4,3) lie on it?'
     ],
     quiz: [
-      { q: 'What is slope of line containing B,C,D?', options: ['1', '2', '0.5', '-1'], correct: 0 },
-      { q: 'Equation of this line?', options: ['y = x - 1', 'y = x + 1', 'y = 2x', 'y = -x + 3'], correct: 0 },
-      { q: 'Next house in pattern?', options: ['(5,4)', '(4,5)', '(5,3)', '(6,4)'], correct: 0 }
+      { q: 'What is slope of line containing B,C,D?', type: 'yesno', correct: 0 },
+      { q: 'What is the equation of this line?', _isText: true, _keywords: ['y = x - 1', 'y=x-1', 'x - 1', 'x-1'] },
+      { q: 'Find the next point in the pattern (2,1), (3,2), (4,3), ...', _isText: true, _keywords: ['(5,4)', '5,4'] }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCCD', title: 'GPS Path', story: 'GPS tracks waypoints. If collinear, walking straight!', question: 'What does collinear mean?', answer: 'on same line' },
-      { emoji: '\uD83D\uDCD0', title: 'Architecture', story: 'Architects check column center alignment.', question: 'Why?', answer: 'alignment' },
-      { emoji: '\uD83D\uDE86', title: 'Railway Tracks', story: 'Sleepers must be collinear for smooth travel.', question: 'What if not?', answer: 'derailment' },
+      { emoji: '📍', title: 'GPS Path', equation: '', story: 'Your phone\'s GPS records waypoints as you walk. If all the recorded points happen to lie on a single straight line, that means you were walking in a perfectly straight direction the whole time. GPS apps use this to detect whether you deviated from a straight path.', question: 'What does it mean for GPS waypoints to be collinear, and what does that tell us about the path you walked?', answer: 'on same line' },
+      { emoji: '📐', title: 'Architecture', equation: '', story: 'When an architect designs a building, the centres of all supporting columns must line up perfectly in a straight row. If even one column is slightly off the line, the structural load distribution becomes uneven, which could cause serious problems.', question: 'Why is it critical for architects to verify that column centre points are collinear during building design?', answer: 'alignment' },
+      { emoji: '🛤️', title: 'Railway Tracks', equation: '', story: 'Railway sleepers (the horizontal beams under the rails) must be perfectly collinear — lying along a straight line — for the train to travel smoothly. If the sleepers are misaligned, the rails will not be straight, and the train could derail.', question: 'What dangerous consequence could occur if railway sleepers are not collinear?', answer: 'derailment' },
     ],
     solveExplanation: 'B=(2,1), C=(3,2), D=(4,3). Slope=1. All satisfy y=x-1 -> collinear!'
   },
@@ -118,13 +108,13 @@ const MISSIONS = [
     quiz: [
       { q: 'Does y = -3x pass through the origin?', type: 'yesno', correct: 0 },
       { q: 'Does y = 0.5x + 0 pass through origin?', type: 'yesno', correct: 0 },
-      { q: 'What about y = x + 1?', options: ['No - constant 1 shifts it up', 'Yes', 'Only when x=1', 'Never'], correct: 0 }
+      { q: 'Does y = x + 1 pass through the origin?', type: 'yesno', correct: 1 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCB0', title: 'Simple Interest', story: 'Interest = Rate x Principal. Principal=0 -> Interest=0!', question: 'Through origin?', answer: 'yes' },
-      { emoji: '\uD83D\uDED2', title: 'Unit Pricing', story: 'Cost = Price x Quantity. Zero qty -> zero cost.', question: 'Through origin?', answer: 'yes' },
-      { emoji: '\uD83C\uDFC3', title: 'Distance', story: 'Distance = Speed x Time. At t=0, d=0.', question: 'Slope?', answer: 'speed' },
-      { emoji: '\uD83D\uDCA7', title: 'Water Flow', story: 'Volume = Rate x Time. At t=0, empty tank.', question: 'Through origin?', answer: 'yes' },
+      { emoji: '💰', title: 'Simple Interest', equation: '', story: 'In simple interest, the interest earned equals the interest rate multiplied by the principal amount. If you deposit Rs0, you earn Rs0 interest. There is no starting amount of interest — it always begins at zero. This means the interest line always passes through the origin.', question: 'Why does the simple interest line always pass through the origin (0,0)?', answer: 'yes' },
+      { emoji: '🛒', title: 'Unit Pricing', equation: '', story: 'When you buy items at a fixed price per unit, the total cost equals the price times the quantity. If you buy zero items, you pay nothing — the cost is zero. There is no fixed charge, so the cost line goes through the origin.', question: 'Why does the unit pricing line pass through the origin (0,0)?', answer: 'yes' },
+      { emoji: '🏃', title: 'Distance', equation: '', story: 'Distance travelled equals speed multiplied by time. At time zero (the moment you start), you have covered zero distance. The starting point is the origin, and the slope of the distance-time graph represents your speed.', question: 'In a distance-time graph, what does the slope of the line represent in physical terms?', answer: 'speed' },
+      { emoji: '💧', title: 'Water Flow', equation: '', story: 'Water flows out of a tank at a constant rate. The volume dispensed equals the flow rate multiplied by time. At time zero, the tank has dispensed nothing — the volume is zero. The line starts at the origin.', question: 'Why does the water flow volume line pass through the origin (0,0)?', answer: 'yes' },
     ],
     solveExplanation: 'When x=0, y=a(0)=0. So (0,0) satisfies the equation for any a. The origin is always on y=ax!'
   },
@@ -149,15 +139,15 @@ const MISSIONS = [
       'The +1 shifts the whole line UP by 1 unit!'
     ],
     quiz: [
-      { q: 'What is y when x=0 for y=2x+1?', options: ['1', '0', '2', '-1'], correct: 0 },
-      { q: 'Where does y=2x+1 cross the y-axis?', options: ['(0,1)', '(0,0)', '(1,0)', '(0,2)'], correct: 0 },
-      { q: 'If we remove the +1, does y=2x pass through origin?', options: ['Yes', 'No', 'Only at x=0', 'Never'], correct: 0 }
+      { q: 'What is y when x=0 for y=2x+1?', _isText: true, _keywords: ['1', 'one'] },
+      { q: 'Where does y=2x+1 cross the y-axis?', _isText: true, _keywords: ['(0,1)', '0,1'] },
+      { q: 'If we remove the +1, does y=2x pass through origin?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDE95', title: 'Taxi Fare', story: 'Base fare Rs25 + Rs12/km. At x=0, fare=Rs25!', question: 'Y-intercept?', answer: '25' },
-      { emoji: '\uD83D\uDCF1', title: 'Phone Plan', story: 'Rs199 + Rs1/min. At x=0, total=199.', question: 'Intercept value?', answer: '199' },
-      { emoji: '\u26A1', title: 'Electricity', story: 'Rs200 fixed + Rs8/unit.', question: 'Intercept value?', answer: '200' },
-      { emoji: '\uD83C\uDF33', title: 'Tree Height', story: 'Sapling 50cm + 20cm/yr. At year 0, 50cm.', question: 'Through origin?', answer: 'no' },
+      { emoji: '🚕', title: 'Taxi Fare', equation: 'Total = 12x + 25', story: 'A taxi charges a base fare of Rs25 plus Rs12 per km. When you have not travelled any distance (x=0), you still owe Rs25 — that is the base fare. The y-intercept of the graph shows this starting cost before any kilometres are covered.', question: 'On the graph, what does the y-intercept value of 25 represent in the context of this taxi fare scenario?', answer: '25' },
+      { emoji: '📱', title: 'Phone Plan', equation: 'Total = 199 + 1x', story: 'Your phone plan costs Rs199 per month as a fixed rental fee, plus Rs1 per extra minute. Even if you do not make a single extra call (x=0), you still pay Rs199. The y-intercept on the graph shows this fixed monthly charge.', question: 'What is the y-intercept value on the graph, and what does it represent in this phone plan?', answer: '199' },
+      { emoji: '⚡', title: 'Electricity', equation: 'Total = 200 + 8x', story: 'Your electricity bill has a fixed charge of Rs200 per month, plus Rs8 per unit consumed. Even if you use zero units of electricity, you still owe Rs200. The y-intercept represents this unavoidable fixed charge.', question: 'What is the y-intercept value on the graph, and what does it represent for this electricity bill?', answer: '200' },
+      { emoji: '🌳', title: 'Tree Height', equation: 'Height = 50 + 20x', story: 'A sapling is planted at a height of 50 cm and grows 20 cm per year. At year zero (when it is first planted), the tree is already 50 cm tall. The y-intercept shows this initial height, which is why the line does not start at the origin.', question: 'Does this tree growth line pass through the origin? Why or why not?', answer: 'no' },
     ],
     solveExplanation: 'When x=0, y=2(0)+1=1. The constant term is the y-intercept - where the line meets the y-axis.'
   },
@@ -167,14 +157,9 @@ const MISSIONS = [
     story: 'Create sliders for a and b. Watch the line y = ax + b dance as you drag!',
     goal: 'Explore how slope (a) and intercept (b) change the line visually.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'If you increase the slope a, what happens to the line?',
-    options: [
-      'The line gets steeper',
-      'The line shifts up',
-      'The line shifts right',
-      'The line gets flatter'
-    ],
+    answerType: 'yesno',
+    prompt: 'When you increase the slope parameter a, does the line y = ax + b become steeper?',
+    options: null,
     correct: 0,
     explanation: 'The slope a controls steepness. Larger a = steeper line. The intercept b controls vertical position.',
     ggbHint: 'Create sliders for a and b, then type y = a*x + b.',
@@ -186,13 +171,13 @@ const MISSIONS = [
       'Drag the sliders and watch the line!'
     ],
     quiz: [
-      { q: 'What does slider a control?', options: ['Slope/steepness', 'Height/position', 'Both', 'Neither'], correct: 0 },
-      { q: 'If b=0, where does the line pass?', options: ['Through origin', 'Above origin', 'Below origin', 'Nowhere'], correct: 0 },
-      { q: 'If you set a=0 and b=3, what do you get?', options: ['Horizontal line at y=3', 'Vertical line at x=3', 'Line through origin', 'A curve'], correct: 0 }
+      { q: 'Does slider a control the slope/steepness of the line?', type: 'yesno', correct: 0 },
+      { q: 'What is the mathematical relationship between the slope a and the angle the line makes with the x-axis?', _isText: true, _keywords: ['tangent', 'tan', 'angle', 'steeper', 'increase'] },
+      { q: 'If you set a=0 and b=3, what type of line do you get and why?', _isText: true, _keywords: ['horizontal', 'flat', 'no slope', 'constant', 'y=3'] }
     ],
     realLife: [
-      { emoji: '\uD83C\uDFC3', title: 'Running Speed', story: 'Slope=speed, intercept=starting distance ahead.', question: 'What does slope represent?', answer: 'speed' },
-      { emoji: '\uD83D\uDCB5', title: 'Savings', story: 'Slope=save per week, intercept=initial savings.', question: 'Intercept =?', answer: 'initial savings' }
+      { emoji: '🏃', title: 'Running Speed', equation: '', story: 'When you go for a run, your distance from home can be modelled as a linear function. The slope of the line represents your running speed — a steeper line means you run faster. The y-intercept represents how far ahead you started from home (your initial position).', question: 'In a distance-time graph for a runner, what does the slope of the line physically represent?', answer: 'speed' },
+      { emoji: '🏦', title: 'Savings', equation: '', story: 'Every week you save a fixed amount of money. Your total savings over time form a straight line. The slope shows how much you save each week, while the y-intercept shows how much money you already had saved before you started this weekly plan.', question: 'In a savings graph over time, what does the y-intercept value represent?', answer: 'initial savings' },
     ],
     solveExplanation: 'Slope a = steepness. Intercept b = where line crosses y-axis. Together they define every line!'
   },
@@ -202,14 +187,9 @@ const MISSIONS = [
     story: 'Plot 2x+3y=7 and 3x+4y=10. Where do they meet? This is our first MATRIX problem!',
     goal: 'Connect simultaneous equations to matrix form.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What does the intersection point of the two lines represent?',
-    options: [
-      'The solution (x,y) that satisfies both equations',
-      'The x-intercept of line 1',
-      'The y-intercept of line 2',
-      'The origin'
-    ],
+    answerType: 'yesno',
+    prompt: 'Does the intersection point of two lines give the (x,y) that satisfies both equations simultaneously?',
+    options: null,
     correct: 0,
     explanation: 'The intersection gives (x,y) that works for BOTH equations. This is exactly the matrix equation Ax=b!',
     ggbHint: 'Type both equations. Use Intersect tool to find where they cross.',
@@ -221,14 +201,14 @@ const MISSIONS = [
       'What point does GeoGebra show?'
     ],
     quiz: [
-      { q: 'The matrix for 2x+3y=7, 3x+4y=10 is...', options: ['[[2,3],[3,4]]', '[[2,3],[4,3]]', '[[7,10],[3,4]]', '[[1,0],[0,1]]'], correct: 0 },
-      { q: 'Solve 2x+3y=7 and 3x+4y=10. What is (x,y)?', options: ['x=2,y=1', 'x=1,y=2', 'x=3,y=1', 'x=2,y=2'], correct: 0 },
-      { q: 'How many solutions does this system have?', options: ['Exactly one', 'Infinite', 'None', 'Two'], correct: 0 }
+      { q: 'Write the coefficient matrix for the system 2x+3y=7, 3x+4y=10.', _isText: true, _keywords: ['[[2,3],[3,4]]', '[2,3]', '2 3', '3 4'] },
+      { q: 'What is the solution (x,y) to 2x+3y=7 and 3x+4y=10?', _isText: true, _keywords: ['x=2', 'y=1', '(2,1)', '2,1'] },
+      { q: 'Can a system of 2 equations in 2 unknowns have more than one solution?', type: 'yesno', correct: 1 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDE9C', title: 'Supply-Demand', story: 'Supply: p=2q+1, Demand: p=-3q+20. Intersection = equilibrium!', question: 'What does intersection represent?', answer: 'equilibrium price' },
-      { emoji: '\uD83C\uDFE2', title: 'Break-even', story: 'Cost: C=100+20x, Revenue: R=50x. Break-even = intersection.', question: 'Break-even x?', answer: '3.33' },
-      { emoji: '\uD83C\uDFD7\uFE0F', title: 'Construction', story: 'Beam1: y=2x+1, Beam2: y=-x+4. Find intersection (x,y) for support.', question: 'Intersection (x,y)?', answer: 'x=1,y=3' },
+      { emoji: '🚌', title: 'Supply-Demand', equation: 'p = 2q + 1, p = -3q + 20', story: 'In a market, the supply curve shows the price at which producers are willing to sell a certain quantity — the more they produce, the higher the price they need. The demand curve shows the price buyers are willing to pay — the more available a product, the less they are willing to pay. Where these two lines cross is the equilibrium point — the price and quantity where supply exactly meets demand.', question: 'What does the intersection point of the supply and demand curves represent in economic terms?', answer: 'equilibrium price' },
+      { emoji: '🏢', title: 'Break-even', equation: 'C = 100 + 20x, R = 50x', story: 'A small business has fixed costs of Rs100 (rent, equipment) and variable costs of Rs20 per unit produced. Each unit is sold for Rs50. At first, costs exceed revenue and the business loses money. But as more units are sold, revenue catches up. The break-even point is where the cost line and revenue line intersect — the exact number of units where the business stops losing money and starts making profit.', question: 'How many units must be sold for the business to break even — that is, for revenue to exactly cover all costs?', answer: '3.33' },
+      { emoji: '🏗️', title: 'Construction', equation: 'y = 2x + 1, y = -x + 4', story: 'An engineer is designing a support structure with two beams that cross each other. Beam 1 follows the line y = 2x + 1 and Beam 2 follows y = -x + 4. The point where they cross is critical — that is where a joint or bracket must be placed to connect them securely.', question: 'At what coordinates (x, y) do the two beams intersect, and where should the support bracket be placed?', answer: 'x=1,y=3' },
     ],
     solveExplanation: 'The matrix [[2,3],[3,4]] times vector [x,y] equals vector [7,10]. Intersection solves Ax=b!'
   },
@@ -251,14 +231,14 @@ const MISSIONS = [
       'GeoGebra shows x=5. That is the unique answer!'
     ],
     quiz: [
-      { q: 'Is f(x)=3x+2 invertible? Why?', options: ['Yes - each x gives unique y', 'No - multiple x give same y', 'Yes - it is always positive', 'No - it is not a function'], correct: 0 },
-      { q: 'What is the inverse function f\u207b\u00b9(y)?', options: ['(y-2)/3', 'y/3 - 2', '3y+2', 'y-2'], correct: 0 },
-      { q: 'If f(a)=17, what is a?', options: ['5', '3', '7', '2'], correct: 0 }
+      { q: 'Is f(x)=3x+2 invertible because each x gives a unique y?', type: 'yesno', correct: 0 },
+      { q: 'What is the formula for the inverse function f⁻¹(y)?', _isText: true, _keywords: ['(y-2)/3', 'y-2/3', 'y/3 - 2', '(y-2)/3'] },
+      { q: 'For a function to be invertible, must it be one-to-one (injective)?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCC8', title: 'Temperature', story: 'Celsius to Fahrenheit: F=1.8C+32. Invert to get C from F!', question: 'Inverse function gives?', answer: 'Celsius' },
-      { emoji: '\uD83D\uDCB0', title: 'Currency', story: 'USD to INR: INR=83xUSD. Inverse: USD=INR/83.', question: 'What does inverse do?', answer: 'reverse conversion' },
-      { emoji: '\uD83C\uDFE0', title: 'Tax Calculation', story: 'Tax: T=0.3xIncome. Inverse tells income from tax paid.', question: 'Inverse =?', answer: 'Income = T/0.3' },
+      { emoji: '📈', title: 'Temperature', equation: 'F = 1.8C + 32', story: 'Converting between Celsius and Fahrenheit uses a linear function. The formula F = 1.8C + 32 tells you the Fahrenheit temperature for any Celsius value. The inverse function — going from Fahrenheit back to Celsius — reverses this calculation: C = (F - 32) / 1.8. Being able to invert a function means you can go both directions.', question: 'When you use the inverse of the Celsius-to-Fahrenheit formula, what physical quantity do you get back?', answer: 'Celsius' },
+      { emoji: '💰', title: 'Currency', equation: 'INR = 83 * USD', story: 'Converting US dollars to Indian rupees is a simple multiplication: multiply by 83. But what if you have rupees and want to know how many dollars that is? You need the inverse function — divide by 83. The inverse lets you reverse the conversion direction.', question: 'What does the inverse of the currency conversion function allow you to do?', answer: 'reverse conversion' },
+      { emoji: '🏠', title: 'Tax Calculation', equation: 'T = 0.3 * Income', story: 'If the tax rate is 30%, your tax equals 0.3 times your income. But what if you know the tax you paid and want to figure out your original income? You need the inverse function: Income = Tax / 0.3. The inverse reverses the calculation.', question: 'What does the inverse of the tax function give you?', answer: 'Income = T/0.3' },
     ],
     solveExplanation: '3a+2=17 -> 3a=15 -> a=5. Each x has exactly one y (and vice versa) => invertible!'
   },
@@ -281,14 +261,14 @@ const MISSIONS = [
       'Click and drag on the curve - watch y change as x moves.'
     ],
     quiz: [
-      { q: 'What is f(0) for f(x)=x\u00b2-10?', options: ['-10', '0', '10', '-5'], correct: 0 },
-      { q: 'What is f(-5)?', options: ['15', '-10', '25', '-35'], correct: 0 },
-      { q: 'Is f(x)=x\u00b2-10 invertible?', options: ['No - two x give same y', 'Yes - it is a function', 'Yes - it is always positive', 'No - it is not a function'], correct: 0 }
+      { q: 'Is f(x)=x²-10 invertible over all real numbers?', type: 'yesno', correct: 1 },
+      { q: 'Why is a parabola not invertible globally?', _isText: true, _keywords: ['two', 'same', 'symmetric', 'one-to-one', 'not unique', 'fails'] },
+      { q: 'If f(a)=f(b) and a≠b for a quadratic, what does this tell you about invertibility?', _isText: true, _keywords: ['not invertible', 'not one-to-one', 'fails horizontal', 'two inputs same output'] }
     ],
     realLife: [
-      { emoji: '\uD83C\uDFB0', title: 'Projectile', story: 'Height of ball: h(t)= -5t\u00b2 + 20t. h(2) gives height at t=2s.', question: 'What is height at t=2?', answer: '20' },
-      { emoji: '\uD83C\uDFAF', title: 'Profit Curve', story: 'Profit: P(x)= -x\u00b2 + 100x. P(30) = profit at 30 units.', question: 'P(30) =?', answer: '2100' },
-      { emoji: '\uD83C\uDF0A', title: 'Tide Height', story: 'Tide: h(t)= 2sin(t) + 5. h(3) = tide height at hour 3.', question: 'What kind of function?', answer: 'trigonometric' },
+      { emoji: '🎮', title: 'Projectile', equation: 'h(t) = -5t² + 20t', story: 'When you throw a ball straight up, its height over time follows a parabolic path — it rises, reaches a peak, then falls back down. The function h(t) = -5t² + 20t models this. At time t=2 seconds, you can substitute into the formula to find exactly how high the ball is at that moment.', question: 'Using the projectile motion formula, what is the height of the ball at time t = 2 seconds?', answer: '20' },
+      { emoji: '🎯', title: 'Profit Curve', equation: 'P(x) = -x² + 100x', story: 'A company\'s profit depends on how many units it produces and sells. At first, profit increases with more units — but eventually, costs like storage and marketing start eating into gains. The profit function P(x) = -x² + 100x is a downward parabola showing this trade-off. At x=30 units, the profit reaches a specific value.', question: 'What is the profit when the company produces and sells 30 units?', answer: '2100' },
+      { emoji: '🌊', title: 'Tide Height', equation: 'h(t) = 2sin(t) + 5', story: 'Ocean tides rise and fall in a periodic, wave-like pattern that can be modelled using trigonometric functions. The tide height h(t) = 2sin(t) + 5 oscillates between 3 metres (low tide) and 7 metres (high tide), with an average water level of 5 metres. At hour 3, you can compute the exact tide height.', question: 'What type of mathematical function is used to model the tide — is it linear, quadratic, or trigonometric?', answer: 'trigonometric' },
     ],
     solveExplanation: 'f(5) = 25 - 10 = 15. The point (5,15) is on the parabola. Simple substitution!'
   },
@@ -310,13 +290,13 @@ const MISSIONS = [
       'How many intersection points? TWO! Both are answers.'
     ],
     quiz: [
-      { q: 'How many values of a satisfy f(a)=54?', options: ['2', '1', '0', 'Infinite'], correct: 0 },
-      { q: 'What are the two values?', options: ['8 and -8', '8 and 8', '-8 and -10', '10 and -10'], correct: 0 },
-      { q: 'Why are there two answers?', options: ['Parabola is symmetric', 'Function is linear', '54 is a perfect square', 'f is invertible'], correct: 0 }
+      { q: 'Can a quadratic equation have two distinct real solutions?', type: 'yesno', correct: 0 },
+      { q: 'Why does the parabola y=x²-10 intersect y=54 at exactly two points?', _isText: true, _keywords: ['symmetric', 'parabola', 'symmetry', 'two', 'even'] },
+      { q: 'If f(a)=f(-a) for all a, what symmetry property does f have?', _isText: true, _keywords: ['even', 'symmetric', 'y-axis', 'f(-x)=f(x)'] }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCE1', title: 'Signal Strength', story: 'Signal = d\u00b2 - 10. Two positions give same signal strength!', question: 'Why two positions?', answer: 'symmetric' },
-      { emoji: '\uD83C\uDFC8', title: 'Projectile Height', story: 'Ball reaches same height twice - going up and coming down.', question: 'Two solutions mean?', answer: 'going up and down' },
+      { emoji: '📡', title: 'Signal Strength', equation: '', story: 'A radio signal\'s strength depends on distance from the transmitter following a quadratic pattern: Signal = d² - 10. Because of the squared term, two different distances (one closer, one farther) can produce the exact same signal strength. This means there are two positions where you receive the same signal quality.', question: 'Why can two different positions give the same signal strength in this quadratic model?', answer: 'symmetric' },
+      { emoji: '🏆', title: 'Projectile Height', equation: '', story: 'When you throw a ball into the air, it reaches any given height twice — once on the way up and once on the way down. The parabola is symmetric, so the same y-value appears at two different x-values (times). This is why quadratic equations can have two solutions.', question: 'When a projectile reaches the same height twice, what does having two solutions tell us about the ball\'s motion?', answer: 'going up and down' },
     ],
     solveExplanation: 'a\u00b2 = 64 -> a = 8 or a = -8. The parabola is symmetric, so two x give same y.'
   },
@@ -338,12 +318,12 @@ const MISSIONS = [
       'Count the intersections! Three points: x = -4, 2, and 3.'
     ],
     quiz: [
-      { q: 'How many intersection points does the cubic have with y=-22?', options: ['3', '1', '2', '0'], correct: 0 },
-      { q: 'Can a cubic have more solutions than a quadratic?', options: ['Yes - higher degree, more solutions', 'No - they are same', 'Only if no constant term', 'Only if positive'], correct: 0 },
+      { q: 'Can a cubic equation have more real solutions than a quadratic equation?', type: 'yesno', correct: 0 },
+      { q: 'Explain the relationship between the degree of a polynomial and its maximum number of real roots.', _isText: true, _keywords: ['degree', 'roots', 'fundamental', 'theorem', 'algebra', 'n'] },
     ],
     realLife: [
-      { emoji: '\uD83C\uDFAE', title: 'Video Game Physics', story: 'Character jump follows cubic path. Same height at 3 different times!', question: 'How many solutions possible?', answer: 'up to 3' },
-      { emoji: '\uD83D\uDCC9', title: 'Stock Market', story: 'Stock price as cubic function. Same price at 3 different days.', question: 'Why multiple?', answer: 'cubic shape' },
+      { emoji: '🎮', title: 'Video Game Physics', equation: '', story: 'In many video games, a character\'s jump height follows a cubic path — they accelerate, decelerate, and may even bounce. Because a cubic function can wiggle up and down, the character might reach the same height at three different moments during the jump — going up, coming down, and bouncing back up again.', question: 'How many different times can a character be at the same height during a cubic jump path?', answer: 'up to 3' },
+      { emoji: '📊', title: 'Stock Market', equation: '', story: 'Stock prices sometimes follow complex patterns that can be modelled by cubic functions. A cubic curve can rise, fall, and rise again — meaning the stock price could be at the same value on three different trading days. This is why cubic equations can have three solutions.', question: 'Why might a cubic stock price model give multiple solutions for when the price equals a certain value?', answer: 'cubic shape' },
     ],
     solveExplanation: 'Cubic can have up to 3 real solutions. g(x) = -22 gives x = -4, 2, or 3.'
   },
@@ -353,14 +333,9 @@ const MISSIONS = [
     story: 'What are R, R\u00b2, and R\u00b3? A point lives in different dimensions!',
     goal: 'Understand dimensional spaces - 1D line, 2D plane, 3D space.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'A point needs 2 coordinates in R\u00b2. What does this mean?',
-    options: [
-      '2D plane - every point is (x,y)',
-      '1D line - every point is (x)',
-      '3D space - every point is (x,y,z)',
-      '4D space - every point is (x,y,z,w)'
-    ],
+    answerType: 'yesno',
+    prompt: 'Does a point in R² require exactly 2 coordinates to specify its position?',
+    options: null,
     correct: 0,
     explanation: 'R = 1D number line (one coordinate). R\u00b2 = 2D plane (two coordinates). R\u00b3 = 3D space (three coordinates).',
     ggbHint: 'Plot a point in 2D (R\u00b2) with (x,y). GeoGebra shows both axes.',
@@ -371,14 +346,14 @@ const MISSIONS = [
       'In R (1D), you would need ONE number. In R\u00b3, THREE numbers!'
     ],
     quiz: [
-      { q: 'R = ?', options: ['1D number line', '2D plane', '3D space', 'Set of functions'], correct: 0 },
-      { q: 'How many coordinates for a point in R\u00b3?', options: ['3', '2', '1', '4'], correct: 0 },
-      { q: 'The origin in R\u00b2 is...', options: ['(0,0)', '(0)', '(0,0,0)', '(1,1)'], correct: 0 }
+      { q: 'How many coordinates does a point in R³ need?', type: 'yesno', correct: 0 },
+      { q: 'What is the mathematical notation for the 2D real coordinate plane?', _isText: true, _keywords: ['R²', 'R^2', 'R2'] },
+      { q: 'If a data point has 5 independent measurements, which space does it live in?', _isText: true, _keywords: ['R⁵', 'R^5', 'R5', '5D', 'five'] }
     ],
     realLife: [
-      { emoji: '\uD83C\uDF0D', title: 'GPS Coordinates', story: 'Latitude, longitude = point in R\u00b2 on Earth surface.', question: 'What space?', answer: 'R\u00b2' },
-      { emoji: '\uD83D\uDCF1', title: 'Phone Location', story: 'Lat, Lon, Altitude = point in R\u00b3.', question: 'Third coordinate?', answer: 'altitude' },
-      { emoji: '\uD83C\uDFB5', title: 'Sound Waves', story: 'Frequency, amplitude, time = R\u00b3.', question: 'How many dimensions?', answer: '3' },
+      { emoji: '🌍', title: 'GPS Coordinates', equation: '', story: 'Your position on Earth\'s surface is described by two numbers: latitude and longitude. These two coordinates form a point in a 2-dimensional space (R²). Just like you need an (x,y) pair to locate a point on a flat map, you need exactly two numbers to pinpoint any location on the globe.', question: 'What mathematical space do latitude and longitude together define?', answer: 'R²' },
+      { emoji: '📱', title: 'Phone Location', equation: '', story: 'Your phone tracks not just your latitude and longitude, but also your altitude above sea level. Now you need three numbers to describe your exact position — this is a point in 3-dimensional space (R³). The third coordinate adds the height dimension.', question: 'When your phone tracks latitude, longitude, and altitude, what is the third coordinate that makes it 3D?', answer: 'altitude' },
+      { emoji: '🎵', title: 'Sound Waves', equation: '', story: 'A sound wave can be described by three key properties: its frequency (how high or low the pitch is), its amplitude (how loud it is), and time (when it occurs). These three values together form a point in a 3-dimensional space, allowing us to analyse and process sound mathematically.', question: 'How many dimensions are needed to describe a sound wave using frequency, amplitude, and time?', answer: '3' },
     ],
     solveExplanation: 'R = 1D, R\u00b2 = 2D, R\u00b3 = 3D. Higher dimensions = more coordinates to describe position!'
   },
@@ -388,15 +363,11 @@ const MISSIONS = [
     story: '\u03c6(x,y) = (2x+3y, 3x+4y). This IS a matrix! Write it as a 2x2 matrix.',
     goal: 'See a function as a matrix transformation.',
     ggbType: 'geometry',
-    answerType: 'mcq',
-    prompt: 'What matrix represents \u03c6(x,y) = (2x+3y, 3x+4y)?',
-    options: [
-      '[[2,3],[3,4]]',
-      '[[2,3],[4,3]]',
-      '[[3,2],[4,3]]',
-      '[[2,4],[3,3]]'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'Write the 2×2 matrix that represents φ(x,y) = (2x+3y, 3x+4y)',
+    options: null,
+    correct: null,
+    expectedKeywords: ['[[2,3],[3,4]]', '[2,3]', '2 3 3 4', '2,3,3,4'],
     explanation: '\u03c6(x,y) = (2x+3y, 3x+4y). The coefficient matrix is [[2,3],[3,4]]. First row gives x\u2019, second gives y\u2019.',
     ggbHint: 'Plot a vector, then apply the transformation. GeoGebra can do matrix multiplication!',
     ggbSteps: [
@@ -406,14 +377,14 @@ const MISSIONS = [
       'GeoGebra shows the transformed vector!'
     ],
     quiz: [
-      { q: 'What is \u03c6(1,0)?', options: ['(2,3)', '(3,4)', '(1,0)', '(0,0)'], correct: 0 },
-      { q: 'What is \u03c6(0,1)?', options: ['(3,4)', '(2,3)', '(0,1)', '(1,0)'], correct: 0 },
-      { q: 'Why study matrices as functions?', options: ['Unified framework for transformations', 'They are easier to compute', 'They look nice', 'No reason'], correct: 0 }
+      { q: 'If φ(1,0) = (2,3), what does this tell you about the first column of the matrix?', _isText: true, _keywords: ['column', 'first', '(2,3)', 'image of basis'] },
+      { q: 'What is φ(0,1) and what does it tell you about the second column?', _isText: true, _keywords: ['(3,4)', 'second column', 'column 2'] },
+      { q: 'Why is studying matrices as linear functions useful?', _isText: true, _keywords: ['unified', 'composition', 'composition', 'transform', 'framework', 'multiply'] }
     ],
     realLife: [
-      { emoji: '\uD83D\uDDA5', title: 'Image Processing', story: 'Each pixel (r,g,b) transformed by a matrix for filters!', question: 'What does matrix do?', answer: 'transforms colors' },
-      { emoji: '\uD83C\uDFA8', title: 'Computer Graphics', story: 'Rotate, scale, shear objects using 3x3 matrices.', question: 'What transformation?', answer: 'rotate' },
-      { emoji: '\uD83E\uDD16', title: 'AI/ML', story: 'Neural network layers are just matrix multiplications!', question: 'Layers =?', answer: 'matrix transforms' },
+      { emoji: '🖥️', title: 'Image Processing', equation: '', story: 'Every pixel in a digital image has three colour values: red, green, and blue (RGB). When you apply a filter — like making an image warmer or converting to black-and-white — each pixel\'s RGB triplet is multiplied by a matrix. The matrix transforms the original colours into new colours, creating the filtered effect.', question: 'What does the filter matrix do to each pixel\'s RGB colour values in image processing?', answer: 'transforms colors' },
+      { emoji: '🎨', title: 'Computer Graphics', equation: '', story: 'When you rotate, scale, or skew a shape on screen, the computer uses matrix multiplication to transform every point. A 2×2 matrix can rotate a shape by any angle, stretch it along an axis, or shear it into a parallelogram. Matrix transformations are the foundation of all computer graphics.', question: 'What common transformation does a matrix perform on objects in computer graphics?', answer: 'rotate' },
+      { emoji: '🤖', title: 'AI/ML', equation: '', story: 'A neural network processes information through layers, and each layer is essentially a matrix multiplication followed by a non-linear function. When an AI recognises a cat in a photo, it is passing the image through dozens of matrix transformations, each one extracting more abstract features from the previous layer.', question: 'In a neural network, what mathematical operation does each layer essentially perform?', answer: 'matrix transforms' },
     ],
     solveExplanation: '\u03c6(x,y) = (2x+3y, 3x+4y). First row coefficients: [2,3]. Second row: [3,4]. Matrix = [[2,3],[3,4]]!'
   },
@@ -423,14 +394,9 @@ const MISSIONS = [
     story: 'Can you REVERSE the transformation? If \u03c6(x,y) = (2x+3y, 3x+4y), can you always find (x,y) from the output?',
     goal: 'Check if a matrix is invertible by checking if its determinant is non-zero.',
     ggbType: 'geometry',
-    answerType: 'mcq',
-    prompt: 'Is the transformation \u03c6 invertible? (determinant = 2*4 - 3*3 = -1)',
-    options: [
-      'Yes - determinant = -1, non-zero so invertible',
-      'No - determinant = -1, negative so not invertible',
-      'Yes - determinant = 1',
-      'No - determinant = 0'
-    ],
+    answerType: 'yesno',
+    prompt: 'Since det([[2,3],[3,4]]) = -1 ≠ 0, is this matrix invertible?',
+    options: null,
     correct: 0,
     explanation: 'det = 2*4 - 3*3 = 8 - 9 = -1. Non-zero determinant means the matrix is invertible!',
     ggbHint: 'Compute the determinant in GeoGebra. Then try to invert the matrix.',
@@ -441,13 +407,13 @@ const MISSIONS = [
       'A non-zero determinant means you can reverse the transformation.'
     ],
     quiz: [
-      { q: 'What is det([[1,2],[2,4]])?', options: ['0', '1', '-2', '4'], correct: 0 },
-      { q: 'A zero determinant means...', options: ['Not invertible (information lost)', 'Perfectly invertible', 'Determinant is infinite', 'Matrix is identity'], correct: 0 },
-      { q: 'Why is inverse important?', options: ['Solves Ax=b by x=A\u207b\u00b9b', 'Makes matrix bigger', 'Changes dimension', 'No practical use'], correct: 0 }
+      { q: 'What is det([[1,2],[2,4]]) and what does it tell you about invertibility?', _isText: true, _keywords: ['0', 'zero', 'not invertible', 'singular'] },
+      { q: 'Does a zero determinant always mean a matrix is not invertible?', type: 'yesno', correct: 0 },
+      { q: 'Explain the connection between det≠0 and solving Ax=b uniquely.', _isText: true, _keywords: ['inverse', 'unique', 'solution', 'x=A⁻¹b', 'non-singular'] }
     ],
     realLife: [
-      { emoji: '\uD83C\uDFC8', title: 'Robotics', story: 'Robot arm needs to reverse its transformation to find joint angles from position.', question: 'What does inverse give?', answer: 'joint angles' },
-      { emoji: '\uD83D\uDCCA', title: 'Data Analysis', story: 'PCA uses eigenvectors to compress data. Invert to reconstruct.', question: 'Compression needs?', answer: 'invertibility' },
+      { emoji: '🏆', title: 'Robotics', equation: '', story: 'A robot arm needs to reach a specific position in space. The forward problem is: given the joint angles, where does the end of the arm end up? The inverse problem is harder but essential — given the desired position, what joint angles achieve it? This requires the matrix to be invertible so the transformation can be reversed.', question: 'What does the inverse of the robot arm\'s transformation matrix give you?', answer: 'joint angles' },
+      { emoji: '📊', title: 'Data Analysis', equation: '', story: 'Principal Component Analysis (PCA) compresses high-dimensional data by projecting it onto fewer dimensions. The key insight is that this compression is reversible — you can reconstruct the original data from the compressed version because the transformation matrix is invertible. Without invertibility, you would permanently lose information.', question: 'What property of the transformation matrix is essential for being able to reconstruct compressed data?', answer: 'invertibility' },
     ],
     solveExplanation: 'det = ad - bc = 2*4 - 3*3 = -1. Non-zero => invertible. A\u207b\u00b9 exists!'
   },
@@ -470,14 +436,14 @@ const MISSIONS = [
       'These vectors form the KERNEL or NULL SPACE.'
     ],
     quiz: [
-      { q: 'What does det=0 mean?', options: ['Matrix is singular - info lost', 'Matrix is perfect', 'Determinant is undefined', 'Matrix is identity'], correct: 0 },
-      { q: 'The set of vectors mapping to origin is called...', options: ['Kernel/Null space', 'Range/Image', 'Column space', 'Row space'], correct: 0 },
-      { q: 'How many vectors map to origin?', options: ['Infinite (a whole line)', 'Only the zero vector', 'Exactly one', 'Two'], correct: 0 }
+      { q: 'What does det=0 mean?', _isText: true, _keywords: ['singular', 'info lost', 'information lost', 'not invertible', 'zero', 'lost', 'collapse'] },
+      { q: 'The set of vectors mapping to the origin is called...', _isText: true, _keywords: ['kernel', 'null space', 'null'] },
+      { q: 'How many vectors map to the origin for a singular matrix?', _isText: true, _keywords: ['infinite', 'line', 'many', 'infinitely'] }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCF7', title: 'Image Blur', story: 'Blurry image = original passed through singular matrix. Info lost!', question: 'Can we perfectly restore?', answer: 'no - info lost' },
-      { emoji: '\uD83D\uDD0A', title: 'Audio Compression', story: 'Lossy compression = singular transform. Some info vanishes.', question: 'What vanishes?', answer: 'null space info' },
-      { emoji: '\uD83D\uDCE6', title: 'Network Routing', story: 'Some traffic patterns cancel out at a node (kernel).', question: 'What does kernel represent?', answer: 'vanishing flows' },
+      { emoji: '📷', title: 'Image Blur', equation: '', story: 'When you blur a photo, some fine details are permanently lost. Mathematically, blurring is like applying a singular matrix to the image — the matrix has determinant zero, meaning certain information (the null space) is destroyed. No amount of processing can perfectly recover the original sharp image because the data has been irreversibly compressed.', question: 'Can you perfectly restore a blurred image back to its original sharp version? Why or why not?', answer: 'no - info lost' },
+      { emoji: '🔊', title: 'Audio Compression', equation: '', story: 'When you compress an audio file into MP3 format, some sounds are discarded to reduce file size. This is like a singular matrix transformation — certain frequency components (those in the null space) vanish entirely. The compressed file sounds almost the same, but the discarded information cannot be perfectly recovered.', question: 'In audio compression, what mathematical concept represents the sounds that are permanently discarded?', answer: 'null space info' },
+      { emoji: '📦', title: 'Network Routing', equation: '', story: 'In a traffic network, certain flow patterns can cancel each other out at a junction — vehicles going in one direction are exactly balanced by vehicles going the other way, resulting in zero net traffic at that node. These cancelling patterns form the kernel (null space) of the network\'s routing matrix.', question: 'In a traffic network, what does the kernel (null space) of the routing matrix represent?', answer: 'vanishing flows' },
     ],
     solveExplanation: 'det=0 -> singular. [[1,2],[2,4]]*(x,y)=(0,0) -> x+2y=0 -> x=-2y. Line of vectors map to origin!'
   },
@@ -487,15 +453,11 @@ const MISSIONS = [
     story: "A=0, B=1, ..., Z=25. SUDARSHANA = 18,20,3,0,17,18,7,0,13,0. Encrypt with matrix [[2,3],[3,4]] → pairs (18,20)→(96,134), (3,0)→(6,9), (17,18)→(88,123). Decrypt using the inverse matrix!",
     goal: 'Use matrix multiplication and inverses for encryption/decryption.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'How do you decrypt ciphertext pairs back to the original message?',
-    options: [
-      'Multiply each pair by inverse of [[2,3],[3,4]]',
-      'Divide each encrypted number by 2',
-      'Transpose the encrypted pairs',
-      'Plot the points and find the line'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'What matrix operation is used to decrypt ciphertext pairs back to the original message in Hill Cipher?',
+    options: null,
+    correct: null,
+    expectedKeywords: ['inverse', 'matrix', 'multiply', 'multiplication', 'invert'],
     explanation: 'Decryption = multiply each ciphertext pair by the inverse matrix. The inverse of [[2,3],[3,4]] is [[4,-3],[-3,2]] (mod 26 arithmetic).',
     ggbHint: 'Type M={{2,3},{3,4}}. Multiply M*{{18},{20}} to get the first encrypted pair. Find inverse with Invert[M].',
     ggbSteps: [
@@ -506,14 +468,14 @@ const MISSIONS = [
       'Multiply inverse by each encrypted pair to recover letters!'
     ],
     quiz: [
-      { q: 'Encrypted value of (S,U)=(18,20) under [[2,3],[3,4]]?', options: ['(96,134)', '(88,123)', '(6,9)', '(14,21)'], correct: 0 },
-      { q: 'What operation decrypts Hill Cipher?', options: ['Inverse matrix multiplication', 'Transpose', 'Addition', 'Determinant'], correct: 0 },
-      { q: 'Does the encryption matrix need to be invertible?', type: 'yesno', correct: 0 }
+      { q: 'If you encrypt (S,U)=(18,20) with [[2,3],[3,4]], what is the first component of the result?', _isText: true, _keywords: ['96', '96'] },
+      { q: 'Does the encryption matrix need to be invertible for decryption to work?', type: 'yesno', correct: 0 },
+      { q: 'Why is modular arithmetic necessary in Hill Cipher encryption?', _isText: true, _keywords: ['mod', 'modulo', 'wrap', 'letter', 'alphabet', '26', 'range'] }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCF1', title: 'Messaging Apps', story: 'WhatsApp uses matrix-based encryption to secure messages.', question: 'What matrix operation encrypts?', answer: 'matrix multiplication' },
-      { emoji: '\uD83C\uDF10', title: 'Online Banking', story: 'Banks encrypt transactions using linear transformations.', question: 'Rows = ?', answer: 'encrypted output' },
-      { emoji: '\uD83D\uDD75\uFE0F', title: 'Military Comms', story: 'Hill Cipher was used for secure battlefield communication in WWII.', question: 'Why inverse needed?', answer: 'to decrypt' },
+      { emoji: '📱', title: 'Messaging Apps', equation: '', story: 'When you send a message on WhatsApp, the text is encrypted before transmission so that no one intercepting the data can read it. The encryption uses matrix multiplication — your message letters are converted to numbers, multiplied by a secret matrix, and the result is sent over the network. Only the recipient with the inverse matrix can decrypt it back.', question: 'What matrix operation is used to encrypt your messages in secure messaging apps?', answer: 'matrix multiplication' },
+      { emoji: '🌐', title: 'Online Banking', equation: '', story: 'When you transfer money online, your transaction details (amount, account numbers, timestamp) are encrypted using linear transformations before being sent. Each row of the encrypted output is a linear combination of the original data, making it unreadable to anyone without the decryption key.', question: 'In encrypted banking transactions, what does each row of the encrypted output matrix represent?', answer: 'encrypted output' },
+      { emoji: '🕵️', title: 'Military Comms', equation: '', story: 'The Hill Cipher was one of the first practical encryption methods, used for secure battlefield communication in World War II. It works by grouping letters into vectors and multiplying them by a secret matrix. The receiver decrypts by multiplying with the inverse matrix. Without knowing the matrix, breaking the code is extremely difficult.', question: 'Why is the inverse matrix essential for decrypting a Hill Cipher message?', answer: 'to decrypt' },
     ],
     solveExplanation: 'M={{2,3},{3,4}}. Encrypt: M * [letter pair]. Decrypt: M_inverse * [encrypted pair]. Must be invertible!'
   },
@@ -523,15 +485,10 @@ const MISSIONS = [
     story: 'Table1: 3 adults + 1 child = \u20B91200. Table2: 1 adult + 2 children = \u20B91000. Can you find cost per adult (A) and child (C)? Then try: 3A+1C=1200, 1A+2C=1000, 1A+1C=900 — overdetermined! No exact solution — just minimize error.',
     goal: 'Solve systems with more equations than unknowns (least squares idea).',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What happens when you have 3 equations for 2 unknowns?',
-    options: [
-      'No exact solution — system is overdetermined',
-      'Always exact solution',
-      'Infinitely many solutions',
-      'Exactly one solution'
-    ],
-    correct: 0,
+    answerType: 'yesno',
+    prompt: 'When you have 3 equations but only 2 unknowns, can you always find an exact solution that satisfies all three?',
+    options: null,
+    correct: 1,
     explanation: '3 equations, 2 unknowns = overdetermined. The extra equation may conflict. No exact (A,C) satisfies all three. Can only minimize error (least squares).',
     ggbHint: 'Plot all three lines. Do they intersect at one point? Type: Solve({3A+1C=1200,1A+2C=1000,1A+1C=900},{A,C})',
     ggbSteps: [
@@ -542,14 +499,14 @@ const MISSIONS = [
       'The system has NO exact solution.'
     ],
     quiz: [
-      { q: 'Solve: 3A+1C=1200, 1A+2C=1000', options: ['A=280, C=360', 'A=200, C=400', 'A=300, C=300', 'A=250, C=350'], correct: 0 },
-      { q: 'With 3 equations & 2 unknowns, the system is...', options: ['Overdetermined', 'Underdetermined', 'Square', 'Identity'], correct: 0 },
-      { q: 'Can we find an exact solution for overdetermined systems?', type: 'yesno', correct: 1 }
+      { q: 'Solve 3A+1C=1200 and 1A+2C=1000. What is A?', _isText: true, _keywords: ['280', '280'] },
+      { q: 'What is a system with more equations than unknowns called?', _isText: true, _keywords: ['overdetermined'] },
+      { q: 'If no exact solution exists, what mathematical technique finds the best approximate solution?', _isText: true, _keywords: ['least squares', 'minimize error', 'minimise', 'best fit'] }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCC8', title: 'Business Forecasting', story: 'Use past sales data (many points) to estimate trend line (few params).', question: 'More data points than parameters?', answer: 'overdetermined' },
-      { emoji: '\uD83D\uDCF1', title: 'GPS Positioning', story: 'GPS uses 4+ satellite signals to pinpoint 3D location.', question: 'Why extra equations?', answer: 'reduce error' },
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Medical Imaging', story: 'CT scans take many X-ray measurements to reconstruct a single image.', question: 'What math finds best fit?', answer: 'least squares' },
+      { emoji: '📈', title: 'Business Forecasting', equation: '', story: 'A company collects sales data from many past months (lots of data points) but wants to fit a simple trend line with just two parameters (slope and intercept). This creates an overdetermined system — more equations than unknowns. No single trend line passes through all the data points, so the best approach is to minimise the total error using least squares.', question: 'When you have many data points but only a few parameters to estimate, what type of system do you get?', answer: 'overdetermined' },
+      { emoji: '📱', title: 'GPS Positioning', equation: '', story: 'Your phone determines your location using signals from at least 4 satellites. But your position has only 3 coordinates (latitude, longitude, altitude). With 4+ satellite signals for 3 unknowns, the system is overdetermined. The extra signals are not wasted — they reduce定位error and improve accuracy through least squares estimation.', question: 'Why does GPS use more satellite signals than the minimum needed for a 3D position?', answer: 'reduce error' },
+      { emoji: '🏥', title: 'Medical Imaging', equation: '', story: 'A CT scanner takes hundreds of X-ray measurements from different angles around your body. Each measurement is one equation, but the image has millions of pixels to reconstruct. This massively overdetermined system is solved using least squares to produce the sharpest possible image from the available measurements.', question: 'What mathematical technique is used to find the best image when you have far more measurements than unknowns?', answer: 'least squares' },
     ],
     solveExplanation: '3A+1C=1200, 1A+2C=1000 ⇒ A=280, C=360. Adding 1A+1C=900 gives conflict — no exact solution. Overdetermined systems minimize error instead.'
   },
@@ -573,14 +530,14 @@ const MISSIONS = [
       'Values converge to ~667 City, ~333 Suburb!'
     ],
     quiz: [
-      { q: 'What is the steady state City fraction?', options: ['66.7%', '50%', '80%', '90%'], correct: 0 },
-      { q: 'What matrix equation defines steady state?', options: ['M*v = v', 'M*v = 0', 'M*v = 1', 'v*M = 0'], correct: 0 },
+      { q: 'What is the steady state City fraction?', _isText: true, _keywords: ['66.7%', '66.7', '2/3', '67', '66.67'] },
+      { q: 'What matrix equation defines steady state?', _isText: true, _keywords: ['M*v = v', 'Mv = v', 'M v = v'] },
       { q: 'Does every Markov chain reach a steady state?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83C\uDFD9\uFE0F', title: 'Urban Planning', story: 'Predict city-suburb population shifts using transition matrices.', question: 'Long-run population?', answer: 'steady state' },
-      { emoji: '\uD83D\uDCC8', title: 'Stock Market', story: 'Markov models predict bull/bear market transitions over time.', question: 'What does steady state represent?', answer: 'long-term probability' },
-      { emoji: '\uD83E\uDDEA', title: 'Genetics', story: 'Gene frequency changes across generations follow Markov chains.', question: 'What is transition matrix?', answer: 'mutation rates' },
+      { emoji: '🏙️', title: 'Urban Planning', equation: '', story: 'City planners study how populations shift between urban and suburban areas over time. Each year, a certain percentage of city dwellers move to the suburbs and vice versa. By modelling these transitions as a matrix and multiplying it repeatedly, planners can predict the long-run population distribution — the steady state where the proportions stabilise.', question: 'When you repeatedly apply a transition matrix to population data, what does the final stable distribution represent?', answer: 'steady state' },
+      { emoji: '📈', title: 'Stock Market', equation: '', story: 'Financial analysts model the stock market as switching between two states: a bull market (prices rising) and a bear market (prices falling). The transition probabilities between these states form a Markov chain. By raising the transition matrix to higher powers, analysts predict the long-run probability of being in a bull or bear market.', question: 'In a stock market Markov model, what does the steady-state vector represent?', answer: 'long-term probability' },
+      { emoji: '🧬', title: 'Genetics', equation: '', story: 'Gene frequencies in a population change across generations due to mutation, selection, and genetic drift. These changes can be modelled as a Markov chain where each generation\'s gene distribution is obtained by multiplying the current distribution by a transition matrix. Over many generations, the gene frequencies settle into a steady state.', question: 'In population genetics, what does the transition matrix of a Markov chain represent?', answer: 'mutation rates' },
     ],
     solveExplanation: 'M = [[0.9,0.2],[0.1,0.8]]. Repeated multiplication converges to eigenvector with eigenvalue 1: City ~ 66.7%, Suburb ~ 33.3%.'
   },
@@ -604,14 +561,14 @@ const MISSIONS = [
       'Try different (x,y) values — you can only minimize error!'
     ],
     quiz: [
-      { q: 'How many rows in the matrix [[3,1],[1,2],[1,1]]?', options: ['3', '2', '1', '4'], correct: 0 },
+      { q: 'How many rows in the matrix [[3,1],[1,2],[1,1]]?', _isText: true, _keywords: ['3', 'three'] },
       { q: 'Can 3 equations with 2 unknowns have an exact solution?', type: 'yesno', correct: 1 },
-      { q: 'What do we call a system with more equations than unknowns?', options: ['Overdetermined', 'Underdetermined', 'Square', 'Singular'], correct: 0 }
+      { q: 'What do we call a system with more equations than unknowns?', _isText: true, _keywords: ['overdetermined', 'over-determined'] }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCC9', title: 'Weather Prediction', story: 'Thousands of data points to estimate just a few weather parameters.', question: 'More equations than unknowns?', answer: 'overdetermined' },
-      { emoji: '\uD83D\uDCF7', title: 'Photo Enhancement', story: 'Millions of pixels adjusted using few filter parameters.', question: 'What minimizes error?', answer: 'least squares' },
-      { emoji: '\uD83C\uDFC0', title: 'Sports Analytics', story: 'Player stats from many games to estimate a few skill ratings.', question: 'Can all stats fit exactly?', answer: 'no overdetermined' },
+      { emoji: '📊', title: 'Weather Prediction', equation: '', story: 'Meteorologists collect thousands of temperature, pressure, and humidity measurements to estimate just a few weather parameters for their forecast model. With far more measurements than parameters, the system is overdetermined. No single set of parameters perfectly fits all the data, so they use least squares to find the best compromise.', question: 'When thousands of weather measurements are used to estimate a few forecast parameters, what type of system results?', answer: 'overdetermined' },
+      { emoji: '📷', title: 'Photo Enhancement', equation: '', story: 'When you apply a filter to enhance a photo, millions of pixels are adjusted using just a handful of filter parameters. The filter must find the best settings that improve the overall image — this is an overdetermined problem because one set of parameters must satisfy the needs of millions of pixels simultaneously.', question: 'What mathematical technique finds the optimal filter settings when millions of pixels must be adjusted by a few parameters?', answer: 'least squares' },
+      { emoji: '🏀', title: 'Sports Analytics', equation: '', story: 'A sports analyst collects performance statistics from dozens of games to estimate a player\'s true skill rating. Each game provides one equation, but the skill rating is a single number. With many equations for one unknown, the system is overdetermined — the analyst uses least squares to find the skill estimate that best fits all the game data.', question: 'When multiple game statistics are used to estimate a single skill rating, can all the data fit exactly?', answer: 'no overdetermined' },
     ],
     solveExplanation: '3 equations, 2 unknowns → overdetermined. No exact (A,C) works for all three. 1A+1C = 640 ≠ 900. Minimize error instead.'
   },
@@ -621,15 +578,10 @@ const MISSIONS = [
     story: "Three lines: 3A+1C=1200, 1A+2C=1000, 1A+1C=900. In a plane, two lines intersect at one point. A third line may not pass through that point. Each equation is a constraint — too many constraints, no perfect fit! Matrix: [[3,1],[1,2],[1,1]]*[A,C] = [1200,1000,900].",
     goal: 'See geometrically why overdetermined linear systems have no exact solution.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'Why can three lines in a plane NOT all intersect at a single point?',
-    options: [
-      'A third line may miss the intersection of the first two',
-      'Lines are always parallel',
-      'Three lines always meet at one point',
-      'Only curved lines can intersect'
-    ],
-    correct: 0,
+    answerType: 'yesno',
+    prompt: 'Can three lines in a plane always be made to intersect at a single common point?',
+    options: null,
+    correct: 1,
     explanation: 'Two lines intersect at exactly one point (unless parallel). A third random line almost never passes through that same point. So 3 equations in 2 unknowns are usually inconsistent — no solution exists.',
     ggbHint: 'Plot all three lines. The first two cross at one point. Does the third pass through it?',
     ggbSteps: [
@@ -640,14 +592,14 @@ const MISSIONS = [
       'Does the third line pass through the intersection? No!'
     ],
     quiz: [
-      { q: 'Two non-parallel lines in a plane intersect at...', options: ['Exactly one point', 'No points', 'Infinite points', 'Two points'], correct: 0 },
-      { q: 'A third line usually ___ through that intersection.', options: ['does NOT pass', 'always passes', 'is parallel to', 'is the same as'], correct: 0 },
-      { q: 'Can an overdetermined system have an exact solution?', type: 'yesno', correct: 1 }
+      { q: 'Do two non-parallel lines in a plane always intersect at exactly one point?', type: 'yesno', correct: 0 },
+      { q: 'Explain geometrically why a third random line is unlikely to pass through the intersection of the first two.', _isText: true, _keywords: ['intersection', 'point', 'specific', 'coincide', 'unlikely', 'random'] },
+      { q: 'What is the geometric interpretation of an overdetermined system with no solution?', _isText: true, _keywords: ['lines', 'do not meet', 'no common', 'not concurrent', 'inconsistent'] }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Engineering Design', story: 'Bridge must satisfy strength, cost, and weight constraints — often conflicting.', question: 'What do engineers minimize?', answer: 'error' },
-      { emoji: '\uD83D\uDCCB', title: 'Survey Data', story: 'Multiple survey questions to estimate few traits — no perfect fit.', question: 'Overdetermined means?', answer: 'more equations than unknowns' },
-      { emoji: '\uD83C\uDFAF', title: 'Target Practice', story: 'Hitting multiple targets with one shot is impossible — like satisfying all equations.', question: 'What does one shot represent?', answer: 'one solution attempt' },
+      { emoji: '🏗️', title: 'Engineering Design', equation: '', story: 'When designing a bridge, engineers must simultaneously satisfy constraints for strength (must support heavy loads), cost (must stay within budget), and weight (must not be too heavy for the foundations). These three constraints often conflict — making the bridge stronger increases cost. Since no single design perfectly satisfies all three, engineers must find the best compromise by minimising the total error.', question: 'When a bridge must satisfy conflicting strength, cost, and weight constraints, what do engineers do?', answer: 'error' },
+      { emoji: '📋', title: 'Survey Data', equation: '', story: 'A company surveys customers using multiple questions that all try to measure the same underlying satisfaction trait. Each question gives slightly different results because people interpret them differently. With more survey questions than traits to estimate, there is no perfect fit — the analysis must find the best compromise across all the questions.', question: 'What does "overdetermined" mean in the context of survey data analysis?', answer: 'more equations than unknowns' },
+      { emoji: '🎯', title: 'Target Practice', equation: '', story: 'Imagine trying to hit three different targets with a single arrow. Each target requires a slightly different aim direction. Since you can only fire one arrow, you cannot hit all three — you must choose the best compromise aim that comes closest to all targets overall. This is exactly what happens with overdetermined systems.', question: 'In the target practice analogy, what does firing a single arrow represent in mathematical terms?', answer: 'one solution attempt' },
     ],
     solveExplanation: 'Two lines intersect at a point. A third line is unlikely to pass through that same point. → 3 equations in 2 unknowns: usually no solution.'
   },
@@ -671,14 +623,14 @@ const MISSIONS = [
       'After many steps: {417, 583} — steady state!'
     ],
     quiz: [
-      { q: 'What is the steady-state fraction of Happy people?', options: ['5/12 ≈ 41.7%', '1/2 = 50%', '7/12 ≈ 58.3%', '1/3 ≈ 33.3%'], correct: 0 },
-      { q: 'Does the steady state depend on the initial state?', type: 'yesno', correct: 1 },
-      { q: 'Each row of the transition matrix must sum to...', options: ['1', '0', '-1', '0.5'], correct: 0 }
+      { q: 'Does the steady-state distribution of a Markov chain depend on the initial state?', type: 'yesno', correct: 1 },
+      { q: 'Why must each row of a transition matrix sum to exactly 1?', _isText: true, _keywords: ['probability', 'total', '100%', 'all outcomes', 'certain'] },
+      { q: 'Can a Markov chain have more than one steady-state distribution?', type: 'yesno', correct: 1 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCCA', title: 'Employee Mood', story: 'Company tracks Happy/Stressed transitions monthly to predict workforce morale.', question: 'Long-run Happy%?', answer: '41.7%' },
-      { emoji: '\uD83D\uDCF1', title: 'App Users', story: 'Users switch between Free and Premium plans each month.', question: 'What is steady state?', answer: 'long-term distribution' },
-      { emoji: '\uD83D\uDCB1', title: 'Stock Market', story: 'Bull vs Bear market transitions follow a Markov chain.', question: 'Rows sum to?', answer: '1' },
+      { emoji: '📊', title: 'Employee Mood', equation: '', story: 'A company tracks whether employees feel Happy or Stressed each month. Some happy employees become stressed due to workload, and some stressed employees become happy after breaks. By modelling these mood transitions as a matrix and multiplying repeatedly, HR can predict the long-run proportion of happy vs stressed workers — regardless of the starting mood distribution.', question: 'Out of 1000 employees, approximately how many will be Happy in the long run according to the steady-state distribution?', answer: '41.7%' },
+      { emoji: '📱', title: 'App Users', equation: '', story: 'A mobile app tracks users switching between Free and Premium plans each month. Some free users upgrade to Premium for extra features, while some Premium users downgrade when they want to save money. After many months, the proportions stabilise — this is the steady state of the user transition Markov chain.', question: 'In an app\'s Free/Premium user model, what does the steady-state distribution represent?', answer: 'long-term distribution' },
+      { emoji: '🐂', title: 'Stock Market', equation: '', story: 'Financial models track whether the stock market is in a Bull (rising) or Bear (falling) state. Each month, there is a probability of transitioning between states. The transition matrix rows must each sum to 1 because every state must transition to some state — the probabilities of all possible outcomes always add up to 100%.', question: 'Why must each row of a Markov chain transition matrix sum to exactly 1?', answer: '1' },
     ],
     solveExplanation: 'πP=π → [h,s]*[[0.3,0.7],[0.5,0.5]]=[h,s] with h+s=1. Solving: h=5/12≈0.417, s=7/12≈0.583. Out of 1000: ~417 Happy, ~583 Stressed.'
   },
@@ -702,14 +654,14 @@ const MISSIONS = [
       'Values converge to ~{402, 353, 246}!'
     ],
     quiz: [
-      { q: 'What is the steady-state fraction in Apartment?', options: ['353/1000 ≈ 35.3%', '402/1000 ≈ 40.2%', '246/1000 ≈ 24.6%', '1/3 ≈ 33.3%'], correct: 0 },
-      { q: 'How many states does this Markov chain have?', options: ['3', '2', '4', '1'], correct: 0 },
-      { q: 'Is the steady state independent of the starting state?', type: 'yesno', correct: 0 }
+      { q: 'Does the steady-state distribution of a 3-state Markov chain depend on the starting state?', type: 'yesno', correct: 1 },
+      { q: 'Why does a 3-state chain need exactly 3 equations (plus normalization) to find the steady state?', _isText: true, _keywords: ['three', 'unknowns', 'states', 'variables', 'equations'] },
+      { q: 'Can you use repeated matrix multiplication to find the steady state numerically?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83C\uDFD4\uFE0F', title: 'Urban Mobility', story: 'People move between Park, Apartment, and Restaurant daily.', question: 'Long-run Restaurant%?', answer: '24.6%' },
-      { emoji: '\uD83D\uDED2', title: 'Shopping Patterns', story: 'Customers move between Online, Store A, and Store B.', question: 'What does steady state mean?', answer: 'stable market share' },
-      { emoji: '\uD83C\uDF0D', title: 'Epidemiology', story: 'Disease spreads between Susceptible, Infected, Recovered states.', question: 'Markov model predicts?', answer: 'long-term infection rate' },
+      { emoji: '🏔️', title: 'Urban Mobility', equation: '', story: 'People in a city move between three locations daily: the Park (leisure), their Apartment (home), and a Restaurant (dining). Each hour, some people leave the park for the apartment, others head to the restaurant, and so on. By modelling these movements as a 3-state Markov chain and multiplying the transition matrix repeatedly, city planners can predict the long-run crowd distribution at each location.', question: 'According to the steady-state distribution, what percentage of people will end up at the Restaurant in the long run?', answer: '24.6%' },
+      { emoji: '🛒', title: 'Shopping Patterns', equation: '', story: 'Customers in a city shop at three places: Online, Store A, and Store B. Each month, some customers switch between shopping channels based on sales, convenience, and availability. After tracking these transitions over many months, the proportions of customers at each channel stabilise to a steady state — representing the stable market share of each shopping option.', question: 'In a three-channel shopping model, what does the steady-state distribution represent for retailers?', answer: 'stable market share' },
+      { emoji: '🌍', title: 'Epidemiology', equation: '', story: 'Epidemiologists track how a disease spreads through a population using three states: Susceptible (can catch the disease), Infected (currently sick), and Recovered (immune). The transition rates between these states form a Markov chain. By multiplying the transition matrix repeatedly, epidemiologists predict the long-term infection rate in the population.', question: 'What does a Markov chain model predict about the long-term spread of a disease in a population?', answer: 'long-term infection rate' },
     ],
     solveExplanation: 'M=[[0.5,0.5,0.1],[0.3,0.1,0.8],[0.2,0.4,0.1]]. Solving M*v=v with p+a+r=1000: a=353, p=402, r=246. Steady state converges regardless of start.'
   },
@@ -719,15 +671,11 @@ const MISSIONS = [
     story: 'Draw vector [1,1]. Find all vectors [x,y] perpendicular to it: [1,1]·[x,y]=0 → x+y=0 → y=-x. Now generalize: replace [1,1] with [a,b]. For any [a,b], perpendicular vectors satisfy ax+by=0 — a whole line through origin!',
     goal: 'Find perpendicular vectors via dot product = 0.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What is the set of all vectors perpendicular to [1,1]?',
-    options: [
-      'Line y = -x',
-      'Line y = x',
-      'The origin only',
-      'The whole plane'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'Describe the set of all vectors [x,y] perpendicular to [1,1] (i.e., [1,1]·[x,y]=0).',
+    options: null,
+    correct: null,
+    expectedKeywords: ['line', 'y=-x', 'y = -x', 'x+y=0', 'x + y = 0', 'through origin', 'origin'],
     explanation: '[1,1]·[x,y]=0 means x+y=0, so y=-x. This is a line through origin. For any [a,b], the perpendicular set is the line ax+by=0.',
     ggbHint: 'Type: v = (1,1). Then type: w = (x,y). Perpendicular when Dot(v,w)=0. Solve for y.',
     ggbSteps: [
@@ -738,14 +686,14 @@ const MISSIONS = [
       'Try with v = (a,b) — get ax + by = 0.'
     ],
     quiz: [
-      { q: 'Dot product of perpendicular vectors is...', options: ['0', '1', '-1', 'Infinity'], correct: 0 },
-      { q: 'Set of vectors perpendicular to [a,b] is...', options: ['Line ax+by=0', 'Line bx+ay=0', 'Point (0,0)', 'Plane'], correct: 0 },
+      { q: 'Is the dot product of two perpendicular vectors always zero?', type: 'yesno', correct: 0 },
+      { q: 'For a general vector [a,b], what equation describes all vectors perpendicular to it?', _isText: true, _keywords: ['ax+by=0', 'ax + by = 0'] },
       { q: 'Is the zero vector perpendicular to every vector?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Force Analysis', story: 'Perpendicular forces act independently — their dot product is zero.', question: 'Dot product of perpendicular forces?', answer: '0' },
-      { emoji: '\uD83D\uDCF1', title: 'Signal Processing', story: 'Orthogonal signals don\'t interfere — used in WiFi and 5G.', question: 'Orthogonal means?', answer: 'perpendicular' },
-      { emoji: '\uD83E\uDD16', title: 'AI & ML', story: 'Word vectors use orthogonality to represent unrelated concepts.', question: 'Unrelated vectors are?', answer: 'perpendicular' },
+      { emoji: '🏗️', title: 'Force Analysis', equation: '', story: 'When two forces act on an object at right angles to each other — like gravity pulling down and a normal force pushing up from a surface — they are perpendicular. Perpendicular forces are independent: changing one does not affect the other. Mathematically, their dot product is zero, confirming they do not interfere with each other.', question: 'What is the dot product of two perpendicular forces, and what does this tell us about their interaction?', answer: '0' },
+      { emoji: '📱', title: 'Signal Processing', equation: '', story: 'In WiFi and 5G communications, data is transmitted on multiple frequency channels that are designed to be orthogonal (perpendicular) to each other. Because the channels are perpendicular, signals on different channels do not interfere — you can download a file and stream a video simultaneously without them garbling each other.', question: 'What does it mean for communication channels to be orthogonal, and why is this important?', answer: 'perpendicular' },
+      { emoji: '🤖', title: 'AI & ML', equation: '', story: 'In natural language processing, words are represented as vectors in a high-dimensional space. The word "cat" and the word "dog" are similar (close together), while "cat" and "democracy" are unrelated (nearly perpendicular). This orthogonality allows AI models to distinguish between related and unrelated concepts mathematically.', question: 'In word embedding vectors, what does it mean when two word vectors are nearly perpendicular?', answer: 'perpendicular' },
     ],
     solveExplanation: 'Dot product [1,1]·[x,y]=x+y=0 → y=-x. All perpendicular vectors lie on this line through origin.'
   },
@@ -768,14 +716,14 @@ const MISSIONS = [
       'T and S are lines through the origin in different directions.'
     ],
     quiz: [
-      { q: 'Equation x+2y+3z=0 defines a...', options: ['Plane through origin', 'Line through origin', 'Point', 'Sphere'], correct: 0 },
-      { q: 'T={α(1,2,1)} is a...', options: ['Line through origin', 'Plane', 'Point', 'Circle'], correct: 0 },
+      { q: 'Does the equation x+2y+3z=0 define a plane through the origin in R³?', type: 'yesno', correct: 0 },
+      { q: 'How many linearly independent equations are needed to define a line (not a plane) in R³?', _isText: true, _keywords: ['two', '2', 'two equations'] },
       { q: 'Does (2,7,3) satisfy x+2y+3z=0?', type: 'yesno', correct: 1 }
     ],
     realLife: [
-      { emoji: '\u2708\uFE0F', title: 'Flight Paths', story: 'A plane in 3D space models possible flight routes with one constraint.', question: 'How many constraints for a plane?', answer: 'one equation' },
-      { emoji: '\uD83C\uDFD0\uFE0F', title: 'Robotics', story: 'Robot arm positions satisfying one constraint form a plane.', question: 'Degrees of freedom?', answer: '2' },
-      { emoji: '\uD83D\uDDFA\uFE0F', title: 'GPS', story: 'One satellite gives a sphere; intersection of spheres gives position.', question: 'How many satellites for 3D?', answer: '4' },
+      { emoji: '✈️', title: 'Flight Paths', equation: '', story: 'An aeroplane\'s feasible velocity set — all possible directions it can fly — is constrained by weather, airspace rules, and fuel. When there is one linear constraint on the velocity (like a maximum crosswind component), the set of allowed velocities forms a plane in 3D space. The plane represents all valid flight directions under that single constraint.', question: 'How many linear constraints are needed to define a plane in 3D space?', answer: 'one equation' },
+      { emoji: '🤖', title: 'Robotics', equation: '', story: 'A robot arm with two joints can reach positions that satisfy one constraint — for example, the total reach cannot exceed a certain length. The set of all reachable positions satisfying this one constraint forms a surface (a plane or curved surface) in 3D space. The robot has 2 degrees of freedom — it can move in two independent directions on that surface.', question: 'If a robot arm\'s reachable positions satisfy one constraint in 3D, how many degrees of freedom does it have?', answer: '2' },
+      { emoji: '🗺️', title: 'GPS', equation: '', story: 'GPS works by measuring the distance to multiple satellites. Each satellite gives one distance constraint (your position lies on a sphere centred at that satellite). To find your 3D position (latitude, longitude, altitude), you need the intersection of at least 4 spheres — because 3 spheres intersect in a circle, not a single point.', question: 'How many satellites does a GPS receiver need to determine a precise 3D position?', answer: '4' },
     ],
     solveExplanation: '[1,2,3]·[x,y,z]=0 → x+2y+3z=0 → a plane through origin. T and S are lines through origin (1D subspaces).'
   },
@@ -785,14 +733,9 @@ const MISSIONS = [
     story: 'W = {α(1,2,1)+β(2,7,3)} — a plane spanned by two vectors. Now find all (x,y,z) such that EVERY w∈W satisfies w·[x,y,z]=0. That means: (1,2,1)·(x,y,z)=0 AND (2,7,3)·(x,y,z)=0. Solve: x+2y+z=0, 2x+7y+3z=0 → x=y, z=-3x → (x,y,z)=t(1,1,-3). This is the NULL SPACE of the plane!',
     goal: 'Find the null space (perpendicular set) of a 2D plane in 3D.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'The set of vectors perpendicular to EVERY vector in W is a...',
-    options: [
-      'Line through origin',
-      'Plane through origin',
-      'Point (origin)',
-      'The whole space'
-    ],
+    answerType: 'yesno',
+    prompt: 'Is the set of vectors perpendicular to every vector in a 2D plane in R³ a line through the origin?',
+    options: null,
     correct: 0,
     explanation: 'Two independent equations in 3 unknowns give a 1D solution = line through origin. Direction: (1,1,-3). This line is the null space — perpendicular to the entire plane W.',
     ggbHint: 'Type: plane = z = -x-2y. Then type: (1,1,-3). Is it perpendicular to (1,2,1) and (2,7,3)?',
@@ -804,14 +747,14 @@ const MISSIONS = [
       'So (x,y,z) = t*(1,1,-3) — a LINE!'
     ],
     quiz: [
-      { q: 'Two equations in 3 unknowns give how many free variables?', options: ['1', '0', '2', '3'], correct: 0 },
-      { q: 'Null space direction of plane W?', options: ['(1,1,-3)', '(1,2,1)', '(2,7,3)', '(0,0,1)'], correct: 0 },
-      { q: 'Is the null space perpendicular to the plane?', type: 'yesno', correct: 0 }
+      { q: 'When you have 2 independent equations in 3 unknowns, how many free variables remain?', _isText: true, _keywords: ['1', 'one', '1 free'] },
+      { q: 'What is the null space direction of the plane W = span{(1,2,1),(2,7,3)}?', _isText: true, _keywords: ['(1,1,-3)', '1,1,-3'] },
+      { q: 'Is the null space always perpendicular to the plane it is derived from?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE1\uFE0F', title: 'Computer Graphics', story: 'Camera view direction is perpendicular to the image plane (null space).', question: 'View direction = ?', answer: 'null space of plane' },
-      { emoji: '\uD83D\uDCC8', title: 'Data Science', story: 'PCA finds directions (null space) of minimum variance in data.', question: 'PCA finds?', answer: 'perpendicular directions' },
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Structural Engineering', story: 'Forces perpendicular to a beam don\'t affect its length.', question: 'Perpendicular force does?', answer: 'no work' },
+      { emoji: '🛡️', title: 'Computer Graphics', equation: '', story: 'When a 3D scene is rendered on your 2D screen, the camera looks along a specific direction. This viewing direction is perpendicular to the image plane — it is the null space direction of the projection. Objects along this direction are flattened onto the screen, while objects perpendicular to it (sideways) remain visible.', question: 'In 3D rendering, what does the camera\'s viewing direction correspond to mathematically?', answer: 'null space of plane' },
+      { emoji: '📈', title: 'Data Science', equation: '', story: 'Principal Component Analysis (PCA) finds the directions in your data where the variance is highest (the principal components) and where it is lowest. The low-variance directions — the null space of the data\'s structure — represent noise or redundant information that can be safely discarded for dimensionality reduction.', question: 'What does PCA identify as the directions that can be safely discarded?', answer: 'perpendicular directions' },
+      { emoji: '🏗️', title: 'Structural Engineering', equation: '', story: 'When you push on a beam perpendicular to its length (like pressing down on a diving board from the side), you are not stretching or compressing it — you are bending it. Forces in the null space of the beam\'s axial direction do no work along the beam\'s length. They act independently of the stretching forces.', question: 'What happens when a force is applied perpendicular to a beam\'s length — does it stretch the beam?', answer: 'no work' },
     ],
     solveExplanation: 'W = span{(1,2,1),(2,7,3)}. Perpendicular condition: (1,2,1)·(x,y,z)=0 and (2,7,3)·(x,y,z)=0. Solving: x=y, z=-3x → line t*(1,1,-3).'
   },
@@ -834,14 +777,14 @@ const MISSIONS = [
       'So (x,y,z) = t*(1,-2,1) — a line!'
     ],
     quiz: [
-      { q: 'Rank of [[1,2,3],[4,5,6],[7,8,9]]?', options: ['2', '1', '3', '0'], correct: 0 },
-      { q: 'Null space direction vector?', options: ['(1,-2,1)', '(1,2,3)', '(1,1,-3)', '(1,2,1)'], correct: 0 },
-      { q: 'Is null space perpendicular to every row of A?', type: 'yesno', correct: 0 }
+      { q: 'What is the rank of [[1,2,3],[4,5,6],[7,8,9]] and why?', _isText: true, _keywords: ['2', 'rank 2', 'row3', 'redundant'] },
+      { q: 'What is the null space direction vector?', _isText: true, _keywords: ['(1,-2,1)', '1,-2,1'] },
+      { q: 'Is the null space perpendicular to every row of the matrix?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCF7', title: 'Image Compression', story: 'Null space represents image details lost during compression.', question: 'Lost info = ?', answer: 'null space components' },
-      { emoji: '\uD83D\uDD0A', title: 'Audio Filtering', story: 'Noise removal = projecting audio onto subspace orthogonal to null space.', question: 'Null space contains?', answer: 'filtered-out noise' },
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Vibration Analysis', story: 'Null space of stiffness matrix = modes of free vibration.', question: 'Null space = ?', answer: 'zero-energy modes' },
+      { emoji: '📷', title: 'Image Compression', equation: '', story: 'When you compress an image (like saving as JPEG), some fine details are discarded to reduce file size. Mathematically, these discarded details correspond to components in the null space of the compression matrix. The information that lies along null space directions is permanently lost during compression.', question: 'What do the null space components of an image compression matrix represent?', answer: 'null space components' },
+      { emoji: '🔊', title: 'Audio Filtering', equation: '', story: 'When you remove background noise from an audio recording, you are filtering out specific frequency components. The noise lives in the null space of the desired signal — it is orthogonal to the clean audio. By projecting the recording onto the subspace orthogonal to the null space, you isolate the clean signal and discard the noise.', question: 'In audio noise removal, what does the null space of the filtering operation contain?', answer: 'filtered-out noise' },
+      { emoji: '🏗️', title: 'Vibration Analysis', equation: '', story: 'When engineers analyse how a bridge vibrates, they compute the stiffness matrix of the structure. The null space of this matrix represents vibration modes that require zero energy — the structure can move in these patterns without any restoring force. These are called rigid body modes, and they indicate ways the structure can move freely.', question: 'What do the zero-energy modes in the null space of a stiffness matrix represent?', answer: 'zero-energy modes' },
     ],
     solveExplanation: 'A=[[1,2,3],[4,5,6],[7,8,9]] has rank 2. Solving Ax=0: x=z, y=-2z → null space = t*(1,-2,1). Perpendicular to all rows!'
   },
@@ -851,14 +794,9 @@ const MISSIONS = [
     story: "A = [[1,2,3],[4,5,6],[7,8,9]]. Three sets: \u211C={α(1,2,3)+β(4,5,6)+γ(7,8,9)} = ROW SPACE (span of rows). C={α(1,4,7)+β(2,5,8)+γ(3,6,9)} = COLUMN SPACE (span of columns). N={(x,y,z)|x(1,4,7)+y(2,5,8)+z(3,6,9)=0} = NULL SPACE. Observe: every vector in \u211C is perpendicular to every vector in N! This is the FUNDAMENTAL THEOREM of linear algebra.",
     goal: 'Identify row space, column space, and null space; see row space ⟂ null space.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What is the relationship between row space ℛ and null space N?',
-    options: [
-      'They are perpendicular',
-      'They are the same set',
-      'They are parallel',
-      'They are unrelated'
-    ],
+    answerType: 'yesno',
+    prompt: 'Are the row space and null space of any matrix always perpendicular to each other?',
+    options: null,
     correct: 0,
     explanation: 'The Fundamental Theorem: Row space ⟂ Null space. Every row dot every null vector = 0. For A, ℛ=span{(1,2,3),(4,5,6)} and N=span{(1,-2,1)}. Check: (1,2,3)·(1,-2,1)=0, (4,5,6)·(1,-2,1)=0.',
     ggbHint: 'Type: r1=(1,2,3), r2=(4,5,6), n=(1,-2,1). Compute Dot(r1,n) and Dot(r2,n). Both are 0!',
@@ -870,14 +808,14 @@ const MISSIONS = [
       'Together they span ALL of space!'
     ],
     quiz: [
-      { q: 'Dimension of row space of A?', options: ['2', '1', '3', '0'], correct: 0 },
-      { q: 'Row space and null space are...', options: ['Perpendicular', 'Parallel', 'Identical', 'Opposite'], correct: 0 },
-      { q: 'Do row space and null space together span the whole space?', type: 'yesno', correct: 0 }
+      { q: 'What is the dimension of the row space of A = [[1,2,3],[4,5,6],[7,8,9]]?', _isText: true, _keywords: ['2', '2D', 'plane'] },
+      { q: 'Do the row space and null space together span the entire input space?', type: 'yesno', correct: 0 },
+      { q: 'Explain why every row vector must be orthogonal to every null space vector.', _isText: true, _keywords: ['definition', 'Ax=0', 'row times', 'dot product', 'null'] }
     ],
     realLife: [
-      { emoji: '\uD83C\uDFC6', title: 'Recommendation Systems', story: 'Netflix finds user preferences (row space) vs irrelevant patterns (null space).', question: 'Null space = ?', answer: 'irrelevant features' },
-      { emoji: '\uD83D\uDCC8', title: 'Economics', story: 'Input-output models separate growth directions (row space) from equilibrium (null space).', question: 'Equilibrium = ?', answer: 'null space' },
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Control Theory', story: 'Controllable states (row space) vs uncontrollable (null space).', question: 'Controllable = ?', answer: 'row space' },
+      { emoji: '🏆', title: 'Recommendation Systems', equation: '', story: 'Netflix uses matrix factorisation to recommend movies. Your viewing preferences live in the row space of the rating matrix — the meaningful patterns. The null space represents irrelevant features that do not contribute to recommendations. By separating these two subspaces, Netflix can focus on the patterns that actually matter for predicting what you will enjoy.', question: 'In Netflix\'s recommendation algorithm, what does the null space of the rating matrix represent?', answer: 'irrelevant features' },
+      { emoji: '📈', title: 'Economics', equation: '', story: 'Input-output models in economics describe how different sectors of an economy interact. The row space of the interaction matrix represents growth directions — sectors that drive economic expansion. The null space represents equilibrium states — flows that cancel each other out, producing no net change in the economy.', question: 'In an economic input-output model, what does the null space represent?', answer: 'null space' },
+      { emoji: '🏗️', title: 'Control Theory', equation: '', story: 'In control systems, the row space of the system matrix represents controllable states — parts of the system you can influence with your inputs. The null space represents uncontrollable states — aspects of the system that your inputs cannot affect. Good control system design ensures the null space is as small as possible.', question: 'In control theory, which subspace represents the states you can control?', answer: 'row space' },
     ],
     solveExplanation: 'Fundamental Theorem: Row space ⟂ Null space. ℛ=span{(1,2,3),(4,5,6)}, N=span{(1,-2,1)}. Check dot products = 0!'
   },
@@ -887,15 +825,11 @@ const MISSIONS = [
     story: 'B = [[1,2],[2,4]] as a function B:\u211D\u00B2\u2192\u211D\u00B2. Line 2y+x=4: apply B → B*(x,y) = (x+2y, 2x+4y) = (x+2y, 2(x+2y)). Since x+2y=4 → B maps EVERY point on the line to (4,8)! The whole line collapses to a single point! For any k, 2y+x=k maps to (k,2k). Range of B = {t*(1,2)} — a 1D line! B COLLAPSES a dimension!',
     goal: 'See how a singular matrix collapses lines/planes onto lower dimensions.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What shape is the range of B = [[1,2],[2,4]]?',
-    options: [
-      'A line through origin',
-      'A plane',
-      'The whole 2D plane',
-      'A single point'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'What geometric shape is the range (output set) of B = [[1,2],[2,4]]?',
+    options: null,
+    correct: null,
+    expectedKeywords: ['line', 'line through origin', '1D', 'one-dimensional', 't(1,2)'],
     explanation: 'det(B)=0, so B is singular. B maps 2D plane onto a 1D line (direction (1,2)). Any line 2y+x=k maps to point (k,2k). Information along perpendicular direction is LOST — dimension collapses!',
     ggbHint: 'Type: B={{1,2},{2,4}}. Type: B*{4,0} and B*{2,1}. Both points on 2y+x=4 give the same result!',
     ggbSteps: [
@@ -906,14 +840,14 @@ const MISSIONS = [
       'B collapses entire lines to points!'
     ],
     quiz: [
-      { q: 'Determinant of [[1,2],[2,4]]?', options: ['0', '1', '-3', '4'], correct: 0 },
-      { q: 'Range of B is the line through...', options: ['(1,2)', '(2,4)', '(1,0)', '(0,1)'], correct: 0 },
-      { q: 'Does B map distinct lines 2y+x=k to distinct points?', type: 'yesno', correct: 0 }
+      { q: 'What is the determinant of [[1,2],[2,4]]?', _isText: true, _keywords: ['0', 'zero'] },
+      { q: 'Does the matrix [[1,2],[2,4]] map distinct parallel lines to distinct points?', type: 'yesno', correct: 0 },
+      { q: 'Explain why B maps the entire line 2y+x=4 to the single point (4,8).', _isText: true, _keywords: ['collapses', 'same', 'output', 'x+2y=4', 'constant'] }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCF7', title: '3D to 2D Photo', story: 'A camera collapses 3D world onto a 2D image — depth dimension is lost.', question: 'Lost dimension = ?', answer: 'depth' },
-      { emoji: '\uD83D\uDCC8', title: 'Data Compression', story: 'PCA drops low-variance dimensions to compress data with minimal loss.', question: 'Dropped dimensions =?', answer: 'null space' },
-      { emoji: '\uD83C\uDFAF', title: 'Shadow Projection', story: 'A 3D object\'s shadow collapses one dimension — like a singular matrix.', question: 'Collapsed = ?', answer: 'one dimension' },
+      { emoji: '📷', title: '3D to 2D Photo', equation: '', story: 'When you take a photo with your phone camera, the 3D world in front of you is projected onto a flat 2D sensor. Millions of points at different depths in the real world all land on the same spot in the image — the depth dimension is collapsed. This is exactly what a singular matrix does: it maps a higher-dimensional space onto a lower-dimensional one, losing information in the process.', question: 'When a camera collapses 3D onto 2D, which dimension is lost — and what mathematical concept does this represent?', answer: 'depth' },
+      { emoji: '📈', title: 'Data Compression', equation: '', story: 'Principal Component Analysis (PCA) reduces the dimensionality of data by keeping only the directions of highest variance and discarding the rest. The discarded directions form the null space of the compression. Like a singular matrix, PCA collapses many dimensions into fewer ones, sacrificing some detail for efficiency.', question: 'In PCA dimensionality reduction, what mathematical concept represents the directions that are dropped?', answer: 'null space' },
+      { emoji: '🎯', title: 'Shadow Projection', equation: '', story: 'When sunlight casts a shadow of a 3D object onto a flat wall, the shadow is a 2D projection — one dimension (depth relative to the wall) is lost. Every point along the line from the object to the wall produces the same shadow point. This is a physical example of a singular matrix collapsing one dimension.', question: 'When a 3D object casts a 2D shadow, what happens to the depth dimension?', answer: 'one dimension' },
     ],
     solveExplanation: 'B=[[1,2],[2,4]] has det=0. 2y+x=k maps to (k,2k) — lines collapse to points. Range = line t*(1,2). B collapses 2D → 1D.'
   },
@@ -923,15 +857,11 @@ const MISSIONS = [
     story: 'W = { \u03b1(1,2,1) + \u03b2(2,7,3) | \u03b1,\u03b2 \u2208 \u211D }. Plot the two vectors and their span in GeoGebra 3D. What shape does W make? Hint: two non-parallel vectors in 3D sweep out a flat surface through the origin.',
     goal: 'Visualize the span of two vectors as a plane through the origin in 3D.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What geometric object does W = span{(1,2,1), (2,7,3)} represent?',
-    options: [
-      'A plane through the origin',
-      'A line through the origin',
-      'A single point (the origin)',
-      'The entire 3D space'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'What geometric object does W = span{(1,2,1), (2,7,3)} represent in R³?',
+    options: null,
+    correct: null,
+    expectedKeywords: ['plane', 'plane through origin', '2D', 'two-dimensional'],
     explanation: 'Two linearly independent vectors in \u211D\u00B3 span a 2D plane through the origin. W = { \u03b1(1,2,1) + \u03b2(2,7,3) } = all linear combinations = a plane!',
     ggbHint: 'Switch to 3D Graphics. Type: v=(1,2,1) and w=(2,7,3). Then type: Plane(v,w) to see the span.',
     ggbSteps: [
@@ -942,14 +872,14 @@ const MISSIONS = [
       'Drag to rotate the 3D view and see the plane through origin.'
     ],
     quiz: [
-      { q: 'How many dimensions does W have?', options: ['2 (a plane)', '1 (a line)', '0 (a point)', '3 (whole space)'], correct: 0 },
-      { q: 'What is the minimum number of vectors needed to span W?', options: ['2', '1', '3', '0'], correct: 0 },
-      { q: 'Does the origin belong to W?', type: 'yesno', correct: 0 }
+      { q: 'How many linearly independent vectors are needed to span a plane in R³?', _isText: true, _keywords: ['2', 'two'] },
+      { q: 'Does the origin always belong to any span of vectors?', type: 'yesno', correct: 0 },
+      { q: 'If two vectors in R³ are scalar multiples of each other, what does their span produce?', _isText: true, _keywords: ['line', '1D', 'one-dimensional', 'not a plane'] }
     ],
     realLife: [
-      { emoji: '\u2708\uFE0F', title: 'Flight Routes', story: 'A plane\'s feasible velocity set = span of two direction vectors — any combination is possible!', question: 'Span of 2 vectors in 3D?', answer: 'plane' },
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Robotic Arm', story: 'A 2-joint arm spans a plane of reachable positions.', question: 'What does span represent?', answer: 'reachable positions' },
-      { emoji: '\uD83C\uDF0D', title: 'GPS', story: 'Two satellite ranges (spheres) intersect in a circle. Third gives position.', question: 'Two vectors span?', answer: 'plane' },
+      { emoji: '✈️', title: 'Flight Routes', equation: '', story: 'An aeroplane can move in multiple directions simultaneously — forward and sideways, for example. The set of all possible velocity combinations forms a plane (the span of two direction vectors). Any velocity that is a linear combination of these basis directions is achievable. This is why two independent direction vectors span a 2D plane of reachable velocities.', question: 'What does the span of two independent direction vectors in 3D represent for an aeroplane?', answer: 'plane' },
+      { emoji: '🤖', title: 'Robotic Arm', equation: '', story: 'A robotic arm with two joints can reach any position that is a combination of its two joint movements. The first joint sweeps out one direction, the second joint sweeps out another. Together, their span forms a flat surface (a plane) of all reachable positions. Any position on this plane can be achieved by the right combination of joint angles.', question: 'What does the span of two joint movement vectors represent for a robotic arm?', answer: 'reachable positions' },
+      { emoji: '🌍', title: 'GPS', equation: '', story: 'GPS uses distances from satellites to pinpoint your location. Two satellite range measurements (each giving a sphere) intersect in a circle — a 1D curve. Adding a third satellite narrows it down further. The span of two satellite direction vectors forms a plane of possible positions, and each additional satellite constrains it further.', question: 'What geometric shape do the span of two satellite direction vectors define?', answer: 'plane' },
     ],
     solveExplanation: 'W = span{(1,2,1), (2,7,3)} = { \u03b1(1,2,1) + \u03b2(2,7,3) }. Two independent vectors in \u211D\u00B3 always span a plane through the origin!'
   },
@@ -959,15 +889,11 @@ const MISSIONS = [
     story: 'In Q1 (Mission 28), W was a plane through origin. Now find ALL vectors (x,y,z) that are perpendicular to EVERY vector in W. This is the NULL SPACE of W. Every w\u2208W must satisfy w\u00b7(x,y,z)=0, so in particular: (1,2,1)\u00b7(x,y,z)=0 AND (2,7,3)\u00b7(x,y,z)=0.',
     goal: 'Find the line through origin perpendicular to a given plane (the null space).',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'The set of all vectors perpendicular to EVERY vector in W is a...',
-    options: [
-      'Line through origin — the null space direction (1,1,-3)',
-      'Plane through origin',
-      'Single point (origin only)',
-      'The whole 3D space'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'What is the null space direction of W = span{(1,2,1), (2,7,3)}? Find the vector (x,y,z) perpendicular to both.',
+    options: null,
+    correct: null,
+    expectedKeywords: ['(1,1,-3)', '1,1,-3', '(1, 1, -3)', 't(1,1,-3)'],
     explanation: 'Solve: x+2y+z=0 and 2x+7y+3z=0. Subtract 2\u00d7first from second: 3y+z=0 \u2192 z=-3y. Then x+2y-3y=0 \u2192 x=y. So (x,y,z) = t(1,1,-3) — a LINE through origin! This is the null space of the plane W.',
     ggbHint: 'Type: Solve({x+2y+z=0, 2x+7y+3z=0}, {x,y,z}). GeoGebra gives the parametric solution!',
     ggbSteps: [
@@ -978,14 +904,14 @@ const MISSIONS = [
       'All points t(1,1,-3) are perpendicular to the whole plane W!'
     ],
     quiz: [
-      { q: 'Two planes intersect in a...', options: ['Line', 'Point', 'Plane', 'Sphere'], correct: 0 },
-      { q: 'What is the null space direction of W?', options: ['(1,1,-3)', '(1,2,1)', '(2,7,3)', '(1,-2,1)'], correct: 0 },
-      { q: 'Is the null space perpendicular to every vector in W?', type: 'yesno', correct: 0 }
+      { q: 'Do two planes in R³ typically intersect in a line?', type: 'yesno', correct: 0 },
+      { q: 'What is the null space direction of W?', _isText: true, _keywords: ['(1,1,-3)', '1,1,-3'] },
+      { q: 'Is the null space perpendicular to every vector in the plane W?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCF7', title: 'Camera View', story: 'Camera looks along the null space direction perpendicular to the image plane.', question: 'View direction = ?', answer: 'null space of image plane' },
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Structural Forces', story: 'Forces perpendicular to a beam do not stretch it — they are in the null space.', question: 'Null space forces do?', answer: 'no work' },
-      { emoji: '\uD83D\uDCC8', title: 'Data PCA', story: 'PCA finds the null space (low variance directions) orthogonal to main data plane.', question: 'Null space = ?', answer: 'minimum variance' },
+      { emoji: '📷', title: 'Camera View', equation: '', story: 'When a camera takes a photo, it looks along a direction that is perpendicular to the image plane. This viewing direction is the null space of the projection — it is the one direction that gets completely flattened onto the sensor. Everything along this direction collapses to a point, while directions perpendicular to it remain visible.', question: 'What does the camera\'s viewing direction correspond to in terms of the image plane\'s subspaces?', answer: 'null space of image plane' },
+      { emoji: '🏗️', title: 'Structural Forces', equation: '', story: 'When you apply a force perpendicular to a beam (like pushing sideways on a diving board), that force does not stretch or compress the beam along its length. The perpendicular force is in the null space of the beam\'s axial direction — it produces no work along that axis. Only forces aligned with the beam\'s length can stretch or compress it.', question: 'What happens to a beam when a force is applied in the null space of its axial direction?', answer: 'no work' },
+      { emoji: '📈', title: 'Data PCA', equation: '', story: 'PCA finds the principal components of your data — the directions of maximum variance. The null space of the data matrix contains directions of minimum or zero variance. These low-variance directions represent noise or redundant features that can be discarded. PCA separates the signal (row space) from the noise (null space).', question: 'In PCA, what do the low-variance directions in the null space of the data represent?', answer: 'minimum variance' },
     ],
     solveExplanation: '(1,2,1)\u00b7(x,y,z)=0 and (2,7,3)\u00b7(x,y,z)=0 \u2192 x=y, z=-3x \u2192 (x,y,z) = t(1,1,-3). A line through origin perpendicular to the plane W!'
   },
@@ -1008,14 +934,14 @@ const MISSIONS = [
       'So null space = t(1,-2,1) — a line!'
     ],
     quiz: [
-      { q: 'Determinant of [[1,4,7],[2,5,8],[3,6,9]]?', options: ['0', '1', '-1', '3'], correct: 0 },
-      { q: 'Null space direction (x,y,z) = ?', options: ['(1,-2,1)', '(1,2,1)', '(1,1,-3)', '(2,-1,0)'], correct: 0 },
-      { q: 'Does the null space depend on which rows are redundant?', type: 'yesno', correct: 1 }
+      { q: 'What is the determinant of [[1,4,7],[2,5,8],[3,6,9]]?', _isText: true, _keywords: ['0', 'zero'] },
+      { q: 'What is the null space direction?', _isText: true, _keywords: ['(1,-2,1)', '1,-2,1'] },
+      { q: 'Does the null space direction depend on which specific rows are redundant?', type: 'yesno', correct: 1 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCF7', title: 'Image Compression', story: 'JPEG compression discards null-space components to reduce file size.', question: 'What is discarded?', answer: 'null space components' },
-      { emoji: '\uD83D\uDD0A', title: 'Audio Noise', story: 'Audio filters remove noise by projecting onto subspace orthogonal to null space.', question: 'Noise lives in?', answer: 'null space' },
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Vibration', story: 'Null space of stiffness matrix = zero-energy vibration modes.', question: 'Zero-energy modes = ?', answer: 'null space' },
+      { emoji: '📷', title: 'Image Compression', equation: '', story: 'When JPEG compresses an image, it discards components that lie in the null space of the compression transform. These are the fine details and subtle colour variations that the human eye barely notices. By throwing away null-space components, the file size shrinks dramatically while the image still looks almost the same.', question: 'In JPEG image compression, what happens to the components that lie in the null space of the transform?', answer: 'null space components' },
+      { emoji: '🔊', title: 'Audio Noise', equation: '', story: 'Audio filters work by separating the desired signal from unwanted noise. The clean audio lives in a subspace, and the noise lives in a different subspace. By projecting the recording onto the subspace orthogonal to the null space, the filter removes the noise while preserving the speech or music you want to hear.', question: 'In audio filtering, where does the unwanted noise typically live mathematically?', answer: 'null space' },
+      { emoji: '🏗️', title: 'Vibration', equation: '', story: 'When engineers analyse a bridge or building for vibrations, they compute the stiffness matrix. The null space of this matrix contains vibration modes that require zero energy to excite — the structure can摆动freeways without any restoring force. These are called rigid body modes and are critical for understanding structural stability.', question: 'What do the zero-energy vibration modes in the null space of a stiffness matrix represent?', answer: 'zero-energy modes' },
     ],
     solveExplanation: 'A=[[1,4,7],[2,5,8],[3,6,9]]. Solving Ax=0: from first two eqns, y=-2z, x=z \u2192 (x,y,z) = t(1,-2,1). Same null space as before!'
   },
@@ -1025,15 +951,11 @@ const MISSIONS = [
     story: 'With A = [[1,4,7],[2,5,8],[3,6,9]], identify three fundamental subspaces: \u211C = Row Space = span of rows = { \u03b1(1,4,7) + \u03b2(2,5,8) + \u03b3(3,6,9) }, C = Column Space = span of columns = { \u03b1(1,2,3) + \u03b2(4,5,6) + \u03b3(7,8,9) }, N = Null Space = { (x,y,z) | A*(x,y,z) = 0 } = t(1,-2,1). Visualize each set in GeoGebra!',
     goal: 'Identify Row Space, Column Space, and Null Space of A.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'The Row Space \u211C of A is a...',
-    options: [
-      'Plane through origin (2D)',
-      'Line through origin (1D)',
-      'Point (origin)',
-      'The whole 3D space'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'What is the dimension of the Row Space of A = [[1,4,7],[2,5,8],[3,6,9]]?',
+    options: null,
+    correct: null,
+    expectedKeywords: ['2', '2D', 'plane', 'plane through origin'],
     explanation: 'Since det(A)=0, A has rank 2. The row space is a plane through origin (2D), column space is also a plane (2D), and null space is a line (1D). Rank-Nullity: rank + nullity = 3 \u2192 2 + 1 = 3.',
     ggbHint: 'Plot rows as points: (1,4,7), (2,5,8). Plot the plane they span. Plot null direction (1,-2,1).',
     ggbSteps: [
@@ -1044,14 +966,14 @@ const MISSIONS = [
       'Row space plane and null space line are perpendicular!'
     ],
     quiz: [
-      { q: 'Rank of [[1,4,7],[2,5,8],[3,6,9]]?', options: ['2', '1', '3', '0'], correct: 0 },
-      { q: 'Nullity (dimension of null space)?', options: ['1', '2', '0', '3'], correct: 0 },
-      { q: 'Do the row space and column space have the same dimension?', type: 'yesno', correct: 0 }
+      { q: 'What is the rank of [[1,4,7],[2,5,8],[3,6,9]]?', _isText: true, _keywords: ['2', 'rank 2'] },
+      { q: 'What is the nullity (dimension of null space)?', _isText: true, _keywords: ['1', 'one'] },
+      { q: 'Do the row space and column space always have the same dimension?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83C\uDFC6', title: 'Recommendation Systems', story: 'User preferences live in row space; irrelevant patterns (null space) are filtered out.', question: 'Row space = ?', answer: 'user preferences' },
-      { emoji: '\uD83D\uDCC8', title: 'Economics', story: 'Input-output models: reachable outputs = column space.', question: 'Column space = ?', answer: 'reachable outputs' },
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Control Theory', story: 'Controllable states = row space; uncontrollable = null space.', question: 'Uncontrollable = ?', answer: 'null space' },
+      { emoji: '🏆', title: 'Recommendation Systems', equation: '', story: 'Netflix decomposes its user-movie rating matrix into subspaces. The row space captures meaningful user preferences — what genres and styles each user enjoys. The null space captures irrelevant patterns that do not help with recommendations. By focusing on the row space and filtering out the null space, Netflix delivers more accurate personalised suggestions.', question: 'In Netflix\'s recommendation system, which subspace contains the meaningful user preference patterns?', answer: 'user preferences' },
+      { emoji: '📈', title: 'Economics', equation: '', story: 'In economic input-output analysis, the column space of the technology matrix represents all achievable output combinations. If a country\'s industries can produce certain goods, the column space tells you every possible bundle of goods that can be manufactured from available resources and technology.', question: 'In an input-output economic model, what does the column space represent?', answer: 'reachable outputs' },
+      { emoji: '🏗️', title: 'Control Theory', equation: '', story: 'In engineering control systems, the row space of the system matrix represents the states you can control with your inputs. The null space represents states that your inputs cannot influence at all. A well-designed controller minimises the null space so that you can steer the system in as many directions as possible.', question: 'Which subspace represents the uncontrollable states in a control system?', answer: 'null space' },
     ],
     solveExplanation: 'A has rank 2. Row space = plane, Column space = plane, Null space = line t(1,-2,1). rank(2) + nullity(1) = 3 dimensions!'
   },
@@ -1061,14 +983,9 @@ const MISSIONS = [
     story: 'Verify using GeoGebra that every vector in \u211C (Row Space) is perpendicular to every vector in N (Null Space) for A = [[1,4,7],[2,5,8],[3,6,9]]. Take r1=(1,4,7), r2=(2,5,8), n=(1,-2,1). Compute dot products and see!',
     goal: 'Verify the Fundamental Theorem: Row Space \u22a5 Null Space.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What is the dot product (1,4,7)\u00b7(1,-2,1)?',
-    options: [
-      '0 — they are perpendicular!',
-      '1',
-      '-1',
-      '7'
-    ],
+    answerType: 'yesno',
+    prompt: 'Is the dot product (1,4,7)·(1,-2,1) equal to zero, confirming these vectors are perpendicular?',
+    options: null,
     correct: 0,
     explanation: '(1,4,7)\u00b7(1,-2,1) = 1\u00b71 + 4\u00b7(-2) + 7\u00b71 = 1 - 8 + 7 = 0. Similarly (2,5,8)\u00b7(1,-2,1) = 2 - 10 + 8 = 0. Every row is orthogonal to every null space vector. This is the Fundamental Theorem!',
     ggbHint: 'Type: r1=(1,4,7), r2=(2,5,8), n=(1,-2,1). Type: Dot(r1,n) and Dot(r2,n). Both are 0!',
@@ -1080,14 +997,14 @@ const MISSIONS = [
       'Type: Dot(r2, n) — also 0! Row space \u22a5 Null space.'
     ],
     quiz: [
-      { q: 'Dot(1,4,7) with (1,-2,1) = ?', options: ['0', '1', '-8', '7'], correct: 0 },
-      { q: 'If Dot(r,n)=0, r and n are...', options: ['Perpendicular', 'Parallel', 'Same direction', 'Opposite'], correct: 0 },
-      { q: 'Does every row have dot product 0 with every null space vector?', type: 'yesno', correct: 0 }
+      { q: 'What is (1,4,7)·(1,-2,1)? Show your computation.', _isText: true, _keywords: ['0', '1-8+7', '1 - 8 + 7'] },
+      { q: 'If Dot(r,n)=0 for a row r and null vector n, what does this confirm?', _isText: true, _keywords: ['perpendicular', 'orthogonal', 'fundamental theorem'] },
+      { q: 'Does every row of A have dot product 0 with every null space vector?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDDA5', title: 'Computer Graphics', story: 'Orthogonal basis separates light (row space) from shadows (null space) in rendering.', question: 'Orthogonal means?', answer: 'dot product = 0' },
-      { emoji: '\uD83D\uDCF1', title: 'Signal Processing', story: 'Orthogonal Frequency Division Multiplexing (OFDM) uses perpendicular carriers.', question: 'Why orthogonal carriers?', answer: 'no interference' },
-      { emoji: '\uD83E\uDD16', title: 'AI Embeddings', story: 'Word embeddings use orthogonality to separate unrelated concepts.', question: 'Unrelated = ?', answer: 'perpendicular vectors' },
+      { emoji: '🖥️', title: 'Computer Graphics', equation: '', story: 'In 3D rendering, light and shadow are separated using orthogonal bases. Light directions live in the row space of the surface normal matrix, while shadow directions live in the null space. Because these subspaces are perpendicular (dot product = 0), the renderer can compute lighting and shadowing independently without them affecting each other.', question: 'In computer graphics rendering, what does it mean when two subspaces are orthogonal (dot product = 0)?', answer: 'dot product = 0' },
+      { emoji: '📱', title: 'Signal Processing', equation: '', story: 'Orthogonal Frequency Division Multiplexing (OFDM) is the technology behind WiFi and 4G/5G. It splits data across many frequency channels that are mathematically orthogonal to each other. Because the channels are perpendicular, signals on different channels never interfere — your video stream and your neighbour\'s web browsing coexist peacefully.', question: 'Why are orthogonal frequency channels important in WiFi and 5G communications?', answer: 'no interference' },
+      { emoji: '🤖', title: 'AI Embeddings', equation: '', story: 'Modern AI systems represent words, images, and concepts as high-dimensional vectors. Unrelated concepts (like "cat" and "democracy") have nearly perpendicular vectors, while related concepts (like "cat" and "kitten") have similar vectors. This orthogonality allows AI to mathematically distinguish between related and unrelated information.', question: 'In AI word embeddings, what does it mean when two concept vectors are perpendicular?', answer: 'perpendicular vectors' },
     ],
     solveExplanation: '(1,4,7)\u00b7(1,-2,1) = 1-8+7 = 0. (2,5,8)\u00b7(1,-2,1) = 2-10+8 = 0. Fundamental Theorem: Row Space \u22a5 Null Space!'
   },
@@ -1097,15 +1014,11 @@ const MISSIONS = [
     story: 'B = [[1,2],[2,4]] maps \u211D\u00B2 \u2192 \u211D\u00B2. Plot the line 2y + x = 4. For every point on this line, compute B*(x,y) = (x+2y, 2x+4y). Since x+2y=4 on this line, B*(x,y) = (4, 8) for EVERY point on the line! The entire line collapses to a single point!',
     goal: 'See how a singular matrix collapses a whole line to a single point.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What does B = [[1,2],[2,4]] do to the line 2y + x = 4?',
-    options: [
-      'Collapses every point on the line to (4,8)',
-      'Maps the line to another line',
-      'Rotates the line 90 degrees',
-      'Stretches the line into a plane'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'What happens to every point on the line 2y + x = 4 when B = [[1,2],[2,4]] is applied?',
+    options: null,
+    correct: null,
+    expectedKeywords: ['collapse', 'point', '(4,8)', 'same', 'single', '4,8'],
     explanation: 'For any (x,y) on 2y+x=4, B*(x,y) = (x+2y, 2x+4y) = (4, 2\u00d74) = (4,8). The entire line maps to a single point! B loses information along the direction perpendicular to (1,2).',
     ggbHint: 'Type: B={{1,2},{2,4}}. Pick two points on the line 2y+x=4, e.g. (4,0) and (2,1). Apply B to both — same result!',
     ggbSteps: [
@@ -1116,14 +1029,14 @@ const MISSIONS = [
       'B collapses the whole line to a single point!'
     ],
     quiz: [
-      { q: 'Determinant of B = [[1,2],[2,4]]?', options: ['0', '1', '2', '-3'], correct: 0 },
-      { q: 'All points on 2y+x=4 map to...', options: ['(4,8)', '(2,1)', '(1,2)', '(0,0)'], correct: 0 },
-      { q: 'Does a non-singular matrix also collapse lines to points?', type: 'yesno', correct: 1 }
+      { q: 'What is the determinant of B = [[1,2],[2,4]]?', _isText: true, _keywords: ['0', 'zero'] },
+      { q: 'All points on the line 2y+x=4 map to which single output point?', _isText: true, _keywords: ['(4,8)', '4,8'] },
+      { q: 'Does a non-singular matrix (det≠0) also collapse lines to single points?', type: 'yesno', correct: 1 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCF7', title: 'Camera Projection', story: 'A camera collapses the entire 3D world onto a 2D sensor — many points map to one pixel.', question: 'Many 3D points map to?', answer: 'one pixel' },
-      { emoji: '\uD83D\uDCCB', title: 'Data Aggregation', story: 'Summing sales by region collapses many transactions to single totals.', question: 'Aggregation = ?', answer: 'collapsing data' },
-      { emoji: '\uD83C\uDFAF', title: 'Shadow', story: 'A 3D object\'s shadow collapses one dimension — many points share same shadow.', question: 'Shadow collapses?', answer: 'one dimension' },
+      { emoji: '📷', title: 'Camera Projection', equation: '', story: 'When a camera captures a scene, many different 3D points in the real world can land on the exact same 2D pixel in the image. A person standing 2 metres away and a tree 20 metres away might both appear at the same spot in the photo. The camera\'s projection matrix is singular — it maps many 3D points to one pixel, collapsing depth information.', question: 'When many 3D points in the real world map to the same pixel in a photo, what does this tell us about the camera\'s transformation?', answer: 'one pixel' },
+      { emoji: '📋', title: 'Data Aggregation', equation: '', story: 'When a company sums up sales data by region, thousands of individual transactions are collapsed into a single total for each region. This is like applying a singular matrix — many distinct data points are mapped to one aggregate value. Detailed information about individual transactions is lost in the aggregation process.', question: 'When individual sales transactions are summed by region, what mathematical operation is being performed?', answer: 'collapsing data' },
+      { emoji: '🎯', title: 'Shadow', equation: '', story: 'A 3D object casts a 2D shadow on a wall. Many different points on the object — at different depths — all produce the same point on the shadow. The shadow projection is a singular transformation that collapses one dimension. Points that are far apart in 3D can be right on top of each other in the 2D shadow.', question: 'When a 3D object casts a 2D shadow, what happens to points that are at different depths?', answer: 'one dimension' },
     ],
     solveExplanation: 'B=[[1,2],[2,4]] has det=0. On line 2y+x=4: B*(x,y) = (x+2y, 2x+4y) = (4, 8) for ALL points. Whole line collapses to one point!'
   },
@@ -1133,15 +1046,11 @@ const MISSIONS = [
     story: 'Same B = [[1,2],[2,4]]. Now try different lines parallel to 2y+x=4: (i) 2y+x=10, (ii) 2y+x=62, (iii) 2y+x=1800. For each line k, compute B*(x,y) for any (x,y) on the line. What do all points on line 2y+x=k map to?',
     goal: 'Discover that each parallel line collapses to a different point.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'All points on the line 2y + x = k map to what point under B = [[1,2],[2,4]]?',
-    options: [
-      '(k, 2k) — each parallel line collapses to a distinct point',
-      '(0,0) — all lines collapse to origin',
-      '(2k, k)',
-      '(1,2) — all lines collapse to same point'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'Under B = [[1,2],[2,4]], what point does the line 2y + x = k map to?',
+    options: null,
+    correct: null,
+    expectedKeywords: ['(k, 2k)', '(k,2k)', 'k,2k', 'k, 2k'],
     explanation: 'For any (x,y) on 2y+x=k, B*(x,y) = (x+2y, 2x+4y) = (k, 2k). Each distinct k gives a distinct output point (k, 2k). Parallel lines map to different points on the range line!',
     ggbHint: 'Pick points on different lines: (10,0) for k=10, (62,0) for k=62, (1800,0) for k=1800. Apply B to each.',
     ggbSteps: [
@@ -1152,14 +1061,14 @@ const MISSIONS = [
       'Each line 2y+x=k maps to (k, 2k)!'
     ],
     quiz: [
-      { q: 'Line 2y+x=10 maps to which point?', options: ['(10,20)', '(20,10)', '(5,10)', '(10,10)'], correct: 0 },
-      { q: 'Line 2y+x=62 maps to which point?', options: ['(62,124)', '(124,62)', '(31,62)', '(62,62)'], correct: 0 },
-      { q: 'Do different values of k give different output points?', type: 'yesno', correct: 0 }
+      { q: 'What point does the line 2y+x=10 map to under B?', _isText: true, _keywords: ['(10,20)', '10,20'] },
+      { q: 'What point does the line 2y+x=62 map to under B?', _isText: true, _keywords: ['(62,124)', '62,124'] },
+      { q: 'Do different values of k always give different output points?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCC9', title: 'Income Brackets', story: 'Different tax brackets (lines) map to different tax amounts (points) — each bracket is distinct.', question: 'Different k map to?', answer: 'different points' },
-      { emoji: '\uD83D\uDED2', title: 'Pricing Tiers', story: 'Each quantity tier (line) maps to a distinct total price (point).', question: 'Each tier maps to?', answer: 'distinct price' },
-      { emoji: '\uD83C\uDFC3', title: 'Race Times', story: 'Each finishing time band maps to a distinct score in a race.', question: 'Different bands = ?', answer: 'different scores' },
+      { emoji: '📊', title: 'Income Brackets', equation: '', story: 'Tax systems group people into income brackets. Everyone earning between Rs5-10 lakh pays one tax rate, everyone between Rs10-20 lakh pays another. Each bracket (a line of constant tax rate) maps to a distinct tax amount. People in different brackets end up with different tax bills — each bracket maps to a unique output point.', question: 'When different income brackets map to different tax amounts, what does each bracket represent in terms of the transformation?', answer: 'different points' },
+      { emoji: '🛒', title: 'Pricing Tiers', equation: '', story: 'A wholesale supplier offers different pricing tiers: buying 1-10 kg costs Rs100/kg, buying 11-50 kg costs Rs80/kg, and buying 50+ kg costs Rs60/kg. Each quantity tier forms a line, and each line maps to a distinct total price point. Customers in different tiers get different final prices.', question: 'In a tiered pricing system, what does each quantity tier map to?', answer: 'distinct price' },
+      { emoji: '🏃', title: 'Race Times', equation: '', story: 'In a race, finishing times are grouped into bands: under 10 seconds, 10-12 seconds, 12-15 seconds. Each time band maps to a distinct score or ranking. Runners who finish in the same time band get the same score, while different bands produce different scores — each band is mapped to a unique output.', question: 'When race finishing time bands are converted to scores, what does each distinct time band produce?', answer: 'different scores' },
     ],
     solveExplanation: 'For 2y+x=k: B*(x,y) = (x+2y, 2x+4y) = (k, 2k). Each distinct k \u2192 distinct point (k,2k) on the range line t(1,2).'
   },
@@ -1182,14 +1091,14 @@ const MISSIONS = [
       'Null space direction (2,-1), range direction (1,2). Perpendicular!'
     ],
     quiz: [
-      { q: 'Null space direction of [[1,2],[2,4]]?', options: ['(2,-1)', '(1,2)', '(1,-2)', '(2,1)'], correct: 0 },
-      { q: 'Range direction of [[1,2],[2,4]]?', options: ['(1,2)', '(2,-1)', '(1,0)', '(0,1)'], correct: 0 },
-      { q: 'Are null space and range perpendicular?', type: 'yesno', correct: 0 }
+      { q: 'What is the null space direction of [[1,2],[2,4]]?', _isText: true, _keywords: ['(2,-1)', '2,-1', '(-2,1)', '-2,1'] },
+      { q: 'What is the range direction of [[1,2],[2,4]]?', _isText: true, _keywords: ['(1,2)', '1,2'] },
+      { q: 'Are the null space and range of a matrix always perpendicular?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCF7', title: 'Data Compression', story: 'PCA keeps range directions (high variance) and discards null space (low variance).', question: 'Range = ?', answer: 'high variance directions' },
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Mechanical Engineering', story: 'Stiffness matrix: range = deformable modes, null space = rigid body motions.', question: 'Null space = ?', answer: 'rigid body modes' },
-      { emoji: '\uD83D\uDCC8', title: 'Economics', story: 'Input-output: range = achievable outputs, null space = self-canceling flows.', question: 'Self-canceling = ?', answer: 'null space' },
+      { emoji: '📷', title: 'Data Compression', equation: '', story: 'PCA (Principal Component Analysis) keeps the range directions — the directions where data varies the most — and discards the null space directions where data barely changes. This is like keeping the most informative features of your data while throwing away the noise. The range represents high-variance, high-information directions.', question: 'In PCA data compression, what do the range directions of the transformation represent?', answer: 'high variance directions' },
+      { emoji: '🏗️', title: 'Mechanical Engineering', equation: '', story: 'When engineers analyse a mechanical structure, the range of the stiffness matrix represents deformable modes — ways the structure can bend and flex. The null space represents rigid body modes — ways the structure can move as a whole without deforming. Understanding both is essential for predicting how the structure responds to loads.', question: 'In structural analysis, what do the null space modes of the stiffness matrix represent?', answer: 'rigid body modes' },
+      { emoji: '📈', title: 'Economics', equation: '', story: 'In an economic input-output model, the range of the production matrix represents achievable outputs — combinations of goods that the economy can produce. The null space represents self-canceling flows — internal transactions that balance out to zero net output. These cancelling flows are economically irrelevant but mathematically present.', question: 'In an economic input-output model, what do the self-canceling flows in the null space represent?', answer: 'null space' },
     ],
     solveExplanation: 'B=[[1,2],[2,4]]: B*(x,y)=(0,0) \u2192 x+2y=0 \u2192 x=-2y. Null space = t(2,-1). Range = t(1,2). They are perpendicular! Rank 1, nullity 1.'
   },
@@ -1199,15 +1108,11 @@ const MISSIONS = [
     story: 'Putting it all together: B = [[1,2],[2,4]] maps the 2D plane (\u211D\u00B2) onto a 1D line. The null space (direction (2,-1)) has dimension 1 — all vectors along it vanish. The range (direction (1,2)) has dimension 1 — outputs live here. Rank (dimension of range) = 1, Nullity (dimension of null space) = 1. Rank + Nullity = 2 = dimension of input space! This is the Rank-Nullity Theorem!',
     goal: 'Understand that B collapses a dimension: 2D input \u2192 1D output.',
     ggbType: 'graphing',
-    answerType: 'mcq',
+    answerType: 'text',
     prompt: 'Why does B = [[1,2],[2,4]] "collapse a dimension"?',
-    options: [
-      'It maps the 2D plane onto a 1D line — one dimension is lost',
-      'It maps everything to zero',
-      'It rotates the plane',
-      'It reflects the plane'
-    ],
-    correct: 0,
+    options: null,
+    correct: null,
+    expectedKeywords: ['maps', '2D', '1D', 'line', 'rank', 'determinant', 'zero', 'dimension', 'lost'],
     explanation: 'det(B)=0 means B is singular. The null space is 1D (vectors along (2,-1) vanish). The range is 1D (line t*(1,2)). So B takes 2D input \u2192 1D output. One dimension collapses! Rank-Nullity: rank(1) + nullity(1) = input dim(2).',
     ggbHint: 'Compute Range of B: B*{1,0} = (1,2). B*{0,1} = (2,4). Both are multiples of (1,2). Range = line t(1,2). Null space = line t(2,-1).',
     ggbSteps: [
@@ -1218,14 +1123,14 @@ const MISSIONS = [
       'Output has only 1 dimension, not 2. One dimension collapsed!'
     ],
     quiz: [
-      { q: 'Rank of [[1,2],[2,4]]?', options: ['1', '2', '0', '3'], correct: 0 },
-      { q: 'Nullity of [[1,2],[2,4]]?', options: ['1', '2', '0', '3'], correct: 0 },
-      { q: 'Rank + Nullity = ?', options: ['2 = dimension of input space', '1', '3', '0'], correct: 0 }
+      { q: 'What is the rank of [[1,2],[2,4]]?', _isText: true, _keywords: ['1', 'rank 1'] },
+      { q: 'What is the nullity of [[1,2],[2,4]]?', _isText: true, _keywords: ['1', 'nullity 1'] },
+      { q: 'Does rank + nullity always equal the dimension of the input space?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCF7', title: '3D to 2D Photo', story: 'Camera collapses 3D \u2192 2D. The depth dimension is lost (null space of projection).', question: 'Depth = ?', answer: 'null space of camera' },
-      { emoji: '\uD83D\uDCCB', title: 'Data Summary', story: 'Summarizing a table (many columns) into a single score collapses dimensions.', question: 'Collapsing dimensions = ?', answer: 'reducing information' },
-      { emoji: '\uD83E\uDD16', title: 'Neural Networks', story: 'A layer mapping 1000 \u2192 10 neurons collapses 990 dimensions (null space).', question: 'Collapsed dims = ?', answer: 'null space dimensions' },
+      { emoji: '📷', title: '3D to 2D Photo', equation: '', story: 'Your phone camera takes the full 3D world — with length, width, and depth — and flattens it onto a 2D screen. The depth dimension is lost in this process. This is exactly what a singular matrix does: it collapses one dimension. The null space of the camera\'s projection matrix is the depth direction that vanishes.', question: 'When a camera collapses 3D to 2D, which dimension becomes the null space of the projection?', answer: 'null space of camera' },
+      { emoji: '📋', title: 'Data Summary', equation: '', story: 'When you summarise a complex dataset — say, reducing hundreds of survey responses to a single satisfaction score — you are collapsing many dimensions into one. Information is inevitably lost. The dimensions that are discarded form the null space of the summarisation transformation, while the dimension that survives is the range.', question: 'When complex data is reduced to a single summary score, what happens to the information in the discarded dimensions?', answer: 'reducing information' },
+      { emoji: '🤖', title: 'Neural Networks', equation: '', story: 'A neural network layer that maps 1000 input features to 10 output neurons must compress the data by 990 dimensions. Those 990 collapsed dimensions form the null space of the layer\'s weight matrix. The network learns to keep the 10 most informative directions (the range) and discard the rest (the null space).', question: 'When a neural network layer maps 1000 inputs to 10 outputs, how many dimensions are collapsed into the null space?', answer: 'null space dimensions' },
     ],
     solveExplanation: 'B: \u211D\u00B2 \u2192 \u211D\u00B2, det=0. Null space = line t(2,-1) (nullity=1). Range = line t(1,2) (rank=1). Rank+Nullity = 1+1 = 2 = dim(input). One dimension collapses!'
   },
@@ -1235,15 +1140,11 @@ const MISSIONS = [
     story: 'M = [[1,2],[3,6]]. Plot and explain three sets: R = Row Space = span{(1,2),(3,6)} \u2014 linear combos of rows. C = Column Space = span{(1,3),(2,6)} \u2014 linear combos of columns. N = Null Space = {(x,y) | x(1,3)+y(2,6)=0}. Notice: (3,6) = 3(1,2) and (2,6) = 2(1,3) \u2014 both rows and columns are multiples!',
     goal: 'Visualize row space, column space, and null space of a rank-1 matrix.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What dimensions do the row space and column space of M = [[1,2],[3,6]] have?',
-    options: [
-      'Both are 1D lines through origin (rank = 1)',
-      'Both are 2D planes (rank = 2)',
-      'Row space is 1D, column space is 2D',
-      'Both are points at the origin'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'What are the dimensions of the row space and column space of M = [[1,2],[3,6]]?',
+    options: null,
+    correct: null,
+    expectedKeywords: ['1', '1D', 'line', 'both 1', 'rank 1', 'one-dimensional'],
     explanation: 'M has rank 1 because (3,6)=3(1,2) and (2,6)=2(1,3). Row space = line t(1,2). Column space = line t(1,3). Null space solves x+3y=0 from column equation = line t(-3,1) \u2014 all are 1D! Rank 1, nullity 1.',
     ggbHint: 'Type: M={{1,2},{3,6}}. Compute Det(M)=0. Rows: r1=(1,2), r2=(3,6) \u2014 collinear! Columns: c1=(1,3), c2=(2,6) \u2014 also collinear!',
     ggbSteps: [
@@ -1254,14 +1155,14 @@ const MISSIONS = [
       'Solve M*{x,y}={0,0} \u2014 null space = line t(-3,1).'
     ],
     quiz: [
-      { q: 'Rank of [[1,2],[3,6]]?', options: ['1', '2', '0', '3'], correct: 0 },
-      { q: 'Row space direction = ?', options: ['(1,2)', '(1,3)', '(-3,1)', '(3,1)'], correct: 0 },
-      { q: 'Are all three subspaces 1D lines?', type: 'yesno', correct: 0 }
+      { q: 'What is the rank of [[1,2],[3,6]]?', _isText: true, _keywords: ['1', 'rank 1'] },
+      { q: 'What is the row space direction?', _isText: true, _keywords: ['(1,2)', '1,2'] },
+      { q: 'Are all three fundamental subspaces (row space, column space, null space) 1D lines for a rank-1 2×2 matrix?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCF7', title: 'Image Filter', story: 'A rank-1 filter keeps only one pattern \u2014 all other info is lost.', question: 'Rank-1 keeps?', answer: 'one direction' },
-      { emoji: '\uD83D\uDCC8', title: 'Single Factor Model', story: 'Stock returns explained by one factor = rank-1 matrix of covariances.', question: 'Rank-1 means?', answer: 'one factor drives all' },
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Simple Lever', story: 'Force applied along one direction only \u2014 rank-1 mechanical system.', question: 'Rank-1 direction = ?', answer: 'line of action' },
+      { emoji: '📷', title: 'Image Filter', equation: '', story: 'A rank-1 image filter keeps only one pattern from the original image — like preserving only the brightness variation while discarding all colour and texture information. Because the filter matrix has rank 1, it can only extract one direction of information. Everything else is lost in the null space.', question: 'What does a rank-1 filter preserve from the original image, and what does it discard?', answer: 'one direction' },
+      { emoji: '📈', title: 'Single Factor Model', equation: '', story: 'In finance, a single-factor model explains all stock returns using just one underlying factor — like the overall market movement. The covariance matrix of returns has rank 1, meaning all the apparent complexity in stock prices is driven by one common factor. This simplification makes portfolio analysis much more tractable.', question: 'In a single-factor financial model, what does a rank-1 covariance matrix tell us about stock returns?', answer: 'one factor drives all' },
+      { emoji: '🏗️', title: 'Simple Lever', equation: '', story: 'A simple lever applies force along one direction only — the line from the fulcrum to the point of application. The mechanical system has rank 1 because it can only transmit force in that single direction. There is no way to push sideways or twist using a simple lever.', question: 'In a simple lever mechanism, why is the system described by a rank-1 matrix?', answer: 'line of action' },
     ],
     solveExplanation: 'M=[[1,2],[3,6]] has det=0, rank=1. Row space = t(1,3), column space = t(1,2), null space = t(-3,1). All 1D!'
   },
@@ -1271,14 +1172,9 @@ const MISSIONS = [
     story: 'For M = [[1,2],[3,6]], verify that every vector in the row space R is perpendicular to every vector in the null space N. R = line t(1,3), N = line t(-3,1). Compute dot product (1,3)\u00b7(-3,1) and see!',
     goal: 'Verify the Fundamental Theorem for a simple rank-1 matrix.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What is the dot product of row direction (1,3) and null direction (-3,1)?',
-    options: [
-      '0 \u2014 they are perpendicular!',
-      '1',
-      '-3',
-      '10'
-    ],
+    answerType: 'yesno',
+    prompt: 'Is the dot product of row direction (1,3) and null direction (-3,1) equal to zero?',
+    options: null,
     correct: 0,
     explanation: '(1,3)\u00b7(-3,1) = 1\u00b7(-3) + 3\u00b71 = -3 + 3 = 0. The row space and null space are perpendicular lines through origin. This is the Fundamental Theorem for any matrix!',
     ggbHint: 'Type: r=(1,3), n=(-3,1). Compute Dot(r,n) \u2014 result is 0! Plot both vectors \u2014 they look perpendicular.',
@@ -1290,14 +1186,14 @@ const MISSIONS = [
       'This holds for EVERY matrix: R(M) \u22a5 N(M).'
     ],
     quiz: [
-      { q: 'Dot product of (1,3) and (-3,1) = ?', options: ['0', '1', '-9', '10'], correct: 0 },
-      { q: 'R(M) and N(M) are...', options: ['Perpendicular subspaces', 'Parallel lines', 'The same line', 'Unrelated'], correct: 0 },
+      { q: 'Compute (1,3)·(-3,1). What do you get?', _isText: true, _keywords: ['0', '-3+3', '-3 + 3'] },
+      { q: 'Are R(M) and N(M) always perpendicular subspaces?', _isText: true, _keywords: ['yes', 'perpendicular', 'orthogonal', 'fundamental'] },
       { q: 'Is the zero vector in both R(M) and N(M)?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDDA5', title: 'Image Processing', story: 'Signal (row space) and noise (null space) are separated by orthogonality.', question: 'Noise lives in?', answer: 'null space' },
-      { emoji: '\uD83D\uDCF1', title: 'Communications', story: 'Orthogonal channels carry independent signals without interference.', question: 'Orthogonal channels = ?', answer: 'non-interfering' },
-      { emoji: '\uD83E\uDD16', title: 'ML Features', story: 'Relevant features (row space) vs irrelevant (null space) are orthogonal.', question: 'Irrelevant = ?', answer: 'null space features' },
+      { emoji: '🖥️', title: 'Image Processing', equation: '', story: 'In image processing, the useful signal (like edges and shapes) lives in the row space of the transformation matrix, while noise lives in the null space. Because these two subspaces are orthogonal, the signal and noise do not overlap. This orthogonality makes it possible to cleanly separate the signal from the noise by projecting onto the appropriate subspace.', question: 'In image processing, where does the noise typically live relative to the useful signal?', answer: 'null space' },
+      { emoji: '📱', title: 'Communications', equation: '', story: 'In wireless communications, different channels are designed to be orthogonal — their signals are perpendicular in the mathematical sense. This means that even though multiple signals share the same airwaves, they never interfere with each other. Your phone call and your neighbour\'s WiFi coexist because their channels are orthogonal.', question: 'Why are orthogonal channels important in wireless communications?', answer: 'non-interfering' },
+      { emoji: '🤖', title: 'ML Features', equation: '', story: 'In machine learning, relevant features (like the key factors that predict house prices) live in the row space of the data matrix. Irrelevant features (like the colour of the front door) live in the null space. Because these subspaces are orthogonal, the model can identify and keep only the features that actually matter for prediction.', question: 'In machine learning feature selection, what do the irrelevant features correspond to mathematically?', answer: 'null space features' },
     ],
     solveExplanation: '(1,3)\u00b7(-3,1) = -3+3 = 0. R(M) = t(1,3), N(M) = t(-3,1). They are perpendicular! Fundamental Theorem: R(M) \u22a5 N(M).'
   },
@@ -1307,15 +1203,11 @@ const MISSIONS = [
     story: 'For M = [[1,2],[3,6]], find N(M) and N(M\u1d40). N(M) solves M*(x,y) = (0,0) \u2192 x+2y=0, 3x+6y=0 \u2192 x=-2y \u2192 line t(-2,1). N(M\u1d40) solves M\u1d40*(x,y) = (0,0) where M\u1d40 = [[1,3],[2,6]] \u2192 x+3y=0, 2x+6y=0 \u2192 x=-3y \u2192 line t(-3,1). N(M) is perpendicular to R(M)! N(M\u1d40) is perpendicular to C(M)!',
     goal: 'Find and visualize the null spaces of M and its transpose.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What is N(M\u1d40) for M = [[1,2],[3,6]]?',
-    options: [
-      'Line t(-3,1) \u2014 perpendicular to column space of M',
-      'Line t(-2,1) \u2014 same as N(M)',
-      'Line t(1,3) \u2014 same as row space',
-      'The origin only'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'What is N(Mᵀ) for M = [[1,2],[3,6]]? Find the direction of the left null space.',
+    options: null,
+    correct: null,
+    expectedKeywords: ['(-3,1)', '-3,1', 't(-3,1)', 'line', 'perpendicular to column'],
     explanation: 'M\u1d40 = [[1,3],[2,6]]. Solve M\u1d40*(x,y) = (0,0): x+3y=0, 2x+6y=0 \u2192 x=-3y. So N(M\u1d40) = t(-3,1). C(M) = t(1,3). Check orthogonality: (1,3)\u00b7(-3,1) = -3+3 = 0. C(M) \u22a5 N(M\u1d40). Similarly, R(M) = t(1,2), N(M) = t(-2,1). (1,2)\u00b7(-2,1) = -2+2 = 0. R(M) \u22a5 N(M).',
     ggbHint: 'Type: M={{1,2},{3,6}}. Compute MT = Transpose(M) = {{1,3},{2,6}}. Solve(MT*{x,y}={0,0},{x,y}).',
     ggbSteps: [
@@ -1326,14 +1218,14 @@ const MISSIONS = [
       'Check: Dot(column of M, N(M\u1d40)) = 0. Perpendicular!'
     ],
     quiz: [
-      { q: 'N(M) for [[1,2],[3,6]] = ?', options: ['t(-2,1)', 't(-3,1)', 't(1,2)', 't(1,3)'], correct: 0 },
-      { q: 'N(M\u1d40) for [[1,2],[3,6]] = ?', options: ['t(-3,1)', 't(-2,1)', 't(1,3)', 't(1,2)'], correct: 0 },
-      { q: 'Is N(M\u1d40) perpendicular to C(M)?', type: 'yesno', correct: 0 }
+      { q: 'What is N(M) for [[1,2],[3,6]]?', _isText: true, _keywords: ['(-2,1)', '-2,1', 't(-2,1)'] },
+      { q: 'What is N(Mᵀ) for [[1,2],[3,6]]?', _isText: true, _keywords: ['(-3,1)', '-3,1', 't(-3,1)'] },
+      { q: 'Is N(Mᵀ) perpendicular to the column space C(M)?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Control Systems', story: 'N(M) = uncontrollable inputs, N(M\u1d40) = unobservable outputs.', question: 'N(M\u1d40) = ?', answer: 'unobservable outputs' },
-      { emoji: '\uD83D\uDCCA', title: 'Statistics', story: 'N(M) = redundant predictors, N(M\u1d40) = unmeasurable responses.', question: 'What is N(M) in regression?', answer: 'redundant predictors' },
-      { emoji: '\uD83D\uDCF1', title: 'Coding Theory', story: 'Error-correcting codes: N(M) = codewords, N(M\u1d40) = detectable errors.', question: 'N(M\u1d40) detects?', answer: 'errors' },
+      { emoji: '🏗️', title: 'Control Systems', equation: '', story: 'In control engineering, N(M) represents the uncontrollable inputs — disturbances or forces that the controller cannot counteract. N(Mᵀ) represents the unobservable outputs — aspects of the system that the sensors cannot detect. Understanding both null spaces is critical for designing a controller that can actually manage the system.', question: 'In control theory, what does the null space of the transpose matrix N(Mᵀ) represent?', answer: 'unobservable outputs' },
+      { emoji: '📊', title: 'Statistics', equation: '', story: 'In regression analysis, N(M) contains the redundant predictors — variables that are linear combinations of others and provide no new information. N(Mᵀ) contains the unmeasurable responses — outcomes that cannot be predicted from the available data. Identifying these null spaces helps statisticians build cleaner, more interpretable models.', question: 'In regression analysis, what does the null space N(M) of the design matrix represent?', answer: 'redundant predictors' },
+      { emoji: '📱', title: 'Coding Theory', equation: '', story: 'Error-correcting codes use the null space of a parity-check matrix to define valid codewords. N(Mᵀ) helps detect errors — if a received message is not orthogonal to the expected pattern, an error has occurred. This is how QR codes and digital communications detect and correct transmission errors.', question: 'In error-correcting codes, what does the null space of the transpose matrix help detect?', answer: 'errors' },
     ],
     solveExplanation: 'M=[[1,2],[3,6]] has rank 1. N(M)=t(-2,1), N(M\u1d40)=t(-3,1). C(M)=t(1,3) is perpendicular to N(M\u1d40). R(M)=t(1,2) is perpendicular to N(M).'
   },
@@ -1343,14 +1235,9 @@ const MISSIONS = [
     story: 'The four fundamental subspaces for any matrix M satisfy: C(M) \u22a5 N(M\u1d40) and R(M) \u22a5 N(M). Verify these for M = [[1,2],[3,6]]: C(M)=t(1,3), N(M\u1d40)=t(-3,1) \u2014 dot = -3+3 = 0. R(M)=t(1,2), N(M)=t(-2,1) \u2014 dot = -2+2 = 0. Both pairs confirmed orthogonal!',
     goal: 'Verify the four subspace orthogonal relationships.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'C(M) \u22a5 N(M\u1d40) means columns of M are perpendicular to...',
-    options: [
-      'Null space of the transpose \u2014 both dot products = 0',
-      'Null space of M \u2014 same as row space relationship',
-      'Row space of M',
-      'Column space of M\u1d40'
-    ],
+    answerType: 'yesno',
+    prompt: 'Are columns of M always perpendicular to the null space of Mᵀ (C(M) ⊥ N(Mᵀ))?',
+    options: null,
     correct: 0,
     explanation: 'For M=[[1,2],[3,6]]: C(M)=t(1,3), N(M\u1d40)=t(-3,1). Dot = (1,3)\u00b7(-3,1) = -3+3=0. And R(M)=t(1,2), N(M)=t(-2,1). Dot = (1,2)\u00b7(-2,1) = -2+2=0. Both orthogonal pairs confirmed!',
     ggbHint: 'Type columns: c1=(1,3), c2=(2,6). They are collinear. Type nMT = (-3,1). Dot(c1, nMT)=0! Then check R(M) \u22a5 N(M).',
@@ -1362,14 +1249,14 @@ const MISSIONS = [
       'Type: nM = (-2,1) \u2014 N(M) direction. Dot(r, nM)=0! R(M) \u22a5 N(M).'
     ],
     quiz: [
-      { q: 'C(M) is perpendicular to which subspace?', options: ['N(M\u1d40)', 'N(M)', 'R(M)', 'C(M\u1d40)'], correct: 0 },
-      { q: 'R(M) is perpendicular to which subspace?', options: ['N(M)', 'N(M\u1d40)', 'C(M)', 'C(M\u1d40)'], correct: 0 },
-      { q: 'Do the four subspaces form two orthogonal pairs?', type: 'yesno', correct: 0 }
+      { q: 'C(M) is perpendicular to which subspace?', _isText: true, _keywords: ['N(Mᵀ)', 'N(MT)', 'left null', 'null space of transpose'] },
+      { q: 'R(M) is perpendicular to which subspace?', _isText: true, _keywords: ['N(M)', 'null space'] },
+      { q: 'Do the four subspaces always form exactly two orthogonal pairs?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83C\uDFC6', title: 'Signal Processing', story: 'Four subspaces: signal (R), noise (N), measurement (C), ambiguity (N(M\u1d40)).', question: 'Signal space = ?', answer: 'row space' },
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Structural Engineering', story: 'Forces (C) and rigid motions (N(M\u1d40)) are orthogonal in equilibrium.', question: 'Rigid motions = ?', answer: 'N(M\u1d40)' },
-      { emoji: '\uD83D\uDCC8', title: 'Econometrics', story: 'Instrumental variables: instruments (R) are orthogonal to errors (N).', question: 'Instruments \u22a5 ?', answer: 'errors (N)' },
+      { emoji: '🏆', title: 'Signal Processing', equation: '', story: 'In signal processing, the four fundamental subspaces each play a specific role. The row space carries the signal, the null space carries the noise, the column space represents what can be measured, and the left null space represents measurement ambiguity. Understanding all four allows engineers to design systems that cleanly separate signal from noise.', question: 'In the four-subspace framework of signal processing, which subspace contains the useful signal?', answer: 'row space' },
+      { emoji: '🏗️', title: 'Structural Engineering', equation: '', story: 'When analysing a structure under load, forces that can be applied (column space) and the rigid body motions that cannot be resisted (left null space) are orthogonal. This means the structure can freely move in certain directions without any internal stress. The orthogonality between these subspaces is fundamental to understanding structural equilibrium.', question: 'In structural analysis, which subspace contains the rigid body motions that produce no internal stress?', answer: 'N(Mᵀ)' },
+      { emoji: '📈', title: 'Econometrics', equation: '', story: 'In econometric models, instrumental variables (row space) must be orthogonal to the error terms (null space). If they are not orthogonal, the estimates will be biased. This orthogonality condition — R(M) ⊥ N(M) — is not just a mathematical curiosity; it is a practical requirement for getting trustworthy economic estimates.', question: 'In econometrics, what must the instrumental variables be orthogonal to for unbiased estimates?', answer: 'errors (N)' },
     ],
     solveExplanation: 'Four subspaces: C(M) \u22a5 N(M\u1d40) and R(M) \u22a5 N(M). M=[[1,2],[3,6]]: C(M)=t(1,3)\u22a5t(-3,1)=N(M\u1d40). R(M)=t(1,2)\u22a5t(-2,1)=N(M).'
   },
@@ -1380,15 +1267,11 @@ const MISSIONS = [
 
     goal: 'Visualize all four fundamental subspaces of a 3\u00d73 rank-2 matrix.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What is the dimension of N(A\u1d40) for A = [[1,4,7],[2,5,8],[3,6,9]]?',
-    options: [
-      '1 (a line) \u2014 same as N(A)',
-      '2 (a plane)',
-      '0 (origin only)',
-      '3 (whole space)'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'What is the dimension of N(Aᵀ) for A = [[1,4,7],[2,5,8],[3,6,9]]?',
+    options: null,
+    correct: null,
+    expectedKeywords: ['1', '1D', 'line', 'one-dimensional'],
     explanation: 'A\u1d40 = [[1,2,3],[4,5,6],[7,8,9]] has rank 2, nullity 1. N(A\u1d40) = t(1,-2,1). The four subspaces: R(A)=plane (span of rows), C(A)=plane (span of columns), N(A)=line t(1,-2,1), N(A\u1d40)=line t(1,-2,1). R(A) \u22a5 N(A) and C(A) \u22a5 N(A\u1d40). Rank-nullity: rank=2, nullity=1, dim=3.',
     ggbHint: 'Type: A={{1,4,7},{2,5,8},{3,6,9}}. Compute rank with Rank(A)=2. NullSpace(A) and NullSpace(Transpose(A)).',
     ggbSteps: [
@@ -1399,14 +1282,14 @@ const MISSIONS = [
       'Both null spaces are lines in 3D through the origin.'
     ],
     quiz: [
-      { q: 'Rank of A = [[1,4,7],[2,5,8],[3,6,9]]?', options: ['2', '1', '3', '0'], correct: 0 },
-      { q: 'N(A) direction = ?', options: ['(1,-2,1)', '(1,2,1)', '(1,1,-3)', '(2,-1,0)'], correct: 0 },
-      { q: 'Are the four subspaces of A all 1D lines?', type: 'yesno', correct: 1 }
+      { q: 'What is the rank of A = [[1,4,7],[2,5,8],[3,6,9]]?', _isText: true, _keywords: ['2', 'rank 2'] },
+      { q: 'What is the N(A) direction?', _isText: true, _keywords: ['(1,-2,1)', '1,-2,1'] },
+      { q: 'Are all four subspaces of this 3×3 rank-2 matrix either 1D lines or 2D planes?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Circuit Analysis', story: 'Kirchhoff\'s laws: R(A)=loop equations, N(A)=currents satisfying all loops.', question: 'Loop equations = ?', answer: 'row space' },
-      { emoji: '\uD83D\uDCF1', title: 'Networks', story: 'Four subspaces model input-output relations in a communication network.', question: 'C(A) = ?', answer: 'reachable outputs' },
-      { emoji: '\uD83D\uDCC8', title: 'Portfolio Theory', story: 'R(A)=return factors, N(A)=risk-free combinations, C(A)=achievable returns, N(A\u1d40)=pricing kernels.', question: 'Risk-free = ?', answer: 'N(A)' },
+      { emoji: '🏗️', title: 'Circuit Analysis', equation: '', story: 'Kirchhoff\'s voltage law states that the sum of voltages around any loop in a circuit is zero. These loop equations form the row space of the circuit matrix. The currents that satisfy all loop equations simultaneously live in the null space. Understanding both subspaces allows engineers to solve for all currents and voltages in complex circuits.', question: 'In circuit analysis, what do the loop equations from Kirchhoff\'s voltage law correspond to?', answer: 'row space' },
+      { emoji: '📱', title: 'Networks', equation: '', story: 'A communication network has inputs (data sent) and outputs (data received). The four subspaces of the network\'s routing matrix describe the input-output relationships: which inputs can reach which outputs, which inputs are redundant, and which outputs are unreachable. Network designers use this to optimise data flow.', question: 'In a communication network, what does the column space of the routing matrix represent?', answer: 'reachable outputs' },
+      { emoji: '📈', title: 'Portfolio Theory', equation: '', story: 'In portfolio theory, the row space represents return factors that drive asset prices. The null space contains risk-free combinations — portfolios that have zero variance and guaranteed returns. The column space shows achievable returns, and the left null space reveals pricing kernels used to value derivatives.', question: 'In portfolio theory, what does the null space of the return matrix represent?', answer: 'risk-free combinations' },
     ],
     solveExplanation: 'A=[[1,4,7],[2,5,8],[3,6,9]], rank=2. R(A)=plane, C(A)=plane, N(A)=t(1,-2,1), N(A\u1d40)=t(1,-2,1). R(A)\u22a5N(A), C(A)\u22a5N(A\u1d40).'
   },
@@ -1429,14 +1312,14 @@ const MISSIONS = [
       'Type: Z = {{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}} \u2014 rank 0.'
     ],
     quiz: [
-      { q: 'Rank of Identity(4) = ?', options: ['4', '3', '2', '1'], correct: 0 },
-      { q: 'Rank of the zero 4\u00d74 matrix = ?', options: ['0', '4', '1', 'undefined'], correct: 0 },
-      { q: 'Does rank always equal the dimension of the range?', type: 'yesno', correct: 0 }
+      { q: 'What is the rank of Identity(4)?', _isText: true, _keywords: ['4', 'full rank'] },
+      { q: 'What is the rank of the zero 4×4 matrix?', _isText: true, _keywords: ['0', 'zero'] },
+      { q: 'Does rank always equal the dimension of the range (column space)?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Mechanical Systems', story: 'Rank = number of independent degrees of freedom in a mechanism.', question: 'Rank 4 = ?', answer: '4 DOF' },
-      { emoji: '\uD83D\uDCC8', title: 'Data Science', story: 'Rank of data matrix = number of independent features in the dataset.', question: 'Rank = ?', answer: 'independent features' },
-      { emoji: '\uD83C\uDF0D', title: 'Networks', story: 'Rank of adjacency matrix = number of independent paths in a network.', question: 'Rank 0 = ?', answer: 'disconnected nodes' },
+      { emoji: '🏗️', title: 'Mechanical Systems', equation: '', story: 'In a mechanical system with multiple joints and linkages, the rank of the system matrix tells you the number of independent degrees of freedom — how many different ways the mechanism can move. A rank-4 system can move in 4 independent directions, while a rank-1 system is essentially locked into one type of motion.', question: 'In a mechanical system, what does a rank-4 system matrix tell you about the mechanism\'s movement?', answer: '4 DOF' },
+      { emoji: '📈', title: 'Data Science', equation: '', story: 'When you have a dataset with many columns (features), the rank of the data matrix tells you how many truly independent features exist. If you have 10 columns but rank 3, then 7 of those columns are redundant — they can be expressed as combinations of the other 3. The rank reveals the true dimensionality of your data.', question: 'In a dataset with many columns, what does the rank of the data matrix reveal?', answer: 'independent features' },
+      { emoji: '🌍', title: 'Networks', equation: '', story: 'The adjacency matrix of a network (like a social network or road network) has a rank that tells you about the network\'s connectivity. A rank-0 adjacency matrix means all entries are zero — no connections exist between nodes. Higher rank means more independent connection patterns exist in the network.', question: 'What does a rank-0 adjacency matrix tell you about a network?', answer: 'disconnected nodes' },
     ],
     solveExplanation: 'Rank = dim(range). Rank 4: I_4. Rank 3: diag(1,1,1,0). Rank 2: diag(1,1,0,0). Rank 1: diag(1,0,0,0). Rank 0: zero matrix. Range dimension = rank!'
   },
@@ -1446,14 +1329,9 @@ const MISSIONS = [
     story: 'If a linear transformation A : \u211D\u00B3 \u2192 \u211D\u00B3 has a point (a,b,c) in its range, then it also contains the entire line S = { \u03b1(a,b,c) | \u03b1 \u2208 \u211D }. Why? Because A(\u03b1x) = \u03b1A(x) = \u03b1(a,b,c). Since A is linear, scaling the input scales the output. So the range is always a subspace \u2014 closed under scaling!',
     goal: 'Prove that the range contains the entire line through any point in it.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'If (2,4,6) is in the range of A, what else must be in the range?',
-    options: [
-      'All scalar multiples \u03b1(2,4,6) \u2014 the whole line through origin',
-      'Only (2,4,6) itself',
-      'Only the origin',
-      'Any point in the plane'
-    ],
+    answerType: 'yesno',
+    prompt: 'If the vector (2,4,6) is in the range of A, must all scalar multiples α(2,4,6) also be in the range?',
+    options: null,
     correct: 0,
     explanation: 'If (a,b,c) = A(x), then for any \u03b1, A(\u03b1x) = \u03b1A(x) = \u03b1(a,b,c). So the entire line { \u03b1(a,b,c) } is contained in the range. This shows the range is a subspace \u2014 closed under scalar multiplication.',
     ggbHint: 'Pick a matrix, e.g. A={{1,0,0},{0,1,0},{0,0,1}}. Then A*(1,2,3) = (1,2,3). Now compute A*(2,4,6) = 2(1,2,3).',
@@ -1465,14 +1343,14 @@ const MISSIONS = [
       'Any subspace is closed under scaling!'
     ],
     quiz: [
-      { q: 'If v is in range, what about 5v?', options: ['Also in range (by linearity)', 'Only if 5v = v', 'Never in range', 'Depends on the matrix'], correct: 0 },
-      { q: 'Is the range always a subspace?', type: 'yesno', correct: 0 },
-      { q: 'What property of linear maps guarantees this?', options: ['Scalar multiplication: A(\u03b1x) = \u03b1A(x)', 'Addition: A(x+y) = A(x)+A(y)', 'Both', 'Neither'], correct: 0 }
+      { q: 'If v is in the range of A, is 5v also in the range?', type: 'yesno', correct: 0 },
+      { q: 'Is the range of a linear map always a subspace (closed under addition and scaling)?', type: 'yesno', correct: 0 },
+      { q: 'Which property of linear maps guarantees that A(αx) = αA(x)?', _isText: true, _keywords: ['scalar', 'homogeneity', 'multiplication', 'linearity', 'scaling'] }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Amplifier', story: 'Doubling input voltage doubles output \u2014 scaling property of linear systems.', question: 'Double input = ?', answer: 'double output' },
-      { emoji: '\uD83D\uDCF7', title: 'Zoom', story: 'Zooming in on an image scales all coordinates uniformly.', question: 'Scaling = ?', answer: 'multiply all coordinates' },
-      { emoji: '\uD83D\uDCC8', title: 'Economics', story: 'Doubling all inputs doubles all outputs in a linear production model.', question: 'Doubling = ?', answer: 'scaling property' },
+      { emoji: '🏗️', title: 'Amplifier', equation: '', story: 'An audio amplifier takes an input signal and produces a larger output. If you double the input volume, the output also doubles — the amplifier is a linear system. This scaling property means the output is always proportional to the input, which is why amplifiers produce clean, undistorted sound at moderate volumes.', question: 'In a linear amplifier, what happens to the output when you double the input voltage?', answer: 'double output' },
+      { emoji: '📷', title: 'Zoom', equation: '', story: 'When you zoom in on a digital image, every coordinate is multiplied by the same scale factor. If you zoom in by 2x, every point moves twice as far from the origin. This uniform scaling is a linear transformation — it preserves straight lines and the proportional relationships between points.', question: 'When you zoom in on an image, what happens to all the coordinates mathematically?', answer: 'multiply all coordinates' },
+      { emoji: '📈', title: 'Economics', equation: '', story: 'In a linear production model, doubling all inputs (labour, materials, energy) exactly doubles all outputs. This is the scaling property of linear systems. It means the production function has constant returns to scale — a useful simplification for economic modelling, even if real production sometimes has diminishing returns.', question: 'In a linear production model, what happens to outputs when all inputs are doubled?', answer: 'scaling property' },
     ],
     solveExplanation: 'If (a,b,c) = A(x) is in range, then A(\u03b1x) = \u03b1A(x) = \u03b1(a,b,c). So the whole line through (a,b,c) is in range. Range is always a subspace!'
   },
@@ -1482,15 +1360,11 @@ const MISSIONS = [
     story: 'Continuing from Q7: if the range contains points (a,b,c) and (d,e,f), then it also contains T = { \u03b1(a,b,c) + \u03b2(d,e,f) | \u03b1,\u03b2 \u2208 \u211D }. This is because if (a,b,c) = A(x) and (d,e,f) = A(y), then A(\u03b1x+\u03b2y) = \u03b1A(x) + \u03b2A(y) = \u03b1(a,b,c) + \u03b2(d,e,f). The range is closed under addition and scaling \u2014 a subspace!',
     goal: 'Prove that the range contains the span of any two vectors in it.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'If (1,0,0) and (0,1,0) are in the range of A, what else must be in the range?',
-    options: [
-      'The whole xy-plane { \u03b1(1,0,0) + \u03b2(0,1,0) }',
-      'Only the two points themselves',
-      'Only the origin',
-      'The entire 3D space'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'If (1,0,0) and (0,1,0) are both in the range of A, what larger set must also be in the range?',
+    options: null,
+    correct: null,
+    expectedKeywords: ['plane', 'span', 'combination', 'linear', 'xy-plane', 'all of', 'every'],
     explanation: 'If (1,0,0)=A(x) and (0,1,0)=A(y), then for any \u03b1,\u03b2: A(\u03b1x+\u03b2y) = \u03b1(1,0,0)+\u03b2(0,1,0). So the entire span (the xy-plane) is contained in the range. The range is always a subspace \u2014 closed under linear combinations!',
     ggbHint: 'Use a matrix whose range you know, e.g. A={{1,0,0},{0,1,0},{0,0,0}}. Range is the xy-plane. Pick any two points and take combinations.',
     ggbSteps: [
@@ -1501,14 +1375,14 @@ const MISSIONS = [
       'Any combination \u03b1(1,0,0)+\u03b2(0,1,0) is in range.'
     ],
     quiz: [
-      { q: 'If v and w are in range, is v + w also in range?', type: 'yesno', correct: 0 },
-      { q: 'The span of two linearly independent vectors in \u211D\u00B3 is a...', options: ['Plane', 'Line', 'Point', 'Cube'], correct: 0 },
-      { q: 'What property guarantees v+w is in range?', options: ['Additivity: A(x+y) = A(x)+A(y)', 'Scalar multiplication', 'Both', 'Neither'], correct: 2 }
+      { q: 'If v and w are in the range of A, is v + w also in the range?', type: 'yesno', correct: 0 },
+      { q: 'The span of two linearly independent vectors in R³ is a...', _isText: true, _keywords: ['plane', '2D', 'two-dimensional'] },
+      { q: 'Which property of linear maps guarantees that A(x+y) = A(x)+A(y)?', _isText: true, _keywords: ['additivity', 'addition', 'superposition', 'linearity'] }
     ],
     realLife: [
-      { emoji: '\uD83C\uDF08', title: 'Color Mixing', story: 'If red and blue are achievable colors, any linear combination (purple shades) is also achievable.', question: 'Color mixing = ?', answer: 'span of colors' },
-      { emoji: '\uD83C\uDFB5', title: 'Sound Synthesis', story: 'If two frequencies are producible, any weighted mix is also producible.', question: 'Freq mix = ?', answer: 'linear combination' },
-      { emoji: '\uD83C\uDFA8', title: 'Graphics', story: 'If two basis colors exist, any color in their span can be rendered.', question: 'Color space = ?', answer: 'span of basis colors' },
+      { emoji: '🌈', title: 'Color Mixing', equation: '', story: 'If you can produce pure red light and pure blue light, then you can produce any shade of purple by mixing them in different proportions. The span of red and blue gives you the entire purple colour gamut. This is the spanning property of linear systems — any combination of achievable outputs is also achievable.', question: 'If red and blue are achievable colours, what does their span represent in terms of achievable colours?', answer: 'span of colors' },
+      { emoji: '🎵', title: 'Sound Synthesis', equation: '', story: 'If a synthesiser can produce two pure tones (sine waves at different frequencies), it can produce any weighted combination of those tones. By adjusting the volume of each tone, you create complex sounds. The span of the two base frequencies gives you an entire family of possible sounds.', question: 'When two sound frequencies can be combined in any proportion, what mathematical concept describes the set of all possible sounds?', answer: 'linear combination' },
+      { emoji: '🎨', title: 'Graphics', equation: '', story: 'In computer graphics, if a display can produce three basis colours (red, green, blue), then any colour in their span can be rendered on screen. The entire visible colour gamut of the display is the span of these three basis vectors. Mixing them in different proportions creates millions of colours.', question: 'What mathematical concept describes the full range of colours a display can produce from its RGB basis?', answer: 'span of basis colors' },
     ],
     solveExplanation: 'If v=A(x), w=A(y) in range, then A(\u03b1x+\u03b2y) = \u03b1v+\u03b2w. So span{v,w} \u2286 range. Range is a subspace \u2014 closed under linear combinations!'
   },
@@ -1518,15 +1392,11 @@ const MISSIONS = [
     story: 'S = { \u03b1(a,b,c) } always has dimension 1 \u2014 it is a line through the origin. But T = { \u03b1(a,b,c) + \u03b2(d,e,f) } does NOT always have dimension 2. If (a,b,c) and (d,e,f) are linearly dependent (one is a multiple of the other), T is just a line (dim 1). Show both cases in GeoGebra: (i) T is a plane (dim 2) when vectors are independent, (ii) T is a line (dim 1) when they are dependent.',
     goal: 'Understand that span dimension depends on linear independence.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What is the dimension of T = span{(1,2,3), (2,4,6)}?',
-    options: [
-      '1 \u2014 (2,4,6) = 2(1,2,3), so they are dependent',
-      '2 \u2014 they are independent',
-      '0 \u2014 both are zero',
-      '3 \u2014 they span the whole space'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'What is the dimension of T = span{(1,2,3), (2,4,6)}? Explain why.',
+    options: null,
+    correct: null,
+    expectedKeywords: ['1', 'dependent', 'multiple', 'collinear', 'same line', '1D'],
     explanation: '(2,4,6) = 2(1,2,3), so the two vectors are linearly dependent. T = span{(1,2,3)} = line (dim 1). For a plane (dim 2), you need two linearly independent vectors like (1,0,0) and (0,1,0). The dimension of a span equals the number of linearly independent vectors.',
     ggbHint: 'Plot v=(1,2,3) and w=(2,4,6). They lie on the same line through origin. Now plot v=(1,0,0) and w=(0,1,0) \u2014 they define a plane.',
     ggbSteps: [
@@ -1539,12 +1409,12 @@ const MISSIONS = [
     quiz: [
       { q: 'Are (1,2,3) and (2,4,6) linearly independent?', type: 'yesno', correct: 1 },
       { q: 'Are (1,0,0) and (0,1,0) linearly independent?', type: 'yesno', correct: 0 },
-      { q: 'Dimension of span of two dependent vectors = ?', options: ['1', '2', '0', '3'], correct: 0 }
+      { q: 'What is the dimension of span of two linearly dependent vectors?', _isText: true, _keywords: ['1', 'one', 'line', '1D'] }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Redundant Sensors', story: 'Two sensors giving the same reading = dependent \u2014 only 1 independent measurement.', question: 'Dependent sensors = ?', answer: 'redundant info' },
-      { emoji: '\uD83D\uDCCA', title: 'Survey Questions', story: 'Two questions that always get same answer = linearly dependent.', question: 'Dependent questions = ?', answer: 'same info' },
-      { emoji: '\uD83D\uDCF1', title: 'Music', story: 'Two instruments playing the same note in unison = dependent sound.', question: 'Unison = ?', answer: 'linearly dependent' },
+      { emoji: '🏗️', title: 'Redundant Sensors', equation: '', story: 'Imagine two temperature sensors in a room that always give the same reading because they are placed right next to each other. These two sensors are linearly dependent — one provides no information beyond what the other already tells you. Only one independent measurement exists, even though you have two sensors. The second sensor is redundant.', question: 'When two sensors always give the same reading, what does this mean in terms of linear independence?', answer: 'redundant info' },
+      { emoji: '📊', title: 'Survey Questions', equation: '', story: 'In a customer satisfaction survey, if two questions always receive the same answers (like "How satisfied are you?" and "How happy are you?"), they are linearly dependent. One question adds no new information. A good survey avoids dependent questions to keep the questionnaire short while capturing maximum information.', question: 'When two survey questions always get the same answers, what mathematical relationship exists between them?', answer: 'same info' },
+      { emoji: '🎵', title: 'Music', equation: '', story: 'When two instruments play the exact same note in unison, their sound waves are identical — they are linearly dependent. You cannot distinguish one from the other by listening. Only one independent sound exists, even though two instruments are playing. To hear two different notes, the instruments must play different (independent) frequencies.', question: 'When two instruments play the same note in unison, what is their mathematical relationship?', answer: 'linearly dependent' },
     ],
     solveExplanation: 'S = \u03b1(a,b,c) always has dim 1. T = span{v,w}: if w = cv (dependent) then dim=1; if independent then dim=2. Dimension = number of linearly independent vectors!'
   },
@@ -1554,15 +1424,11 @@ const MISSIONS = [
     story: 'For ANY matrix A (size m\u00d7n), four subspaces define its behavior: R(A) = Row Space = span of rows (in \u211D\u207F). C(A) = Column Space = span of columns (in \u211D\u1D40). N(A) = Null Space = {x | Ax=0} (in \u211D\u207F). N(A\u1d40) = Left Null Space = {y | A\u1d40y=0} (in \u211D\u1D40). Review with A = [[1,2],[3,6]]: R(A) = t(1,3), C(A) = t(1,2), N(A) = t(-2,1), N(A\u1d40) = t(-3,1).',
     goal: 'See the complete map of the four fundamental subspaces.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'For A = [[1,2],[3,6]], which subspace lives in \u211D\u00B2 (same space as the input)?',
-    options: [
-      'Both R(A) and N(A) \u2014 they are in the input space',
-      'Both C(A) and N(A\u1d40) \u2014 they are in the output space',
-      'Only R(A) \u2014 it is in the input space',
-      'Only N(A) \u2014 it is in the input space'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'For A = [[1,2],[3,6]], which two subspaces live in the input space Rⁿ?',
+    options: null,
+    correct: null,
+    expectedKeywords: ['R(A)', 'N(A)', 'row space', 'null space', 'row', 'null'],
     explanation: 'R(A) \u2282 \u211D\u207F (input space) and N(A) \u2282 \u211D\u207F (input space). C(A) \u2282 \u211D\u1D40 (output space) and N(A\u1d40) \u2282 \u211D\u1D40 (output space). R(A) and N(A) are perpendicular subspaces of \u211D\u207F. C(A) and N(A\u1d40) are perpendicular subspaces of \u211D\u1D40. Together they form the complete picture!',
     ggbHint: 'For any matrix A, use GeoGebra to find: NullSpace(A) gives N(A). NullSpace(Transpose(A)) gives N(A\u1d40). Rank(A) gives dimension of R(A) and C(A).',
     ggbSteps: [
@@ -1573,14 +1439,14 @@ const MISSIONS = [
       'R(A) \u22a5 N(A) in input space, C(A) \u22a5 N(A\u1d40) in output space.'
     ],
     quiz: [
-      { q: 'R(A) and N(A) live in...', options: ['Input space (\u211D\u207F)', 'Output space (\u211D\u1D40)', 'Different spaces', 'Nowhere'], correct: 0 },
-      { q: 'C(A) and N(A\u1d40) live in...', options: ['Output space (\u211D\u1D40)', 'Input space (\u211D\u207F)', 'Different spaces', 'Nowhere'], correct: 0 },
-      { q: 'Do R(A) and N(A) span the entire input space?', type: 'yesno', correct: 0 }
+      { q: 'R(A) and N(A) live in which space?', _isText: true, _keywords: ['input', 'Rⁿ', 'domain', 'domain of A'] },
+      { q: 'C(A) and N(Aᵀ) live in which space?', _isText: true, _keywords: ['output', 'Rᵐ', 'codomain', 'range of A'] },
+      { q: 'Do R(A) and N(A) together span the entire input space?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'System Design', story: 'Inputs decompose into controllable (R) and uncontrollable (N) components.', question: 'Controllable = ?', answer: 'row space' },
-      { emoji: '\uD83D\uDCF1', title: 'Communications', story: 'Outputs decompose into signal (C) and noise (N\u1d40) at the receiver.', question: 'Signal = ?', answer: 'column space' },
-      { emoji: '\uD83D\uDCC8', title: 'Data Science', story: 'PCA projects data onto R(A) (signal) and discards N(A) (noise).', question: 'Discarded = ?', answer: 'null space' },
+      { emoji: '🏗️', title: 'System Design', equation: '', story: 'When designing an engineering system, the inputs can be decomposed into two parts: the controllable components (row space) that your design can influence, and the uncontrollable components (null space) that are beyond your reach. A good design maximises the row space — making as many inputs controllable as possible — while minimising the null space.', question: 'In system design, which subspace contains the inputs that your design can actually control?', answer: 'row space' },
+      { emoji: '📱', title: 'Communications', equation: '', story: 'When a signal is transmitted through a communication channel, the output received is a mixture of the actual signal (column space) and unavoidable noise (left null space). The receiver must separate these two components to extract the original message. The orthogonality between column space and left null space makes this separation possible.', question: 'At the receiver end of a communication channel, which subspace contains the useful signal?', answer: 'column space' },
+      { emoji: '📈', title: 'Data Science', equation: '', story: 'PCA (Principal Component Analysis) decomposes your data into signal (the row space — high-variance directions worth keeping) and noise (the null space — low-variance directions to discard). This decomposition is the practical application of the four-subspace framework: keep what matters, discard what does not.', question: 'In PCA, which subspace contains the noise and redundant information that should be discarded?', answer: 'null space' },
     ],
     solveExplanation: 'Four subspaces: R(A), N(A) in input space \u211D\u207F; C(A), N(A\u1d40) in output space \u211D\u1D40. R \u22a5 N and C \u22a5 N\u1d40. Dimensions: rank + nullity = n.'
   },
@@ -1590,14 +1456,9 @@ const MISSIONS = [
     story: 'Verify all orthogonal relationships for A = [[1,4,7],[2,5,8],[3,6,9]] using GeoGebra. Check: (i) R(A) \u22a5 N(A) \u2014 dot product of every row with every null vector = 0. (ii) C(A) \u22a5 N(A\u1d40) \u2014 dot product of every column with every left null vector = 0. These are not optional \u2014 they always hold for ANY matrix!',
     goal: 'Verify the two orthogonal pairs for a 3\u00d73 rank-2 matrix.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What is Dot((1,4,7), (1,-2,1)) where (1,4,7) is a row and (1,-2,1) is the null space direction?',
-    options: [
-      '0 \u2014 they are perpendicular',
-      '1',
-      '-1',
-      '8'
-    ],
+    answerType: 'yesno',
+    prompt: 'Is the dot product (1,4,7)·(1,-2,1) equal to zero, confirming the row space is perpendicular to the null space?',
+    options: null,
     correct: 0,
     explanation: '(1,4,7)\u00b7(1,-2,1) = 1-8+7 = 0. (2,5,8)\u00b7(1,-2,1) = 2-10+8 = 0. R(A) \u22a5 N(A). Similarly, columns (1,2,3)\u00b7(1,-2,1) = 1-4+3 = 0. C(A) \u22a5 N(A\u1d40). These always hold!',
     ggbHint: 'Type rows: r1=(1,4,7), r2=(2,5,8). Type null direction n=(1,-2,1). Dot(r1,n) and Dot(r2,n) both = 0.',
@@ -1609,14 +1470,14 @@ const MISSIONS = [
       'Type: Dot(c1,n) = 0, Dot(c2,n) = 0 \u2014 C(A) \u22a5 N(A\u1d40).'
     ],
     quiz: [
-      { q: 'Dot product of (1,4,7) and (1,-2,1) = ?', options: ['0', '1', '-2', '8'], correct: 0 },
-      { q: 'Dot product of (4,5,6) and (1,-2,1) = ?', options: ['0', '4-10+6=0', '3', '-3'], correct: 0 },
-      { q: 'Are the two orthogonal pairs always true for any matrix?', type: 'yesno', correct: 0 }
+      { q: 'Compute (1,4,7)·(1,-2,1).', _isText: true, _keywords: ['0', '1-8+7', '1 - 8 + 7'] },
+      { q: 'Compute (4,5,6)·(1,-2,1).', _isText: true, _keywords: ['0', '4-10+6', '4 - 10 + 6'] },
+      { q: 'Are these two orthogonal pairs always true for any matrix?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE1\uFE0F', title: 'Image Restoration', story: 'Decompose a blurry image: signal in R(A), noise in N(A). Orthogonal means they don\'t mix!', question: 'Signal \u22a5 Noise means?', answer: 'independent components' },
-      { emoji: '\uD83D\uDCF1', title: 'Wireless Channels', story: 'Orthogonal frequency channels carry data without interference.', question: 'Why orthogonal?', answer: 'no interference' },
-      { emoji: '\uD83E\uDD16', title: 'AI Features', story: 'Orthogonal feature representations capture independent aspects of data.', question: 'Orthogonal = ?', answer: 'independent information' },
+      { emoji: '🛡️', title: 'Image Restoration', equation: '', story: 'When restoring a degraded image, the clean signal lives in the row space of the degradation matrix, and the noise lives in the null space. Because these subspaces are orthogonal (perpendicular), they do not overlap. This orthogonality is what makes it mathematically possible to separate the signal from the noise and restore the original image.', question: 'When signal and noise are in orthogonal subspaces, what does this mean for image restoration?', answer: 'independent components' },
+      { emoji: '📱', title: 'Wireless Channels', equation: '', story: 'Modern wireless standards like WiFi 6 and 5G use orthogonal frequency channels to carry data. Because the channels are perpendicular (dot product = 0), multiple data streams can share the same airwaves without interfering. Your phone can download a file while streaming music because the channels are mathematically independent.', question: 'Why are orthogonal frequency channels critical for modern wireless communications?', answer: 'no interference' },
+      { emoji: '🤖', title: 'AI Features', equation: '', story: 'In modern AI, feature representations are designed to be orthogonal — each feature captures an independent aspect of the data. For example, in face recognition, one feature might encode face shape while another encodes skin tone. Orthogonality ensures these features do not redundantly capture the same information.', question: 'When AI features are orthogonal to each other, what does this tell us about the information they capture?', answer: 'independent information' },
     ],
     solveExplanation: 'R(A) \u22a5 N(A): every row dot every null vector = 0. C(A) \u22a5 N(A\u1d40): every column dot every left null vector = 0. Always true for any matrix!'
   },
@@ -1640,14 +1501,14 @@ const MISSIONS = [
       'Rank + Nullity = number of columns. Always!'
     ],
     quiz: [
-      { q: 'Rank + Nullity = ?', options: ['Number of columns (n)', 'Number of rows (m)', 'min(m,n)', 'max(m,n)'], correct: 0 },
-      { q: 'For B = [[1,2],[2,4]], rank + nullity = ?', options: ['2', '1', '3', '0'], correct: 0 },
+      { q: 'Rank + Nullity = ? (in terms of matrix dimensions)', _isText: true, _keywords: ['n', 'columns', 'number of columns'] },
+      { q: 'For B = [[1,2],[2,4]], what is rank + nullity?', _isText: true, _keywords: ['2', 'two'] },
       { q: 'Does rank + nullity always equal the number of columns?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Degrees of Freedom', story: 'Rank = number of independent inputs; nullity = number of redundant constraints.', question: 'Redundancies = ?', answer: 'nullity' },
-      { emoji: '\uD83D\uDCCA', title: 'Statistics', story: 'In regression, rank = independent predictors; nullity = collinear predictors.', question: 'Collinear = ?', answer: 'null space' },
-      { emoji: '\uD83D\uDCF1', title: 'Coding Theory', story: 'Rank = message bits; nullity = parity check bits in error correction.', question: 'Parity bits = ?', answer: 'nullity' },
+      { emoji: '🏗️', title: 'Degrees of Freedom', equation: '', story: 'In a mechanical system, the rank tells you the number of independent degrees of freedom — how many ways the system can move. The nullity tells you the number of redundant constraints — equations that do not add new information. Together, rank + nullity equals the total number of variables, giving you the complete picture of the system\'s freedom.', question: 'In a mechanical system, what does the nullity (dimension of the null space) represent?', answer: 'redundancies' },
+      { emoji: '📊', title: 'Statistics', equation: '', story: 'In regression analysis, the rank of the design matrix tells you how many independent predictors you actually have. The nullity tells you how many predictors are collinear — they are redundant because they can be expressed as combinations of others. A good model keeps the rank high and the nullity low.', question: 'In regression, what do collinear predictors correspond to in terms of the null space?', answer: 'null space' },
+      { emoji: '📱', title: 'Coding Theory', equation: '', story: 'In error-correcting codes, the rank of the generator matrix tells you how many independent message bits can be encoded. The nullity tells you how many parity check bits are added for error detection. The balance between rank and nullity determines the code\'s ability to detect and correct errors.', question: 'In error-correcting codes, what do the parity check bits correspond to in terms of rank and nullity?', answer: 'nullity' },
     ],
     solveExplanation: 'Rank-Nullity: rank(A) + nullity(A) = n (columns). A=[[1,2,3],[4,5,6],[7,8,9]]: rank=2, nullity=1, n=3. Always check with GeoGebra!'
   },
@@ -1657,15 +1518,11 @@ const MISSIONS = [
     story: 'Given M = [[2,4],[1,2],[3,6]] (3\u00d72 matrix). Find ALL four subspaces using GeoGebra: R(M), C(M), N(M), N(M\u1d40). What are their dimensions? How are they related? Hint: M has rank 1 (all rows are multiples of (1,2), all columns are multiples of (2,1,3)\u1d40).',
     goal: 'Apply the full four-subspace analysis to a new matrix.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What is the dimension of N(M) for M = [[2,4],[1,2],[3,6]]?',
-    options: [
-      '1 \u2014 nullity = n - rank = 2 - 1 = 1',
-      '0 \u2014 matrix is invertible',
-      '2 \u2014 everything maps to zero',
-      '3 \u2014 all vectors are in null space'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'What is the dimension of N(M) for M = [[2,4],[1,2],[3,6]]? (3×2 matrix with rank 1)',
+    options: null,
+    correct: null,
+    expectedKeywords: ['1', '1D', 'line', 'one-dimensional', 'nullity'],
     explanation: 'M is 3\u00d72, rank 1 (all rows multiples of (1,2)). Nullity = n - rank = 2 - 1 = 1. N(M) = t(-2,1). R(M) = t(1,2) in \u211D\u00B2. C(M) = t(2,1,3) in \u211D\u00B3. N(M\u1d40) = solutions to M\u1d40y=0 \u2014 a plane in \u211D\u00B3 (dimension 2). Check: C(M) \u22a5 N(M\u1d40) and R(M) \u22a5 N(M).',
     ggbHint: 'Type: M={{2,4},{1,2},{3,6}}. Rank(M)=1. Solve(M*{x,y}={0,0}) for N(M). Solve(Transpose(M)*{x,y,z}={0,0,0}) for N(M\u1d40).',
     ggbSteps: [
@@ -1676,14 +1533,14 @@ const MISSIONS = [
       'R(M) = t(1,2) in \u211D\u00B2, C(M) = t(2,1,3) in \u211D\u00B3, N(M) = t(-2,1), N(M\u1d40) = plane.'
     ],
     quiz: [
-      { q: 'Rank of 3\u00d72 matrix with all rows collinear?', options: ['1', '2', '3', '0'], correct: 0 },
-      { q: 'R(M) lives in which space?', options: ['\u211D\u00B2 (input space)', '\u211D\u00B3 (output space)', '\u211D\u2074', '\u211D'], correct: 0 },
-      { q: 'Is C(M) a line in \u211D\u00B3?', type: 'yesno', correct: 0 }
+      { q: 'What is the rank of a 3×2 matrix with all rows collinear?', _isText: true, _keywords: ['1', 'rank 1'] },
+      { q: 'R(M) lives in which space?', _isText: true, _keywords: ['R²', 'input', 'R^2', '2D'] },
+      { q: 'Is C(M) a line in R³ for this rank-1 matrix?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Engineering Systems', story: 'A 3 sensors measuring 2 variables \u2014 the extra sensor is redundant (rank 1).', question: 'Redundant sensor = ?', answer: 'dependent row' },
-      { emoji: '\uD83D\uDCCA', title: 'Survey Analysis', story: '3 survey questions measuring 1 underlying trait \u2014 rank-1 data matrix.', question: 'Rank 1 = ?', answer: 'one underlying factor' },
-      { emoji: '\uD83D\uDCF1', title: 'Network Traffic', story: '3 routers forwarding 2 data streams \u2014 rank determines throughput.', question: 'Throughput = ?', answer: 'rank of routing matrix' },
+      { emoji: '🏗️', title: 'Engineering Systems', equation: '', story: 'When a system has 3 sensors but only 2 independent variables to measure, the third sensor is redundant — its reading can be predicted from the other two. The system matrix has rank 2 (two independent measurements) and nullity 1 (one redundant sensor). The redundant sensor adds a dependent row that does not increase the rank.', question: 'When 3 sensors measure only 2 independent variables, what does the redundant sensor represent in matrix terms?', answer: 'dependent row' },
+      { emoji: '📊', title: 'Survey Analysis', equation: '', story: 'A survey with 3 questions but only 1 underlying trait being measured produces a rank-1 data matrix. All three questions are essentially asking the same thing in different ways. The null space captures the two redundant dimensions — variations between questions that do not reflect real differences in the trait being measured.', question: 'When 3 survey questions measure only 1 underlying trait, what is the rank of the data matrix?', answer: 'one underlying factor' },
+      { emoji: '📱', title: 'Network Traffic', equation: '', story: 'In a network with 3 routers forwarding 2 data streams, the routing matrix has rank at most 2. The rank determines the maximum throughput — how many independent data streams can be simultaneously routed. A rank-1 routing matrix means the network can only handle one stream at a time, regardless of how many routers exist.', question: 'In a network with multiple routers, what does the rank of the routing matrix determine?', answer: 'rank of routing matrix' },
     ],
     solveExplanation: 'M=[[2,4],[1,2],[3,6]] (3\u00d72, rank 1). R(M)=t(1,2) in \u211D\u00B2, C(M)=t(2,1,3) in \u211D\u00B3, N(M)=t(-2,1), N(M\u1d40)=plane. R\u22a5N, C\u22a5N\u1d40. Rank+Nullity=n!'
   },
@@ -1693,15 +1550,11 @@ const MISSIONS = [
     story: 'Congratulations! You have completed the Linear Algebra mission. Let us summarize the wisdom: (1) A matrix defines four subspaces: Row Space, Column Space, Null Space, Left Null Space. (2) Row Space \u22a5 Null Space in the input domain. (3) Column Space \u22a5 Left Null Space in the output domain. (4) Rank-Nullity: rank(A) + nullity(A) = n. (5) A singular matrix collapses dimensions \u2014 information is lost along the null space. You now see linear algebra as the study of subspaces and their relationships!',
     goal: 'Celebrate the achievement and summarize the key insights.',
     ggbType: 'graphing',
-    answerType: 'mcq',
+    answerType: 'text',
     prompt: 'Which statement best captures the essence of linear algebra?',
-    options: [
-      'Every matrix reveals four subspaces with orthogonal pairs and dimension relationships',
-      'Matrices are just numbers in a grid',
-      'Determinants are the most important concept',
-      'Linear algebra is about solving equations only'
-    ],
-    correct: 0,
+    options: null,
+    correct: null,
+    expectedKeywords: ['subspaces', 'orthogonal', 'four', 'rank', 'dimension', 'relationship'],
     explanation: 'Linear algebra is fundamentally about the four subspaces and their orthogonal relationships. Every matrix tells a story: R(A) shows what inputs matter, N(A) shows what inputs are lost, C(A) shows what outputs are reachable, and N(A\u1d40) shows what outputs are unreachable. Rank tells us how many dimensions survive!',
     ggbHint: 'Use GeoGebra to explore any matrix and discover its four subspaces. Each matrix has a story to tell!',
     ggbSteps: [
@@ -1712,14 +1565,14 @@ const MISSIONS = [
       'Remember: every matrix has this beautiful structure!'
     ],
     quiz: [
-      { q: 'How many fundamental subspaces does a matrix define?', options: ['4', '2', '3', '1'], correct: 0 },
-      { q: 'The dimension of C(A) equals...', options: ['Rank(A)', 'Nullity(A)', 'Number of rows', 'Number of columns'], correct: 0 },
+      { q: 'How many fundamental subspaces does a matrix define?', _isText: true, _keywords: ['4', 'four'] },
+      { q: 'The dimension of C(A) equals...', _isText: true, _keywords: ['rank', 'Rank(A)', 'rank of A'] },
       { q: 'Have you achieved Linear Algebra wisdom?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDEE0\uFE0F', title: 'Engineering', story: 'Every linear system in engineering is understood through its four subspaces.', question: 'Key to systems?', answer: 'four subspaces' },
-      { emoji: '\uD83D\uDCCA', title: 'Data Science', story: 'Dimensionality reduction, PCA, and regression all rely on subspace thinking.', question: 'Core math?', answer: 'linear algebra subspaces' },
-      { emoji: '\uD83E\uDD16', title: 'AI & ML', story: 'Neural networks are compositions of linear transformations \u2014 each layer has its four subspaces.', question: 'Each layer = ?', answer: 'a linear transformation' },
+      { emoji: '🏗️', title: 'Engineering', equation: '', story: 'Every linear system in engineering — from bridges to circuits to control systems — is ultimately understood through its four fundamental subspaces. The row space tells you what inputs matter, the null space tells you what is lost, the column space tells you what outputs are reachable, and the left null space tells you what is unobservable. Mastering these four subspaces is the key to mastering engineering.', question: 'What mathematical framework is essential for understanding every linear system in engineering?', answer: 'four subspaces' },
+      { emoji: '📊', title: 'Data Science', equation: '', story: 'Dimensionality reduction (PCA), regression analysis, and matrix factorisation all rely on subspace thinking. PCA finds the row space to keep and the null space to discard. Regression finds the column space of reachable predictions. Matrix factorisation decomposes data into interpretable subspace components.', question: 'What is the core mathematical concept behind PCA, regression, and matrix factorisation in data science?', answer: 'linear algebra subspaces' },
+      { emoji: '🤖', title: 'AI & ML', equation: '', story: 'A neural network is essentially a composition of linear transformations, each followed by a non-linear activation. Each layer has its own four subspaces: what it can represent (column space), what it discards (null space), what inputs matter (row space), and what is hidden (left null space). Understanding these subspaces helps explain why neural networks work.', question: 'What is each layer of a neural network essentially performing in mathematical terms?', answer: 'a linear transformation' },
     ],
     solveExplanation: 'Four subspaces, two orthogonal pairs, rank-nullity theorem: the complete picture of any linear transformation. Congratulations on your Linear Algebra wisdom!'
   },
@@ -1729,15 +1582,11 @@ const MISSIONS = [
     story: 'Netflix has users and movies. Build a 3\u00d74 rating matrix R where rows = users (Alice, Bob, Charlie) and columns = movies (M1, M2, M3, M4). Ratings: Alice=(5,3,0,1), Bob=(4,0,0,1), Charlie=(1,1,5,4). This matrix has rank? Compute Rank(R) in GeoGebra. The null space reveals which rating patterns never occur!',
     goal: 'Understand the user-item rating matrix and its rank.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'What is the rank of the 3\u00d74 rating matrix R = [[5,3,0,1],[4,0,0,1],[1,1,5,4]]?',
-    options: [
-      '3 \u2014 all three users have independent preferences',
-      '2 \u2014 one user is a linear combo of others',
-      '1 \u2014 all users rate the same way',
-      '4 \u2014 more columns than rows means full rank'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'What is the rank of the 3×4 rating matrix R = [[5,3,0,1],[4,0,0,1],[1,1,5,4]]?',
+    options: null,
+    correct: null,
+    expectedKeywords: ['3', 'full row rank', 'rank 3', 'three'],
     explanation: 'Rank(R) = 3 (full row rank). Each user has an independent rating pattern. The null space is {0} (only the zero vector maps to zero). The column space is 3D \u2014 ratings live in a 3D subspace of \u211D\u2074. SVD would reveal latent features like "genre preferences"!',
     ggbHint: 'Type: R={{5,3,0,1},{4,0,0,1},{1,1,5,4}}. Compute Rank(R) in GeoGebra. Try NullSpace(R) as well.',
     ggbSteps: [
@@ -1748,14 +1597,14 @@ const MISSIONS = [
       'No redundancy in user preferences \u2014 3 independent taste profiles.'
     ],
     quiz: [
-      { q: 'Rank of a 3\u00d74 matrix can be at most...', options: ['3', '4', '7', '12'], correct: 0 },
-      { q: 'What does rank measure in a rating matrix?', options: ['Number of independent taste profiles', 'Number of movies', 'Number of users', 'Total ratings'], correct: 0 },
+      { q: 'Rank of a 3×4 matrix can be at most...', _isText: true, _keywords: ['3', 'three', 'min(3,4)'] },
+      { q: 'What does rank measure in a rating matrix?', _isText: true, _keywords: ['independent', 'taste', 'profile', 'preference', 'pattern'] },
       { q: 'If rank < number of users, what does that mean?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83C\uDFAC', title: 'Netflix', story: 'Netflix\'s rating matrix has millions of users and movies \u2014 but low rank reveals genre patterns!', question: 'Low rank = ?', answer: 'latent preferences' },
-      { emoji: '\uD83D\uDCF1', title: 'Amazon', story: 'Purchase history matrix: users \u00d7 products. Rank reveals product categories.', question: 'Rank reveals?', answer: 'product categories' },
-      { emoji: '\uD83C\uDFB5', title: 'Spotify', story: 'User \u00d7 song play count matrix. Low-rank structure = music taste dimensions!', question: 'Taste dimensions = ?', answer: 'latent factors from SVD' },
+      { emoji: '🎬', title: 'Netflix', equation: '', story: 'Netflix\'s recommendation system is built on a massive user-movie rating matrix with millions of users and tens of thousands of movies. Even though this matrix is enormous, it has surprisingly low rank — because most users\' preferences can be explained by just a few latent factors like genre preference, recency bias, and viewing habits. Low rank reveals hidden patterns.', question: 'What does a low-rank rating matrix at Netflix reveal about user preferences?', answer: 'latent preferences' },
+      { emoji: '📱', title: 'Amazon', equation: '', story: 'Amazon tracks which products each customer has purchased in a user-product matrix. The rank of this matrix reveals the underlying product categories — if rank is 5, there are roughly 5 distinct shopping patterns among customers. Low-rank structure means customers tend to buy items from a few categories, not randomly across all products.', question: 'What does the rank of Amazon\'s purchase history matrix reveal about products?', answer: 'product categories' },
+      { emoji: '🎵', title: 'Spotify', equation: '', story: 'Spotify builds a user-song play count matrix to understand music taste. Using SVD (Singular Value Decomposition), this matrix is decomposed into latent factors — abstract dimensions like "preference for upbeat music" or "love of classical piano." These latent factors from SVD are what drive Spotify\'s Discover Weekly recommendations.', question: 'What does SVD decomposition of Spotify\'s play count matrix reveal?', answer: 'latent factors from SVD' },
     ],
     solveExplanation: 'R = 3\u00d74 rating matrix, rank 3. Each user is independent \u2014 no redundant tastes. In real systems, rating matrices are approximately low-rank = latent factors!'
   },
@@ -1779,14 +1628,14 @@ const MISSIONS = [
       'Recommend M2 (rating 3 from Alice, unrated by Bob)!'
     ],
     quiz: [
-      { q: 'Dot product measures...', options: ['Similarity between vectors', 'Distance', 'Rank', 'Determinant'], correct: 0 },
-      { q: 'Who is Bob most similar to?', options: ['Alice (dot=21)', 'Charlie (dot=8)', 'Equally similar', 'Neither'], correct: 0 },
+      { q: 'What does the dot product measure?', _isText: true, _keywords: ['similarity', 'similar', 'angle', 'projection'] },
+      { q: 'Who is Bob most similar to?', _isText: true, _keywords: ['Alice', 'alice'] },
       { q: 'If two users have dot product 0, are they similar?', type: 'yesno', correct: 1 }
     ],
     realLife: [
-      { emoji: '\uD83C\uDFAC', title: 'Netflix', story: '"Users who liked this also liked..." = collaborative filtering by dot product similarity!', question: 'Similar users = ?', answer: 'high dot product' },
-      { emoji: '\uD83D\uDED2', title: 'Amazon', story: '"Frequently bought together" recommendations use purchase vector similarity.', question: 'Bought together = ?', answer: 'similar purchase vectors' },
-      { emoji: '\uD83C\uDFB5', title: 'Spotify', story: 'Discover Weekly uses collaborative filtering on listening history vectors.', question: 'Discover Weekly = ?', answer: 'collaborative filtering' },
+      { emoji: '🎬', title: 'Netflix', equation: '', story: 'Netflix\'s "Users who liked this also liked..." feature works by computing the similarity between users using dot products on their rating vectors. Users with high dot products have similar taste. The system finds your nearest neighbours (most similar users) and recommends movies they loved but you have not yet seen.', question: 'How does Netflix identify users with similar taste to yours?', answer: 'high dot product' },
+      { emoji: '🛒', title: 'Amazon', equation: '', story: 'Amazon\'s "Frequently bought together" feature uses the same principle. It computes the dot product between your purchase history vector and other customers\' vectors. Customers with high dot product scores tend to buy similar products. Amazon then suggests items that those similar customers bought but you have not.', question: 'What does Amazon\'s "Frequently bought together" feature use to find similar customers?', answer: 'similar purchase vectors' },
+      { emoji: '🎵', title: 'Spotify', equation: '', story: 'Spotify\'s Discover Weekly playlist is powered by collaborative filtering — the same dot-product-based technique used by Netflix and Amazon. Your listening history is a vector, and Spotify finds users with the most similar vectors (highest dot products). Songs that those similar users loved but you have not heard appear in your playlist.', question: 'What powers Spotify\'s Discover Weekly playlist recommendations?', answer: 'collaborative filtering' },
     ],
     solveExplanation: 'Dot(Bob,Alice)=21 > Dot(Bob,Charlie)=8. Alice is more similar. Recommend movies Alice liked that Bob hasn\'t seen \u2014 collaborative filtering in action!'
   },
@@ -1796,15 +1645,11 @@ const MISSIONS = [
     story: 'Google PageRank models the web as a directed graph. Pages = nodes, Links = edges. Consider 4 pages: A\u2192B, A\u2192C, B\u2192C, C\u2192A, D\u2192C. Build the adjacency matrix where M(i,j)=1 if page j links to page i. Then normalize columns so each column sums to 1 \u2014 this is a Markov chain transition matrix! The steady-state eigenvector gives page rankings.',
     goal: 'Build the web graph adjacency matrix and understand the PageRank Markov chain.',
     ggbType: 'graphing',
-    answerType: 'mcq',
-    prompt: 'For the web graph A\u2192B, A\u2192C, B\u2192C, C\u2192A, D\u2192C, which page has the most incoming links?',
-    options: [
-      'C (3 incoming links: from A, B, D)',
-      'A (1 incoming link: from C)',
-      'B (1 incoming link: from A)',
-      'D (0 incoming links)'
-    ],
-    correct: 0,
+    answerType: 'text',
+    prompt: 'For the web graph A→B, A→C, B→C, C→A, D→C, which page has the most incoming links?',
+    options: null,
+    correct: null,
+    expectedKeywords: ['C', 'page C', 'three', '3 incoming'],
     explanation: 'C has 3 incoming links (from A, B, D). In PageRank, more incoming links = more important. The adjacency column-stochastic matrix is: [[0,0,1,0],[1,0,0,0],[1,1,0,1],[0,0,0,0]]. The eigenvector with eigenvalue 1 gives PageRank scores!',
     ggbHint: 'Type: M={{0,0,1,0},{1,0,0,0},{1,1,0,1},{0,0,0,0}}. Each column shows outgoing links. Normalize so columns sum to 1.',
     ggbSteps: [
@@ -1815,14 +1660,14 @@ const MISSIONS = [
       'Column 4: D links to C. Page C has most links!'
     ],
     quiz: [
-      { q: 'In PageRank, incoming links from important pages = ?', options: ['Higher rank', 'Lower rank', 'No effect', 'Negative rank'], correct: 0 },
-      { q: 'The PageRank algorithm solves which eigenvector problem?', options: ['Mv = v (eigenvalue 1)', 'Mv = 0', 'Mv = 2v', 'Mv = -v'], correct: 0 },
+      { q: 'In PageRank, incoming links from important pages give...', _isText: true, _keywords: ['higher', 'higher rank', 'more important', 'more importance'] },
+      { q: 'The PageRank algorithm solves which eigenvector problem?', _isText: true, _keywords: ['Mv = v', 'M*v = v', 'eigenvalue 1', 'eigenvalue = 1'] },
       { q: 'Is the web graph adjacency matrix usually sparse?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDD0D', title: 'Google Search', story: 'PageRank was Google\'s original ranking algorithm \u2014 eigenvector of the web graph!', question: 'PageRank = ?', answer: 'eigenvector of web graph' },
-      { emoji: '\uD83D\uDCF1', title: 'Social Media', story: 'Twitter influence = eigenvector centrality of the follow graph.', question: 'Influence = ?', answer: 'eigenvector centrality' },
-      { emoji: '\uD83C\uDFC6', title: 'Sports Rankings', story: 'Team rankings use eigenvector centrality on win-loss graph.', question: 'Rankings = ?', answer: 'eigenvector of win matrix' },
+      { emoji: '🔍', title: 'Google Search', equation: '', story: 'Google\'s original PageRank algorithm models the entire web as a directed graph — each page is a node, and each hyperlink is an edge. By converting this graph into a column-stochastic transition matrix and finding its dominant eigenvector (the eigenvector with eigenvalue 1), Google determines the importance of every page. Pages with more incoming links from important pages rank higher.', question: 'What mathematical object does Google\'s PageRank algorithm compute to rank web pages?', answer: 'eigenvector of web graph' },
+      { emoji: '📱', title: 'Social Media', equation: '', story: 'Twitter\'s "Who to Follow" feature uses eigenvector centrality on the follow graph. Your influence score depends not just on how many followers you have, but on how influential those followers are. This is computed as the dominant eigenvector of the social network\'s adjacency matrix — the same principle as PageRank.', question: 'How is influence measured on social media platforms like Twitter?', answer: 'eigenvector centrality' },
+      { emoji: '🏆', title: 'Sports Rankings', equation: '', story: 'Sports leagues use eigenvector centrality to rank teams based on their win-loss records. Beating a strong team gives you more ranking points than beating a weak team. The ranking is computed as the eigenvector of the win-loss adjacency matrix, ensuring that the quality of opponents matters, not just the number of wins.', question: 'How are team rankings computed when the quality of opponents matters?', answer: 'eigenvector of win matrix' },
     ],
     solveExplanation: 'PageRank: adjacency matrix \u2192 column-stochastic \u2192 eigenvector with eigenvalue 1 = page importance scores. More incoming links from important pages = higher rank!'
   },
@@ -1832,15 +1677,11 @@ const MISSIONS = [
     story: 'To compute PageRank, use the Power Method: start with any vector v\u2080, repeatedly multiply by the transition matrix M. After enough iterations, v converges to the dominant eigenvector (PageRank). For M = column-stochastic matrix of 4 pages, start with v=(0.25,0.25,0.25,0.25) and multiply by M repeatedly until stable.',
     goal: 'Compute the PageRank eigenvector using repeated matrix multiplication.',
     ggbType: 'graphing',
-    answerType: 'mcq',
+    answerType: 'text',
     prompt: 'Starting with v=(0.25,0.25,0.25,0.25), after one multiplication by M (from Q53), which page has the highest score?',
-    options: [
-      'C \u2014 gets links from A, B, D giving it highest probability',
-      'A \u2014 gets a link from C',
-      'B \u2014 gets a link from A',
-      'D \u2014 gets no links, score drops to 0'
-    ],
-    correct: 0,
+    options: null,
+    correct: null,
+    expectedKeywords: ['C', 'page C', '0.75', 'highest'],
     explanation: 'M*v = (0.25\u00d70 + 0.25\u00d70 + 0.25\u00d71 + 0.25\u00d70, 0.25\u00d71 + 0, 0.25\u00d71 + 0.25\u00d71 + 0.25\u00d70 + 0.25\u00d71, 0) = (0.25, 0.25, 0.75, 0). Page C has the highest score (0.75)! Repeated multiplication converges to the true PageRank vector where C remains highest.',
     ggbHint: 'Type: M={{0,0,1,0},{1,0,0,0},{1,1,0,1},{0,0,0,0}}. Type: v0={0.25,0.25,0.25,0.25}. Compute M*v0 repeatedly.',
     ggbSteps: [
@@ -1851,14 +1692,14 @@ const MISSIONS = [
       'The steady state = eigenvector with eigenvalue 1 = PageRank!'
     ],
     quiz: [
-      { q: 'The Power Method converges to which eigenvector?', options: ['Dominant (eigenvalue 1)', 'Smallest eigenvalue', 'Second largest', 'Any eigenvector'], correct: 0 },
-      { q: 'After first multiplication, C\'s score was...', options: ['0.75', '0.25', '0.5', '1.0'], correct: 0 },
+      { q: 'The Power Method converges to which eigenvector?', _isText: true, _keywords: ['dominant', 'eigenvalue 1', 'largest', 'principal'] },
+      { q: "After first multiplication, C's score was...", _isText: true, _keywords: ['0.75', '3/4'] },
       { q: 'Does the power method always converge?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDD0D', title: 'Google', story: 'Google\'s original PageRank computed on billions of pages using power iteration.', question: 'Scale = ?', answer: 'billions of pages' },
-      { emoji: '\uD83D\uDCF1', title: 'Twitter', story: 'Twitter\'s WhoToFollow uses personalized PageRank via power iteration.', question: 'WhoToFollow = ?', answer: 'personalized PageRank' },
-      { emoji: '\uD83D\uDCCA', title: 'Citation Networks', story: 'Academic paper importance = eigenvector of citation graph via power method.', question: 'Important papers = ?', answer: 'high eigenvector score' },
+      { emoji: '🔍', title: 'Google', equation: '', story: 'Google\'s original PageRank algorithm did not solve the eigenvector equation directly — that would be too slow for billions of pages. Instead, it used the Power Method: start with any ranking vector and repeatedly multiply by the web graph\'s transition matrix. After enough iterations, the vector converges to the dominant eigenvector — the PageRank scores.', question: 'At what scale was Google\'s original PageRank power iteration computed?', answer: 'billions of pages' },
+      { emoji: '📱', title: 'Twitter', equation: '', story: 'Twitter\'s WhoToFollow system uses a personalised version of PageRank. Instead of computing the global eigenvector, it computes a power iteration starting from your specific follow graph. This gives you a personalised ranking of accounts you might find interesting, based on your unique position in the social network.', question: 'What does Twitter\'s WhoToFollow feature use to generate personalised suggestions?', answer: 'personalized PageRank' },
+      { emoji: '📊', title: 'Citation Networks', equation: '', story: 'Academic paper importance is measured using eigenvector centrality of the citation graph. A paper cited by many important papers is itself important. The Power Method iteratively computes each paper\'s importance score by aggregating the scores of all papers that cite it, converging to the true influence ranking.', question: 'How is academic paper importance computed from the citation graph?', answer: 'high eigenvector score' },
     ],
     solveExplanation: 'Power method: v_{k+1} = M v_k. Converges to dominant eigenvector (eigenvalue 1) = PageRank scores. C has highest score (0.75), D has lowest (0).'
   },
@@ -1868,15 +1709,11 @@ const MISSIONS = [
     story: 'PCA (Principal Component Analysis) finds the directions of maximum variance in data. Given 2D points: (1,1), (2,2), (3,3), (1,4), (2,5), (3,6). Center the data (subtract mean), compute covariance matrix, find eigenvectors. The eigenvector with largest eigenvalue = first principal component \u2014 direction of most variance. Project data onto this component to reduce from 2D to 1D!',
     goal: 'Use eigendecomposition to find principal components and reduce dimensions.',
     ggbType: 'graphing',
-    answerType: 'mcq',
+    answerType: 'text',
     prompt: 'For points along y=x (1,1), (2,2), (3,3), what is the first principal component direction?',
-    options: [
-      '(1,1) \u2014 direction of largest variance along the line',
-      '(1,-1) \u2014 perpendicular to the data',
-      '(1,0) \u2014 horizontal direction',
-      '(0,1) \u2014 vertical direction'
-    ],
-    correct: 0,
+    options: null,
+    correct: null,
+    expectedKeywords: ['(1,1)', '1,1', 'direction', 'y=x', 'line', '45'],
     explanation: 'Points (1,1), (2,2), (3,3) vary along y=x. The covariance matrix eigenvector with largest eigenvalue is (1,1) (normalized). The second eigenvector (1,-1) has zero eigenvalue \u2014 no variance in that direction. PCA would project onto (1,1), reducing 2D \u2192 1D while preserving all variance!',
     ggbHint: 'Plot points: (1,1),(2,2),(3,3),(1,4),(2,5),(3,6). They roughly follow y=x. The first PC = direction (1,1).',
     ggbSteps: [
@@ -1887,14 +1724,14 @@ const MISSIONS = [
       'Project onto first PC: 2D \u2192 1D along y=x!'
     ],
     quiz: [
-      { q: 'PCA finds directions of...', options: ['Maximum variance', 'Minimum variance', 'Zero variance', 'Random directions'], correct: 0 },
-      { q: 'Eigenvector with largest eigenvalue = ?', options: ['First principal component', 'Last principal component', 'Mean of data', 'Covariance matrix'], correct: 0 },
+      { q: 'PCA finds directions of...', _isText: true, _keywords: ['maximum variance', 'max variance', 'largest variance', 'most variance', 'variance'] },
+      { q: 'Eigenvector with largest eigenvalue equals...', _isText: true, _keywords: ['first principal component', 'principal component', 'first PC', 'PC1'] },
       { q: 'Does reducing dimensions always lose some information?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83D\uDCF7', title: 'Face Recognition', story: 'Eigenfaces: PCA on face images reduces millions of pixels to ~100 eigenface coefficients!', question: 'Eigenfaces = ?', answer: 'principal components of faces' },
-      { emoji: '\uD83D\uDCCA', title: 'Finance', story: 'PCA reduces hundreds of stock returns to a few market factors (eigenvectors of covariance).', question: 'Market factors = ?', answer: 'principal components' },
-      { emoji: '\uD83E\uDD16', title: 'Genomics', story: 'PCA reduces thousands of gene expression levels to 2-3 components for visualization.', question: 'Gene expression dims = ?', answer: 'reduced by PCA' },
+      { emoji: '📷', title: 'Face Recognition', equation: '', story: 'Eigenfaces is a classic face recognition technique that uses PCA on face images. Each face image has millions of pixels, but PCA reduces this to around 100 eigenface coefficients — the principal components. These 100 numbers capture the essential features of a face (shape, lighting, expression) while discarding irrelevant details like background and image noise.', question: 'How does the Eigenfaces technique reduce millions of face pixels to a manageable number?', answer: 'principal components of faces' },
+      { emoji: '📊', title: 'Finance', equation: '', story: 'Financial analysts use PCA to reduce hundreds of stock return time series to a few market factors. The first principal component typically represents the overall market movement. The second might represent sector-specific trends. This dimensionality reduction reveals the hidden structure driving stock prices across the entire market.', question: 'When PCA is applied to stock returns, what do the principal components represent?', answer: 'principal components' },
+      { emoji: '🧬', title: 'Genomics', equation: '', story: 'In genomics, researchers measure thousands of gene expression levels for each patient. PCA reduces this high-dimensional data to 2-3 principal components that can be plotted on a scatter plot. Patients with similar genetic profiles cluster together, revealing hidden patterns like disease subtypes or treatment responses.', question: 'How does PCA help genomics researchers visualise high-dimensional gene expression data?', answer: 'reduced by PCA' },
     ],
     solveExplanation: 'PCA: center data \u2192 covariance matrix \u2192 eigenvectors. Largest eigenvalue = direction of max variance. Projecting onto top components reduces dimensions while preserving variance!'
   },
@@ -1904,15 +1741,11 @@ const MISSIONS = [
     story: 'The Singular Value Decomposition (SVD) A = U\u03a3V\u1d40 unifies everything you have learned: U columns = eigenvectors of AA\u1d40 (left singular vectors = basis for column space). V columns = eigenvectors of A\u1d40A (right singular vectors = basis for row space). Non-zero singular values = square roots of eigenvalues. Zero singular values = null space! SVD reveals the four subspaces and their dimensions automatically!',
     goal: 'Connect SVD to the four subspaces and see the complete picture.',
     ggbType: 'graphing',
-    answerType: 'mcq',
+    answerType: 'text',
     prompt: 'For A = [[1,2],[2,4]] (rank 1), how many non-zero singular values does SVD give?',
-    options: [
-      '1 \u2014 rank = number of non-zero singular values',
-      '2 \u2014 all 2\u00d72 matrices have 2 singular values',
-      '0 \u2014 singular values are always zero',
-      '3 \u2014 extra for the null space'
-    ],
-    correct: 0,
+    options: null,
+    correct: null,
+    expectedKeywords: ['1', 'one', 'rank'],
     explanation: 'A=[[1,2],[2,4]] has rank 1, so SVD gives 1 non-zero singular value (\u03c3\u2081 = \u221a(5\u00b2+0) = 5 approximately). The zero singular value corresponds to the null space direction. SVD automatically separates the range (non-zero \u03c3) from the null space (zero \u03c3). Number of non-zero singular values = rank!',
     ggbHint: 'Type: A={{1,2},{2,4}}. GeoGebra can compute SVD: SingularValues(A) gives the list. Count non-zero ones = rank!',
     ggbSteps: [
@@ -1923,43 +1756,43 @@ const MISSIONS = [
       'SVD gives the complete picture: range basis (U), row space basis (V), and rank (\u03c3).'
     ],
     quiz: [
-      { q: 'Number of non-zero singular values = ?', options: ['Rank of the matrix', 'Number of rows', 'Number of columns', 'Size of matrix'], correct: 0 },
-      { q: 'Zero singular values correspond to...', options: ['Null space directions', 'Range directions', 'Row space directions', 'Column space directions'], correct: 0 },
+      { q: 'Number of non-zero singular values equals...', _isText: true, _keywords: ['rank', 'rank of the matrix'] },
+      { q: 'Zero singular values correspond to...', _isText: true, _keywords: ['null space', 'null', 'nullity', 'kernel'] },
       { q: 'Does SVD reveal all four subspaces?', type: 'yesno', correct: 0 }
     ],
     realLife: [
-      { emoji: '\uD83C\uDFAC', title: 'Netflix Prize', story: 'SVD was the core of winning Netflix Prize solution \u2014 factorize rating matrix into U\u03a3V!', question: 'Netflix SVD = ?', answer: 'user-movie latent factors' },
-      { emoji: '\uD83D\uDCF7', title: 'Image Compression', story: 'JPEG uses SVD-like DCT to compress images \u2014 keep top singular values, discard the rest.', question: 'Compression = ?', answer: 'keep top singular values' },
-      { emoji: '\uD83D\uDCCA', title: 'Topic Modeling', story: 'SVD on document-word matrix = Latent Semantic Analysis, finds document topics.', question: 'LSA = ?', answer: 'SVD on document matrix' },
+      { emoji: '🎬', title: 'Netflix Prize', equation: '', story: 'The Netflix Prize was a million-dollar competition to improve movie recommendations. The winning solution used SVD (Singular Value Decomposition) to factorise the massive user-movie rating matrix into three smaller matrices: user factors, singular values, and movie factors. This factorisation revealed latent features that captured hidden patterns in viewing behaviour.', question: 'What was the core mathematical technique used to win the Netflix Prize competition?', answer: 'user-movie latent factors' },
+      { emoji: '📷', title: 'Image Compression', equation: '', story: 'JPEG image compression uses a mathematical transform (DCT, which is closely related to SVD) to decompose an image into frequency components. By keeping only the largest singular values — the most important frequency components — and discarding the small ones, JPEG achieves dramatic compression while maintaining visual quality.', question: 'In JPEG image compression, what does keeping only the largest singular values achieve?', answer: 'keep top singular values' },
+      { emoji: '📊', title: 'Topic Modeling', equation: '', story: 'Latent Semantic Analysis (LSA) applies SVD to a document-word matrix to discover hidden topics. The singular vectors reveal which words tend to co-occur — words like "queen", "king", and "crown" cluster together as a "royalty" topic. SVD automatically discovers these semantic relationships without any human labelling.', question: 'What technique is used to automatically discover topics from a document-word matrix?', answer: 'SVD on document matrix' },
     ],
     solveExplanation: 'SVD: A = U\u03a3V\u1d40. Non-zero \u03c3 = rank. Zero \u03c3 = null space. U columns span C(A), V columns span R(A). SVD reveals all four subspaces at once!'
   },
 ];
 
 /* ── GeoGebra embed component ──────────────────────── */
-function GGBEmbed({ missionId, ggbType }) {
+function GGBEmbed({ missionId }) {
   const [ggbFailed, setGgbFailed] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const wrapRef = useRef(null);
-  const readyRef = useRef(false);
+  const appletRef = useRef(null);
+  const origSizeRef = useRef({ w: 0, h: 0 });
+  const containerId = 'ggb-' + missionId;
 
   useEffect(() => {
     let cancelled = false;
     const el = wrapRef.current;
     if (!el) return;
-    const containerId = 'ggb-c-' + missionId + '-' + Date.now();
+    if (document.getElementById(containerId)) return;
 
     const tryInject = () => {
       if (!window.GGBApplet || cancelled) { setGgbFailed(true); return; }
       const rect = el.getBoundingClientRect();
-      const w = Math.max(rect.width - 2, 300);
-      const h = Math.max(rect.height - 2, 300);
       const params = {
-        appName: ggbType || 'graphing',
-        width: Math.round(w),
-        height: Math.round(h),
+        appName: 'graphing',
+        width: Math.round(Math.max(rect.width - 2, 300)),
+        height: Math.round(Math.max(rect.height - 2, 300)),
         showToolBar: true,
-        showMenuBar: false,
+        showMenuBar: true,
         showAlgebraInput: true,
         enableRightClick: false,
         language: 'en',
@@ -1969,7 +1802,7 @@ function GGBEmbed({ missionId, ggbType }) {
       try {
         const applet = new window.GGBApplet(params);
         applet.inject(containerId);
-        readyRef.current = true;
+        appletRef.current = applet;
       } catch (e) {
         if (!cancelled) setGgbFailed(true);
       }
@@ -1979,12 +1812,41 @@ function GGBEmbed({ missionId, ggbType }) {
     inner.id = containerId;
     inner.style.width = '100%';
     inner.style.height = '100%';
-    el.innerHTML = '';
     el.appendChild(inner);
 
     const timer = setTimeout(tryInject, 400);
-    return () => { cancelled = true; clearTimeout(timer); };
-  }, [missionId, fullscreen]);
+    return () => { cancelled = true; clearTimeout(timer); el.innerHTML = ''; };
+  }, [missionId]);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      if (!origSizeRef.current.w) {
+        origSizeRef.current = { w: Math.round(rect.width), h: Math.round(rect.height) };
+      }
+      const targetW = fullscreen ? Math.round(rect.width) : origSizeRef.current.w;
+      const targetH = fullscreen ? Math.round(rect.height) : origSizeRef.current.h;
+      if (targetW < 100 || targetH < 100) return;
+      const retryResize = (attempt = 0) => {
+        if (!appletRef.current) {
+          if (attempt < 10) setTimeout(() => retryResize(attempt + 1), 200);
+          return;
+        }
+        const api = appletRef.current.getAppletObject();
+        if (!api) {
+          if (attempt < 10) setTimeout(() => retryResize(attempt + 1), 200);
+          return;
+        }
+        try {
+          if (typeof api.setWidth === 'function') api.setWidth(targetW);
+          if (typeof api.setHeight === 'function') api.setHeight(targetH);
+        } catch (e) {}
+      };
+      setTimeout(retryResize, 100);
+    });
+  }, [fullscreen, containerId]);
 
   return (
     <div className={'la-ggb-outer' + (fullscreen ? ' fullscreen' : '')}>
@@ -2050,9 +1912,9 @@ function parseAxisLabels(story) {
   return { xLabel, yLabel };
 }
 
-function MiniGraph({ story }) {
+function MiniGraph({ story, equation }) {
   const { xLabel, yLabel } = parseAxisLabels(story || '');
-  const params = parseLinearParams(story);
+  const params = parseLinearParams(equation || story || '');
   const hasEq = params && !isNaN(params.m) && !isNaN(params.b);
   const W = 260, H = 210, titleH = hasEq ? 24 : 0, pad = 36;
   const defaultMax = 10;
@@ -2145,7 +2007,7 @@ function LinearAlgebraApp({ onBack }) {
     try { return parseInt(localStorage.getItem('la_module') || '1', 10); } catch { return 1; }
   });
   const [phase, setPhase] = useState('intro');
-  const [skillLevel, setSkillLevel] = useState(null);
+  const [skillLevel, setSkillLevel] = useState('little');
   const [showSteps, setShowSteps] = useState(true);
   const [showHint, setShowHint] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -2165,6 +2027,24 @@ function LinearAlgebraApp({ onBack }) {
   const [shuffledQuiz, setShuffledQuiz] = useState([]);
   const [shuffledMCQ, setShuffledMCQ] = useState(null);
   const [quizDifficulty, setQuizDifficulty] = useState(null);
+
+  const [mqStarted, setMqStarted] = useState(false);
+  const [mqFinished, setMqFinished] = useState(false);
+  const [mqQuestion, setMqQuestion] = useState(null);
+  const [mqAnswer, setMqAnswer] = useState('');
+  const [mqScore, setMqScore] = useState(0);
+  const [mqQNum, setMqQNum] = useState(0);
+  const mqTotal = 10;
+  const [mqFeedback, setMqFeedback] = useState('');
+  const [mqIsCorrect, setMqIsCorrect] = useState(null);
+  const [mqLoading, setMqLoading] = useState(false);
+  const [mqLoadError, setMqLoadError] = useState('');
+  const [mqRevealed, setMqRevealed] = useState(false);
+  const [mqResults, setMqResults] = useState([]);
+  const [mqDifficulty, setMqDifficulty] = useState('easy');
+  const mqSubmittedRef = useRef(false);
+  const mqAdvancedRef = useRef(false);
+  const mqAdvanceRef = useRef(null);
 
   function shuffle(arr) {
     const a = [...arr];
@@ -2218,6 +2098,10 @@ function LinearAlgebraApp({ onBack }) {
       const correctIdx = shuffledMCQ ? shuffledMCQ.correct : m.correct;
       correct = parseInt(input, 10) === correctIdx;
       msg = correct ? 'Correct!' : 'Not quite. Look at what GeoGebra shows.';
+    } else if (m.answerType === 'yesno') {
+      const ynIdx = input === 'yes' ? 0 : input === 'no' ? 1 : -1;
+      correct = ynIdx === m.correct;
+      msg = correct ? 'Correct!' : 'Not quite. Think about what GeoGebra shows.';
     } else if (m.answerType === 'num') {
       const val = parseFloat(input);
       if (isNaN(val)) { setFeedback({ correct: false, message: 'Please enter a number!', detail: '' }); setAttempts(a => a + 1); return; }
@@ -2234,7 +2118,6 @@ function LinearAlgebraApp({ onBack }) {
     if (correct) markSolved(m.id);
   };
 
-  const startSkillCheck = () => setPhase('skill');
   const startPlay = () => {
     const hideAll = skillLevel === 'perfect';
     setPhase('play'); setFeedback(null); setAnswer(''); setAttempts(0);
@@ -2247,7 +2130,10 @@ function LinearAlgebraApp({ onBack }) {
     setPhase('quiz'); setQuizAnswers({}); setQuizSubmitted(false); setQuizPassed(false);
     setQuizDifficulty(diff);
     let items = mission.quiz || [];
-    if (diff === 'easy') items = items.filter(q => q.type !== 'yesno');
+    if (diff === 'easy') items = items.filter(q => q.type === 'yesno' || q.type === 'yn');
+    else if (diff === 'medium') items = items.filter(q => q.type !== 'yesno' && q.type !== 'yn' && !q._isHard);
+    else if (diff === 'hard') items = items.filter(q => q._isHard || q.type === 'text' || q._isText);
+    if (items.length === 0) items = mission.quiz || [];
     let shuffled = shuffleQuiz(items);
     if (diff === 'hard' && mission.answerType === 'num' && mission.correct !== undefined && mission.correct !== null) {
       shuffled.push({ q: 'Extra: ' + mission.prompt, options: [], correct: null, _isNum: true, _answer: mission.correct, _tol: mission.tolerance });
@@ -2273,7 +2159,7 @@ function LinearAlgebraApp({ onBack }) {
     setQuizAnswers({}); setQuizSubmitted(false); setQuizPassed(false);
     setShuffledMCQ(null);
     setQuizDifficulty(null);
-    setSkillLevel(null);
+    setSkillLevel('little');
   };
 
   const submitQuiz = () => {
@@ -2288,17 +2174,83 @@ function LinearAlgebraApp({ onBack }) {
     else { setSelectedRL(idx); setRlAnswer(''); setRlFeedback(null); }
   };
 
+  const startMissionQuiz = () => {
+    setPhase('missionquiz');
+    setMqStarted(false); setMqFinished(false); setMqQuestion(null);
+    setMqAnswer(''); setMqScore(0); setMqQNum(0); setMqResults([]);
+    setMqFeedback(''); setMqIsCorrect(null); setMqRevealed(false);
+    setMqDifficulty('easy'); mqSubmittedRef.current = false; mqAdvancedRef.current = false;
+  };
+
+  const loadMqQuestion = async () => {
+    setMqLoading(true); setMqLoadError('');
+    try {
+      const r = await fetch(`/la-mission-quiz-api/question?missionId=${currentMission}&difficulty=${mqDifficulty}`);
+      if (!r.ok) throw new Error(`Server returned ${r.status}`);
+      const data = await r.json();
+      if (!data || !data.prompt) throw new Error('No prompt');
+      setMqQuestion(data); setMqAnswer(''); setMqFeedback(''); setMqIsCorrect(null); setMqRevealed(false);
+      mqSubmittedRef.current = false; mqAdvancedRef.current = false;
+    } catch (e) {
+      setMqQuestion(null); setMqLoadError(`Couldn't load question (${e.message}).`);
+    }
+    setMqLoading(false);
+  };
+
+  const mqStart = () => {
+    setMqStarted(true); setMqFinished(false); setMqScore(0); setMqQNum(1); setMqResults([]);
+    mqSubmittedRef.current = false; mqAdvancedRef.current = false;
+  };
+
+  const mqAdvance = () => {
+    if (mqAdvancedRef.current) return;
+    mqAdvancedRef.current = true;
+    if (mqQNum >= mqTotal) setMqFinished(true); else setMqQNum(n => n + 1);
+  };
+  mqAdvanceRef.current = mqAdvance;
+
+  useEffect(() => { if (phase === 'missionquiz' && mqStarted && !mqFinished && mqQNum > 0) loadMqQuestion(); }, [phase, mqStarted, mqQNum, mqFinished]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const mqSubmit = async () => {
+    if (!mqQuestion || mqRevealed || !mqAnswer.trim() || mqSubmittedRef.current) return;
+    mqSubmittedRef.current = true;
+    const payload = { ...mqQuestion, userAnswer: mqAnswer.trim() };
+    try {
+      const r = await fetch('/la-mission-quiz-api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await r.json();
+      setMqIsCorrect(data.correct); setMqRevealed(true);
+      if (data.correct) setMqScore(s => s + 1);
+      setMqFeedback(data.correct ? `Correct! ${data.display}` : `Incorrect. Answer: ${data.display}`);
+      setMqResults(prev => [...prev, { prompt: mqQuestion.prompt, userAnswer: mqAnswer.trim(), correctAnswer: data.display, correct: data.correct }]);
+    } catch (e) { mqSubmittedRef.current = false; }
+  };
+
+  const mqSolve = () => {
+    if (!mqQuestion || mqRevealed) return;
+    mqSubmittedRef.current = true;
+    setMqIsCorrect(false); setMqRevealed(true);
+    const display = mqQuestion.display || mqQuestion.answer || '';
+    setMqFeedback(`Solution: ${display}`);
+    setMqResults(prev => [...prev, { prompt: mqQuestion.prompt, userAnswer: '(solved)', correctAnswer: display, correct: false }]);
+  };
+
+  const mqSkip = () => {
+    if (!mqQuestion || mqRevealed) return;
+    mqSubmittedRef.current = true;
+    setMqIsCorrect(false); setMqRevealed(true);
+    setMqFeedback('Skipped.');
+    setMqResults(prev => [...prev, { prompt: mqQuestion.prompt, userAnswer: '(skipped)', correctAnswer: '—', correct: false }]);
+  };
+
+  const mqKeyDown = (e) => { if (e.key === 'Enter') { e.preventDefault(); if (!mqRevealed) mqSubmit(); else mqAdvance(); } };
+
   const guidancePanel = () => {
     if (phase !== 'play' || !mission) return null;
-    const showDetailed = (skillLevel === 'new' && showSteps) || (attempts >= 2 && showSteps);
     return (
       <div>
-        <button className="la-guidance-toggle" onClick={() => setShowSteps(!showSteps)}>
-          {showSteps ? 'Hide steps' : 'Show steps'}
-        </button>
         {showSteps && mission.ggbSteps && (
           <div className="la-guidance">
-            {mission.ggbSteps.map((step, i) => <div key={i} className="la-guidance-step"><span className="step-num">{i + 1}.</span> {step}</div>)}
+            {mission.ggbSteps.slice(0, -1).map((step, i) => <div key={i} className="la-guidance-step"><span className="step-num">{i + 1}.</span> {step}</div>)}
           </div>
         )}
         {showHint && <div className="la-guidance-hint"><strong>Hint: </strong>{mission.ggbHint}</div>}
@@ -2309,14 +2261,27 @@ function LinearAlgebraApp({ onBack }) {
 
   const actionButtons = () => (
     <div className="la-action-row">
-      <button className="la-action-btn" onClick={() => setShowHint(!showHint)}>{showHint ? 'Hide hint' : 'What do I do?'}</button>
-      <button className="la-action-btn" onClick={() => setShowSteps(!showSteps)}>{showSteps ? 'Hide steps' : 'Show me!'}</button>
-      <button className="la-action-btn" onClick={() => { setShowAnswer(!showAnswer); setShowSteps(true); }}>{showAnswer ? 'Hide answer' : 'Give up'}</button>
+      <button className="la-action-btn" onClick={() => setShowSteps(!showSteps)}>{showSteps ? 'Hide steps' : 'Show steps'}</button>
+      <button className="la-action-btn" onClick={() => { setShowAnswer(!showAnswer); setShowSteps(!showAnswer); }}>{showAnswer ? 'Hide answer' : 'Give up'}</button>
     </div>
   );
 
   const answerArea = () => {
     if (!mission) return null;
+    if (mission.answerType === 'yesno') {
+      return (
+        <div className="la-answer-area">
+          <div className="la-question-prompt">{mission.prompt}</div>
+          <div className="la-quiz-options yesno" style={{ justifyContent: 'flex-start', gap: 12, marginBottom: 10 }}>
+            <button className={'la-quiz-opt' + (answer === 'yes' ? ' selected' : '')} onClick={() => setAnswer('yes')} style={{ minWidth: 90, fontWeight: 600, fontSize: '0.95rem', padding: '10px 24px' }}>Yes</button>
+            <button className={'la-quiz-opt' + (answer === 'no' ? ' selected' : '')} onClick={() => setAnswer('no')} style={{ minWidth: 90, fontWeight: 600, fontSize: '0.95rem', padding: '10px 24px' }}>No</button>
+          </div>
+          <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+            <button className="la-check-btn" onClick={checkAnswer} disabled={answer === ''}>Check</button>
+          </div>
+        </div>
+      );
+    }
     if (mission.answerType === 'mcq') {
       const mcqData = shuffledMCQ || { options: mission.options, correct: mission.correct };
       return (
@@ -2375,6 +2340,7 @@ function LinearAlgebraApp({ onBack }) {
       if (ans === undefined) return false;
       const q = qs[i];
       if (q._isNum) return ans !== '';
+      if (q._isText) return ans !== '';
       return true;
     });
     if (!quizDifficulty) {
@@ -2383,9 +2349,9 @@ function LinearAlgebraApp({ onBack }) {
           <div className="la-quiz-title">Quick Test</div>
           <p style={{ marginBottom: 10, fontWeight: 500 }}>Choose difficulty:</p>
           <div className="la-skill-check">
-            <button className={'la-skill-btn' + (quizDifficulty === 'easy' ? ' selected' : '')} onClick={() => startQuiz('easy')}>Easy (MCQ only)</button>
-            <button className={'la-skill-btn' + (quizDifficulty === 'medium' ? ' selected' : '')} onClick={() => startQuiz('medium')}>Medium (All types)</button>
-            <button className={'la-skill-btn' + (quizDifficulty === 'hard' ? ' selected' : '')} onClick={() => startQuiz('hard')}>Hard (+ numerical)</button>
+            <button className={'la-skill-btn' + (quizDifficulty === 'easy' ? ' selected' : '')} onClick={() => startQuiz('easy')}>Easy (Yes/No)</button>
+            <button className={'la-skill-btn' + (quizDifficulty === 'medium' ? ' selected' : '')} onClick={() => startQuiz('medium')}>Medium (Short Answer)</button>
+            <button className={'la-skill-btn' + (quizDifficulty === 'hard' ? ' selected' : '')} onClick={() => startQuiz('hard')}>Hard (Complex Reasoning)</button>
           </div>
         </div>
       );
@@ -2395,7 +2361,7 @@ function LinearAlgebraApp({ onBack }) {
         <div className="la-quiz-title">Quick Test <span style={{ fontSize:'0.7rem', opacity:0.6, textTransform:'uppercase' }}>({quizDifficulty})</span></div>
         {qs.map((q, i) => {
           const selected = quizAnswers[i];
-          const isCorrect = quizSubmitted && (q._isNum ? selected !== '' && Math.abs(parseFloat(selected) - q._answer) <= (q._tol || 0.001) : selected === q.correct);
+          const isCorrect = quizSubmitted && (q._isNum ? selected !== '' && Math.abs(parseFloat(selected) - q._answer) <= (q._tol || 0.001) : q._isText ? textMatches(selected || '', q._keywords || []) : selected === q.correct);
           const isWrong = quizSubmitted && selected !== undefined && !isCorrect;
           if (q._isNum) {
             return (
@@ -2403,6 +2369,17 @@ function LinearAlgebraApp({ onBack }) {
                 <div className="la-quiz-q-text">{q.q}</div>
                 <div className="la-input-row">
                   <input className="la-num-input" type="text" value={selected || ''} onChange={e => selectQuizOption(i, e.target.value)} placeholder="Enter number" disabled={quizSubmitted} />
+                </div>
+                {quizSubmitted && <div className={'la-quiz-result ' + (isCorrect ? 'pass' : 'fail')}>{isCorrect ? 'Correct!' : 'Wrong'}</div>}
+              </div>
+            );
+          }
+          if (q._isText) {
+            return (
+              <div key={i} className="la-quiz-question">
+                <div className="la-quiz-q-text">{q.q}</div>
+                <div className="la-input-row">
+                  <input className="la-text-input" type="text" value={selected || ''} onChange={e => selectQuizOption(i, e.target.value)} placeholder="Type your answer..." disabled={quizSubmitted} />
                 </div>
                 {quizSubmitted && <div className={'la-quiz-result ' + (isCorrect ? 'pass' : 'fail')}>{isCorrect ? 'Correct!' : 'Wrong'}</div>}
               </div>
@@ -2457,25 +2434,25 @@ function LinearAlgebraApp({ onBack }) {
 
   const makeDescriptiveQuestion = (rl) => {
     const q = (rl.question || '').toLowerCase();
-    const s = (rl.story || '');
-    if (q.includes('y-intercept')||q.includes('intercept value')||q.includes('intercept?')) return `Looking at the graph above, what is the y-intercept? That is, what is the value of y when x is 0 in this scenario?`;
+    const hasGraph = !!(rl.equation);
+    if (q.includes('y-intercept')||q.includes('intercept value')||q.includes('intercept?')) return hasGraph ? `Looking at the graph above, what is the y-intercept? That is, what is the value of y when x is 0 in this scenario?` : `What is the y-intercept in this scenario? That is, what is the value of y when x is 0?`;
     if (q.includes('slope?')) return `What is the slope of this line? Remember, slope represents the rate of change — how much y increases for each unit increase in x.`;
-    if (q.includes('total for')) return `Using the graph, figure out the total value when x is the given number in this real-world context.`;
-    if (q.includes('why through origin')) return `Why does this line pass through the origin (0,0)? Look at the graph — what is special about the y-intercept?`;
-    if (q.includes('cost for')) return `Based on the graph, what is the total cost for the given quantity? Find the y-value at the corresponding x-value.`;
+    if (q.includes('total for')) return hasGraph ? `Using the graph, figure out the total value when x is the given number in this real-world context.` : `Figure out the total value when x is the given number in this real-world context.`;
+    if (q.includes('why through origin')) return hasGraph ? `Why does this line pass through the origin (0,0)? Look at the graph — what is special about the y-intercept?` : `Why does this line pass through the origin (0,0)? Think about what the y-intercept means in this context.`;
+    if (q.includes('cost for')) return hasGraph ? `Based on the graph, what is the total cost for the given quantity? Find the y-value at the corresponding x-value.` : `What is the total cost for the given quantity? Use the relationship described in the story to calculate it.`;
     if (q.includes('fixed charge')) return `What is the fixed charge or base cost in this scenario? This is the y-intercept — the cost when usage is zero.`;
-    if (q.includes('height after')) return `Using the graph, find the height after the given number of years. What is the y-value at that x-value?`;
-    if (q.includes('type of function')) return `What type of function is represented by this line? Is it linear, quadratic, or something else? How can you tell from the graph?`;
-    if (q.includes('distance for')) return `Looking at the graph, find the x-value (distance) that gives the total cost shown. Trace from the y-value to the line and down to the x-axis.`;
+    if (q.includes('height after')) return hasGraph ? `Using the graph, find the height after the given number of years. What is the y-value at that x-value?` : `Find the height after the given number of years. Use the growth rate described in the story to calculate it.`;
+    if (q.includes('type of function')) return hasGraph ? `What type of function is represented by this line? Is it linear, quadratic, or something else? How can you tell from the graph?` : `What type of function is represented here? Is it linear, quadratic, or something else? Think about how the output changes with the input.`;
+    if (q.includes('distance for')) return hasGraph ? `Looking at the graph, find the x-value (distance) that gives the total cost shown. Trace from the y-value to the line and down to the x-axis.` : `Find the distance that gives the total cost shown. Use the relationship described in the story to work backwards from cost to distance.`;
     if (q.includes('what does intersection')) return `What does the intersection point of these two lines represent in this real-world scenario? Think about what it means when the two quantities are equal.`;
     if (q.includes('break-even')) return `What is the break-even point? This is where cost equals revenue — the x-value at which the two lines intersect.`;
-    if (q.includes('what does collinear')) return `What does it mean for points to be collinear? Look at the graph — do all the points lie on a single straight line?`;
-    if (q.includes('through origin?')) return `Does this line pass through the origin (0,0)? Look at the graph and check whether (0,0) lies on the line.`;
+    if (q.includes('what does collinear')) return `What does it mean for points to be collinear? Think about whether all the points lie on a single straight line.`;
+    if (q.includes('through origin?')) return hasGraph ? `Does this line pass through the origin (0,0)? Look at the graph and check whether (0,0) lies on the line.` : `Does this line pass through the origin (0,0)? Think about what the y-intercept tells you.`;
     if (q.includes('what does inverse')) return `What does the inverse of this function tell us? How do we reverse the calculation to find the original input from the output?`;
     if (q.includes('inverse')) return `What is the inverse of this function? How would you reverse the calculation to go from y back to x?`;
     if (q.includes('intersection')) return `Find where the two lines cross. Solve the equations together to get (x,y) — the coordinates of their meeting point.`;
-    if (q.includes('why')) return `Look at the graph and explain: ${q}`;
-    return `Based on the graph above, ${q} Look at the line and the labeled points to figure out the answer.`;
+    if (q.includes('why')) return `Explain: ${q}`;
+    return `Based on the story above, ${q} Think about the relationships described to figure out the answer.`;
   };
 
   const realLifeSection = () => {
@@ -2494,7 +2471,7 @@ function LinearAlgebraApp({ onBack }) {
         </div>
         {selectedRL !== null && (
           <div className="la-reallife-expanded">
-            <MiniGraph story={rl.story} />
+            {rl.equation && <MiniGraph story={rl.story} equation={rl.equation} />}
             <div className="rl-story">{rl.story}</div>
             <div className="rl-puzzle-box">
               <div className="rl-question">
@@ -2586,19 +2563,20 @@ function LinearAlgebraApp({ onBack }) {
     <div className="la-module">
       <button className="la-back" onClick={onBack}>&larr; Home</button>
       <div className="la-header">
-        <span className="la-module-pill">
-          <button className="la-module-nav-btn" onClick={() => {
-            const prevMod = MODULES.find(m => m.id === currentModule - 1);
-            if (prevMod) { setCurrentModule(prevMod.id); setCurrentMission(prevMod.start); setPhase('intro');
-              try { localStorage.setItem('la_module', String(prevMod.id)); } catch {} }
-          }} disabled={currentModule <= 1}>&lsaquo;</button>
-          {mod.emoji} Module {mod.id}: {mod.title}
-          <button className="la-module-nav-btn" onClick={() => {
-            const nextMod = MODULES.find(m => m.id === currentModule + 1);
-            if (nextMod) { setCurrentModule(nextMod.id); setCurrentMission(nextMod.start); setPhase('intro');
-              try { localStorage.setItem('la_module', String(nextMod.id)); } catch {} }
-          }} disabled={currentModule >= MODULES.length}>&rsaquo;</button>
-        </span>
+        <div className="la-module-tabs">
+          {MODULES.map(m => {
+            const mSolved = solvedMissions.filter(id => id >= m.start && id <= m.end).length;
+            const mTotal = m.end - m.start + 1;
+            const isComplete = mSolved >= mTotal;
+            const isUnlocked = m.id === 1 || MODULES.filter(pm => pm.id < m.id).every(pm => solvedMissions.filter(id => id >= pm.start && id <= pm.end).length >= (pm.end - pm.start + 1));
+            const isCurrent = m.id === currentModule;
+            return (
+              <button key={m.id} className={'la-module-tab' + (isCurrent ? ' active' : '') + (isComplete ? ' complete' : '') + (!isUnlocked ? ' locked' : '')} onClick={() => { if (isUnlocked) { setCurrentModule(m.id); setCurrentMission(m.start); setPhase('intro'); try { localStorage.setItem('la_module', String(m.id)); } catch {} } }} disabled={!isUnlocked}>
+                {m.emoji} {m.title} {!isUnlocked ? '\uD83D\uDD12' : ''}
+              </button>
+            );
+          })}
+        </div>
         <h1>{mission.emoji} {mission.title}</h1>
         <p>Module {currentModule} &middot; Mission {currentMission - mod.start + 1} of {modTotal}</p>
       </div>
@@ -2620,20 +2598,7 @@ function LinearAlgebraApp({ onBack }) {
       {phase === 'intro' && (
         <div className="la-mission">
           <div className="la-mission-goal"><strong>Your Mission:</strong> {mission.goal}</div>
-          <p style={{ lineHeight: 1.6, color: 'var(--la-text-soft)', marginBottom: 14 }}>{mission.story}</p>
-          <button className="la-quiz-next-btn" onClick={startSkillCheck} style={{ maxWidth: 250, margin: '0 auto' }}>Accept Mission</button>
-        </div>
-      )}
-
-      {phase === 'skill' && (
-        <div className="la-mission">
-          <p style={{ marginBottom: 10, fontWeight: 500 }}>How comfortable are you with GeoGebra?</p>
-          <div className="la-skill-check">
-            <button className={'la-skill-btn' + (skillLevel === 'new' ? ' selected' : '')} onClick={() => setSkillLevel('new')}>Show me the ropes</button>
-            <button className={'la-skill-btn' + (skillLevel === 'little' ? ' selected' : '')} onClick={() => setSkillLevel('little')}>I know some things</button>
-            <button className={'la-skill-btn' + (skillLevel === 'perfect' ? ' selected' : '')} onClick={() => setSkillLevel('perfect')}>Let me cook - no hints</button>
-          </div>
-          <button className="la-check-btn" onClick={startPlay} disabled={!skillLevel} style={{ width: '100%', marginTop: 8 }}>Start Exploring</button>
+          <button className="la-quiz-next-btn" onClick={startPlay} style={{ maxWidth: 250, margin: '0 auto' }}>Accept Mission</button>
         </div>
       )}
 
@@ -2650,6 +2615,7 @@ function LinearAlgebraApp({ onBack }) {
           {feedback && feedback.correct && !quizSubmitted && (
             <div style={{ textAlign: 'center', marginTop: 12 }}>
               <button className="la-quiz-next-btn" onClick={() => { setPhase('quiz'); setQuizAnswers({}); setQuizSubmitted(false); setQuizPassed(false); setQuizDifficulty(null); setShuffledQuiz([]); }} style={{ maxWidth: 300, margin: '0 auto' }}>Take the Quick Test</button>
+              <button className="la-quiz-next-btn" onClick={startMissionQuiz} style={{ maxWidth: 300, margin: '8px auto 0', background: 'linear-gradient(135deg, #ff9800, #f44336)', color: '#fff', border: 'none' }}>Take Mission Quiz (10 questions)</button>
             </div>
           )}
         </div>
@@ -2665,6 +2631,88 @@ function LinearAlgebraApp({ onBack }) {
         <div className="la-mission">
           <div className="la-reallife-title" style={{ textAlign: 'center', marginBottom: 12 }}>Unlocked: Real-Life Applications</div>
           {realLifeSection()}
+        </div>
+      )}
+
+      {phase === 'missionquiz' && (
+        <div className="la-mission" style={{ maxWidth: 600, margin: '0 auto' }}>
+          <button className="la-back" onClick={() => setPhase('intro')}>&larr; Back to Mission</button>
+          <h3 style={{ textAlign: 'center', margin: '12px 0 4px' }}>Mission {currentMission} Quiz</h3>
+          {!mqStarted && !mqFinished && (
+            <div style={{ textAlign: 'center', padding: '16px 0' }}>
+              <p style={{ fontSize: '0.9rem', color: 'var(--clr-dim)', marginBottom: 12 }}>Test your understanding of this mission with 10 questions.</p>
+              <div className="checkbox-group" style={{ marginBottom: 12, justifyContent: 'center' }}>
+                {['easy', 'medium', 'hard'].map(d => (
+                  <label key={d} className={`checkbox-pill${mqDifficulty === d ? ' active' : ''}`}>
+                    <input type="radio" name="mq-diff" checked={mqDifficulty === d} onChange={() => setMqDifficulty(d)} />
+                    {d.charAt(0).toUpperCase() + d.slice(1)}
+                  </label>
+                ))}
+              </div>
+              <button className="la-quiz-next-btn" onClick={mqStart} style={{ maxWidth: 250, margin: '0 auto' }}>Start Quiz</button>
+            </div>
+          )}
+          {mqStarted && !mqFinished && (
+            <div style={{ textAlign: 'center' }}>
+              <div className="progress-pill center" style={{ marginBottom: 8 }}>Question {mqQNum}/{mqTotal} &middot; Score: {mqScore}</div>
+              {mqLoading && <div style={{ padding: 20, color: 'var(--clr-text-soft)' }}>Loading…</div>}
+              {!mqLoading && mqLoadError && <div style={{ padding: 16, color: 'var(--clr-wrong)' }}>{mqLoadError} <button onClick={loadMqQuestion}>Retry</button></div>}
+              {mqQuestion && (
+                <div>
+                  <div style={{ fontSize: '1.2rem', margin: '16px 0', lineHeight: 1.5 }}>{mqQuestion.prompt}</div>
+                  <input className="answer-input" type="text" value={mqAnswer} onChange={e => { if (!mqRevealed) setMqAnswer(e.target.value) }} disabled={mqRevealed} placeholder={mqQuestion.answerType === 'vector' ? '(x, y)' : mqQuestion.answerType === 'matrix' ? '[a,b;c,d]' : 'Type answer'} onKeyDown={mqKeyDown} autoFocus style={{ maxWidth: 400 }} />
+                  {mqFeedback && (
+                    <div style={{ margin: '12px 0', padding: '10px 16px', borderRadius: 8, background: mqIsCorrect ? 'rgba(76,175,80,0.12)' : 'rgba(244,67,54,0.12)', color: mqIsCorrect ? 'var(--clr-correct)' : 'var(--clr-wrong)', fontWeight: 600 }}>
+                      {mqFeedback}
+                    </div>
+                  )}
+                  <div className="button-row" style={{ marginTop: 8 }}>
+                    {!mqRevealed ? (
+                      <>
+                        <button onClick={mqSubmit} disabled={mqLoading || !mqAnswer.trim()}>Submit</button>
+                        <button onClick={mqSolve} disabled={mqLoading} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
+                        <button onClick={mqSkip} disabled={mqLoading} style={{ background: 'transparent', border: '1px solid var(--clr-text-soft)', color: 'var(--clr-text-soft)' }}>Skip</button>
+                      </>
+                    ) : (
+                      <button onClick={mqAdvance}>{mqQNum >= mqTotal ? 'Finish' : 'Next'}</button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          {mqFinished && (() => {
+            const pct = mqTotal > 0 ? Math.round((mqScore / mqTotal) * 100) : 0;
+            const passed = pct >= 80;
+            const hasNext = currentMission < mod.end || MODULES.some(m => m.id === currentModule + 1);
+            return (
+            <div style={{ textAlign: 'center', padding: '16px 0' }}>
+              <h4>Quiz Complete!</h4>
+              <p style={{ fontSize: '1.2rem', fontWeight: 700, margin: '8px 0' }}>Score: {mqScore}/{mqTotal} ({pct}%)</p>
+              {passed && <p style={{ fontSize: '0.95rem', color: 'var(--clr-correct)', fontWeight: 600, margin: '4px 0' }}>Great job! You scored above 80%!</p>}
+              {!passed && <p style={{ fontSize: '0.9rem', color: 'var(--clr-dim)', margin: '4px 0' }}>Score at least 80% to unlock the next mission.</p>}
+              {mqResults.length > 0 && (
+                <table style={{ width: '100%', borderCollapse: 'collapse', margin: '12px 0', fontSize: '0.85rem' }}>
+                  <thead><tr style={{ borderBottom: '2px solid var(--clr-border)' }}><th style={{ textAlign: 'left', padding: 6 }}>#</th><th style={{ textAlign: 'left', padding: 6 }}>Question</th><th style={{ padding: 6 }}>Result</th></tr></thead>
+                  <tbody>{mqResults.map((r, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid var(--clr-border)' }}>
+                      <td style={{ padding: 6 }}>{i + 1}</td>
+                      <td style={{ textAlign: 'left', padding: 6, maxWidth: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.prompt}</td>
+                      <td style={{ padding: 6, color: r.correct ? 'var(--clr-correct)' : 'var(--clr-wrong)', fontWeight: 600 }}>{r.correct ? '✓' : '✗'}</td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+              )}
+              <div className="button-row" style={{ marginTop: 12 }}>
+                {passed && hasNext && (
+                  <button onClick={() => { nextMission(); setMqStarted(false); setMqFinished(false); }} style={{ background: 'linear-gradient(135deg, #4caf50, #2e7d32)', color: '#fff', border: 'none' }}>Next Mission &rarr;</button>
+                )}
+                <button onClick={() => { setMqStarted(false); setMqFinished(false); }}>Try Again</button>
+                <button onClick={() => setPhase('intro')} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Back to Mission</button>
+              </div>
+            </div>
+            );
+          })()}
         </div>
       )}
     </div>
