@@ -41067,7 +41067,7 @@ function App() {
                   <p className="subtitle" style={{ margin: 0 }}>View your achievements and milestones</p>
                 </div>
               </div>
-              <ProfileShowcase onSelectTopic={(topicKey) => { window.location.href = `/?mode=${topicKey}` }} />
+              <ProfileShowcase completedTopics={completedTopics} onSelectTopic={(topicKey) => { window.location.href = `/?mode=${topicKey}` }} />
             </div>
           </AuthGate>
         </div>
@@ -41995,7 +41995,8 @@ const TOPIC_DISPLAY_NAMES = {
   'pythag': "Pythagoras' Theorem",
   'polygons': 'Polygons',
   'trig': 'Trigonometry',
-  'coordgeom': 'Coordinate Geometry'
+  'coordgeom': 'Coordinate Geometry',
+  'percent': 'Percentages'
 };
 
 const getTopicDisplayName = (key) => {
@@ -42146,10 +42147,10 @@ function AchievementCollections({ completedTopics = [], onSelectTopic }) {
   );
 }
 
-function ProfileShowcase({ onSelectTopic }) {
+function ProfileShowcase({ completedTopics = [], onSelectTopic }) {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [inventory, setInventory] = useState([])
+  const [collectionsProgress, setCollectionsProgress] = useState([])
   const [selectedSection, setSelectedSection] = useState('bookshelf')
   const [activeBadgeDetail, setActiveBadgeDetail] = useState(null)
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -42158,13 +42159,89 @@ function ProfileShowcase({ onSelectTopic }) {
 
   const dropdownRef = useRef(null)
 
-  const completedTopics = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem('tenali-completed-topics') || '[]')
-    } catch {
-      return []
+  // Dynamically compute the badges in the inventory based on collections progress and completed topics
+  const inventory = useMemo(() => {
+    const allBadges = [];
+    if (!collectionsProgress || collectionsProgress.length === 0) return [];
+
+    // A. Album Badges
+    collectionsProgress.forEach(col => {
+      allBadges.push({
+        badgeId: col.collectionId,
+        name: col.name,
+        badgeType: col.badgeType,
+        type: 'collection',
+        locked: !col.completed,
+        requirement: `Complete all topics in the "${col.name}" album.`,
+        description: col.description
+      })
+    })
+
+    // B. Topic Badges
+    const addedTopics = new Set()
+    collectionsProgress.forEach(col => {
+      col.topics.forEach(topic => {
+        if (!addedTopics.has(topic.topicKey)) {
+          addedTopics.add(topic.topicKey)
+          const level = getTopicBadgeLevel(topic.topicKey, completedTopics)
+          const topicName = getTopicDisplayName(topic.topicKey)
+          allBadges.push({
+            badgeId: topic.topicKey,
+            name: topicName,
+            badgeType: 'topic',
+            type: 'topic',
+            locked: level === 'locked',
+            requirement: `Complete Easy difficulty or start practice in the "${topicName}" quiz.`,
+            description: `Practice and master the "${topicName}" quiz to upgrade this badge from Blue to Gold!`
+          })
+        }
+      })
+    })
+
+    // C. Dynamically add custom topics not part of collections.json (e.g. Percentages)
+    if (completedTopics && Array.isArray(completedTopics)) {
+      completedTopics.forEach(tKey => {
+        const baseTopicKey = tKey.replace(/-(easy|medium|hard|gold|started|adaptive|extrahard)$/, '');
+        if (baseTopicKey && !addedTopics.has(baseTopicKey)) {
+          addedTopics.add(baseTopicKey);
+          const level = getTopicBadgeLevel(baseTopicKey, completedTopics);
+          if (level !== 'locked') {
+            const topicName = getTopicDisplayName(baseTopicKey);
+            allBadges.push({
+              badgeId: baseTopicKey,
+              name: topicName,
+              badgeType: 'topic',
+              type: 'topic',
+              locked: false,
+              requirement: `Complete Easy difficulty or start practice in the "${topicName}" quiz.`,
+              description: `Practice and master the "${topicName}" quiz to upgrade this badge from Blue to Gold!`
+            });
+          }
+        }
+      });
     }
-  }, [])
+
+    // D. Streak Badges
+    const userStreak = profile ? profile.streak : 0
+    const streaksConfig = [
+      { days: 3, id: 'streak_3', name: '3-Day Streak' },
+      { days: 7, id: 'streak_7', name: '7-Day Streak' },
+      { days: 30, id: 'streak_30', name: '30-Day Streak' }
+    ]
+    streaksConfig.forEach(s => {
+      allBadges.push({
+        badgeId: s.id,
+        name: s.name,
+        badgeType: s.id,
+        type: 'streak',
+        locked: userStreak < s.days,
+        requirement: `Maintain a consecutive active practice streak of at least ${s.days} days.`,
+        description: `Awarded for logging in and solving quizzes for ${s.days} consecutive days!`
+      })
+    })
+
+    return allBadges;
+  }, [collectionsProgress, completedTopics, profile]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -42198,62 +42275,7 @@ function ProfileShowcase({ onSelectTopic }) {
       })
       if (progressRes.ok) {
         const progressData = await progressRes.json()
-        const allBadges = []
-
-        // A. Album Badges
-        progressData.collections.forEach(col => {
-          allBadges.push({
-            badgeId: col.collectionId,
-            name: col.name,
-            badgeType: col.badgeType,
-            type: 'collection',
-            locked: !col.completed,
-            requirement: `Complete all topics in the "${col.name}" album.`,
-            description: col.description
-          })
-        })
-
-        // B. Topic Badges
-        const addedTopics = new Set()
-        progressData.collections.forEach(col => {
-          col.topics.forEach(topic => {
-            if (!addedTopics.has(topic.topicKey)) {
-              addedTopics.add(topic.topicKey)
-              const level = getTopicBadgeLevel(topic.topicKey, completedTopics)
-              const topicName = topic.topicKey.charAt(0).toUpperCase() + topic.topicKey.slice(1)
-              allBadges.push({
-                badgeId: topic.topicKey,
-                name: topicName,
-                badgeType: 'topic',
-                type: 'topic',
-                locked: level === 'locked',
-                requirement: `Complete Easy difficulty or start practice in the "${topicName}" quiz.`,
-                description: `Practice and master the "${topicName}" quiz to upgrade this badge from Blue to Gold!`
-              })
-            }
-          })
-        })
-
-        // C. Streak Badges
-        const userStreak = profileData ? profileData.streak : 0
-        const streaksConfig = [
-          { days: 3, id: 'streak_3', name: '3-Day Streak' },
-          { days: 7, id: 'streak_7', name: '7-Day Streak' },
-          { days: 30, id: 'streak_30', name: '30-Day Streak' }
-        ]
-        streaksConfig.forEach(s => {
-          allBadges.push({
-            badgeId: s.id,
-            name: s.name,
-            badgeType: s.id,
-            type: 'streak',
-            locked: userStreak < s.days,
-            requirement: `Maintain a consecutive active practice streak of at least ${s.days} days.`,
-            description: `Awarded for logging in and solving quizzes for ${s.days} consecutive days!`
-          })
-        })
-
-        setInventory(allBadges)
+        setCollectionsProgress(progressData.collections || [])
       }
     } catch (e) {
       console.error('Failed to load profile details & badges:', e)
@@ -42266,11 +42288,31 @@ function ProfileShowcase({ onSelectTopic }) {
     fetchProfileAndBadges()
   }, [])
 
+  const unlockedBadges = useMemo(() => {
+    const rawUnlocked = inventory.filter(b => !b.locked);
+    const getSortScore = (badge) => {
+      if (badge.type === 'collection') return 1;
+      if (badge.type === 'topic') {
+        const lvl = getTopicBadgeLevel(badge.badgeId, completedTopics);
+        if (lvl === 'gold')   return 2;
+        if (lvl === 'silver') return 4;
+        if (lvl === 'bronze') return 5;
+        if (lvl === 'blue')   return 6;
+      }
+      if (badge.type === 'streak') return 3;
+      return 7;
+    };
+    return [...rawUnlocked].sort((a, b) => {
+      const diff = getSortScore(a) - getSortScore(b);
+      if (diff !== 0) return diff;
+      return a.name.localeCompare(b.name);
+    });
+  }, [inventory, completedTopics]);
+
   if (loading) {
     return <div className="loading-screen">Opening Profile Showcase...</div>
   }
 
-  const unlockedBadges = inventory.filter(b => !b.locked)
   const lockedTopics = inventory.filter(b => b.type === 'topic' && (b.locked || getTopicBadgeLevel(b.badgeId, completedTopics) !== 'gold'))
   const lockedStreaks = inventory.filter(b => b.type === 'streak' && b.locked)
 
