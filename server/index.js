@@ -47,6 +47,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const wordCreator = require('./wordCreator');
 
 // Initialize Express app and configure middleware
 const app = express();
@@ -8478,7 +8479,6 @@ app.post('/diffeq-api/check', express.json(), (req, res) => {
   res.json({ correct, display, message: correct ? 'Correct!' : 'Incorrect' });
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
 // /darts-api — Visual Coordinate Geometry (Dart Board)
 // ═══════════════════════════════════════════════════════════════════════════
 app.get('/darts-api/question', (req, res) => {
@@ -8529,6 +8529,11 @@ app.post('/darts-api/check', express.json(), (req, res) => {
   const correct = userX === x && userY === y;
   res.json({ correct, message: correct ? 'Bullseye!' : 'Missed!' });
 });
+
+// WORD CREATOR PUZZLE ROUTER (wordcreator-api)
+// ═══════════════════════════════════════════════════════════════════════════
+const wordCreatorRouter = require('./routes/wordCreator');
+app.use('/wordcreator-api', wordCreatorRouter);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // /graph — Prerequisite DAG visualisation
