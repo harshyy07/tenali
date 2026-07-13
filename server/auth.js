@@ -29,6 +29,10 @@ const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
   passwordHash: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
+  gradeLevel: { type: String, default: 'Grade 3' },
+  coinBalance: { type: Number, default: 0 },
+  xpScore: { type: Number, default: 0 },
+  pinnedBadges: { type: [String], default: [] }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -39,7 +43,7 @@ let connected = false;
 
 async function connectMongo(uri = MONGO_URI) {
   if (connected) return;
-  await mongoose.connect(uri, { serverSelectionTimeoutMS: 4000 });
+  await mongoose.connect(uri, { serverSelectionTimeoutMS: 8000, family: 4 });
   connected = true;
   console.log(`[auth] Mongo connected: ${uri.replace(/\/\/.*@/, '//***@')}`);
 }
