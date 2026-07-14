@@ -41380,7 +41380,7 @@ function Home({ onSelect, isGoalSelection = false, onBack }) {
   const filteredRegular = isSearching ? regularApps.filter(matchFilter) : regularApps
   
   // Decide which items to show on the main grid list
-  const displayGridApps = isGoalSelection ? filteredRegular : [...filteredFeatured, ...filteredRegular]
+  const displayGridApps = isGoalSelection ? filteredRegular : [...filteredRegular]
 
   // Grid layout tracking (for responsive display)
   const gridRef = useRef(null)
