@@ -56,6 +56,7 @@ function useProgressSubmit(revealed, isCorrect, topic, questionId) {
 }
 import './App.css'
 import InteractiveLcmHcfApp from './LcmHcfApp';
+import IdliVadaSambharApp from './IdliVadaSambharApp';
 import VisualMathLabRedux, {
   FrogJumpTemplate,
   MathMachineTemplate,
@@ -41137,6 +41138,7 @@ function App() {
     sdt: SDTApp,                   // Speed, Distance, Time
     variation: VariationApp,       // Variation
     hcflcm: InteractiveLcmHcfApp,  // HCF & LCM
+    idlivada: IdliVadaSambharApp,  // Idli–Vada–Sambhar (Multiples, Common Multiples & LCM)
     profitloss: ProfitLossApp,     // Profit & Loss
     rounding: RoundingApp,         // Rounding
     binomial: BinomialApp,         // Binomial Theorem
@@ -41286,6 +41288,7 @@ function Home({ onSelect, isGoalSelection = false, onBack }) {
     { key: 'gk', name: 'GK', subtitle: 'General Knowledge questions', color: 'purple' },
     { key: 'gst', name: 'GST', subtitle: 'Goods & Services Tax', color: 'purple' },
     { key: 'hcflcm', name: 'HCF & LCM', subtitle: 'Highest common factor & LCM', color: 'blue' },
+    { key: 'idlivada', name: 'Idli Vada Sambhar', subtitle: 'Multiples, common multiples & LCM game', color: 'orange' },
     { key: 'heron', name: "Heron's Formula", subtitle: 'Triangle area from sides', color: 'blue' },
     { key: 'indices', name: 'Indices', subtitle: 'Laws of exponents', color: 'purple' },
     { key: 'ineq', name: 'Inequalities', subtitle: 'Linear & quadratic inequalities', color: 'green' },
