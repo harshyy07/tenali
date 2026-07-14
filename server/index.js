@@ -539,6 +539,81 @@ app.post('/addition-api/check', (req, res) => {
 });
 
 /**
+ * COLUMN ADDITION API
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Vertical column addition with carry boxes.
+ * GET  returns two numbers + precomputed carries
+ * POST validates answer digits and carry digits
+ */
+
+function computeColumnData(a, b) {
+  const sum = a + b;
+  const aStr = String(a);
+  const bStr = String(b);
+  const sStr = String(sum);
+  const opLen = Math.max(aStr.length, bStr.length);
+  const ansLen = sStr.length;
+  // Pad operands to ansLen so they align with answer columns
+  const aPad = aStr.padStart(ansLen, ' ');
+  const bPad = bStr.padStart(ansLen, ' ');
+  // carries[i] = carry INTO position i of the answer
+  // carries[0] is always 0 (ones column has no carry in)
+  const carries = new Array(ansLen).fill(0);
+  let carry = 0;
+  for (let i = ansLen - 1; i >= 0; i--) {
+    const da = parseInt(aPad[i]) || 0;
+    const db = parseInt(bPad[i]) || 0;
+    const colSum = da + db + carry;
+    carry = colSum >= 10 ? 1 : 0;
+    if (i > 0) carries[i - 1] = carry;
+  }
+  const answerDigits = sStr.split('').map(Number);
+  const aDigits = aPad.split('').map(d => d === ' ' ? null : Number(d));
+  const bDigits = bPad.split('').map(d => d === ' ' ? null : Number(d));
+  return { answerDigits, aDigits, bDigits, carries, digits: opLen };
+}
+
+app.get('/column-addition-api/question', (req, res) => {
+  const difficulty = req.query.difficulty || 'easy';
+  const digitMap = { easy: 1, medium: 2, hard: 3, extrahard: 4 };
+  const numDigits = digitMap[difficulty] || 1;
+  const range = digitRange(numDigits);
+  let a, b, data;
+  let attempts = 0;
+  do {
+    a = randomInt(Math.max(range.min, 1), range.max);
+    b = randomInt(Math.max(range.min, 1), range.max);
+    data = computeColumnData(a, b);
+    attempts++;
+  } while (data.carries.slice(1).every(c => c === 0) && attempts < 20);
+  res.json({
+    id: `ca-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    a, b,
+    answer: a + b,
+    ...data,
+  });
+});
+
+app.post('/column-addition-api/check', (req, res) => {
+  const { a, b, userAnswer, userCarries } = req.body || {};
+  const numA = Number(a), numB = Number(b);
+  const correctAnswer = numA + numB;
+  const data = computeColumnData(numA, numB);
+  const answerCorrect = Array.isArray(userAnswer) &&
+    userAnswer.map(Number).join('') === data.answerDigits.join('');
+  const carriesCorrect = Array.isArray(userCarries) &&
+    userCarries.map(Number).join('') === data.carries.join('');
+  const correct = answerCorrect && carriesCorrect;
+  res.json({
+    correct,
+    correctAnswer,
+    answerDigits: data.answerDigits,
+    correctCarries: data.carries,
+    message: correct ? 'Correct!' : carriesCorrect ? 'Answer digits wrong' : answerCorrect ? 'Carries wrong' : 'Try again',
+  });
+});
+
+/**
  * QUADRATIC EVALUATION API
  * ═══════════════════════════════════════════════════════════════════════════
  */

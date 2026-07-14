@@ -65,6 +65,28 @@ function generateExplanation(req, data) {
     return s;
   }
 
+  // ── Column Addition (must check before plain addition-api) ────
+  if (p.includes('column-addition-api')) {
+    const { a, b: num2 } = b;
+    const sum = (d.correctAnswer != null) ? d.correctAnswer : a + num2;
+    const aStr = String(a), bStr = String(num2), sStr = String(sum);
+    const maxLen = Math.max(aStr.length, bStr.length);
+    const aPad = aStr.padStart(maxLen, ' '), bPad = bStr.padStart(maxLen, ' ');
+    let s = `Problem: Column addition of ${a} + ${num2}\n\n`;
+    s += `Working right to left, column by column:\n`;
+    let carry = 0;
+    for (let i = maxLen - 1; i >= 0; i--) {
+      const da = parseInt(aPad[i]) || 0, db = parseInt(bPad[i]) || 0;
+      const total = da + db + carry;
+      const outDigit = total % 10;
+      const newCarry = total >= 10 ? 1 : 0;
+      s += `  ${da} + ${db}${carry ? ' + carry ' + carry : ''} = ${total} → write ${outDigit}${newCarry ? ', carry 1' : ''}\n`;
+      carry = newCarry;
+    }
+    s += `\nAnswer: ${a} + ${num2} = ${sum}`;
+    return s;
+  }
+
   // ── Addition ──────────────────────────────────────────────────
   if (p.includes('addition-api')) {
     const { a, b: num2 } = b;
