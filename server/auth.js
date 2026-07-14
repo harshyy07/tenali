@@ -35,7 +35,20 @@ const UserSchema = new mongoose.Schema({
   pinnedBadges: { type: [String], default: [] }
 });
 
+const ProgressSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  topic: { type: String, required: true }, // e.g., 'addition', 'basicarith'
+  difficulty: { type: String, default: 'easy' }, // current adaptive level
+  score: { type: Number, default: 0 }, // a metric of performance
+  seenQuestions: { type: [String], default: [] }, // history of unique question strings or prompts
+  updatedAt: { type: Date, default: Date.now }
+});
+
+// Ensure a user has only one progress document per topic
+ProgressSchema.index({ userId: 1, topic: 1 }, { unique: true });
+
 const User = mongoose.model('User', UserSchema);
+const Progress = mongoose.model('Progress', ProgressSchema);
 
 // ─── Connection + seeding ────────────────────────────────────────────────────
 
@@ -124,4 +137,4 @@ router.get('/me', requireAuth, (req, res) => {
   res.json({ user: req.user });
 });
 
-module.exports = { connectMongo, seedUsers, router, requireAuth, User };
+module.exports = { connectMongo, seedUsers, router, requireAuth, User, Progress };
