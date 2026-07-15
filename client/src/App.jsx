@@ -25,10 +25,14 @@ import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import VoiceAssistant from './components/VoiceAssistant';
 import { motion } from 'framer-motion';
 import OnboardingTour from './components/OnboardingTour';
+import LinearAlgebraApp from './LinearAlgebraApp';
+import { HintModal } from './components/HintSystem/HintModal.jsx';
+import { useQuizHintsAndXp } from './components/HintSystem/useHints.jsx';
 
 window.React = React;
 console.log("React version:", React.version);
-import LinearAlgebraApp from './LinearAlgebraApp'
+
+export const API = import.meta.env.VITE_API_BASE_URL || '';
 
 
 /**
@@ -41,7 +45,7 @@ function useProgressSubmit(revealed, isCorrect, topic, questionId) {
     const token = localStorage.getItem('tenali-token');
     if (!token || !topic) return;
 
-    const API = import.meta.env.VITE_API_BASE_URL || '';
+    
     fetch(`${API}/api/progress/update`, {
       method: 'POST',
       headers: {
@@ -73,8 +77,7 @@ import CoordinateGrid from './components/CoordinateGrid';
 import LanguageDashboard from './language/LanguageDashboard'
 import { VOCAB_CORPUS } from './vocabCorpus'
 
-// API base URL from environment variables (Vite)
-const API = import.meta.env.VITE_API_BASE_URL || '';
+// API base URL from environment variables (Vite) — exported as `API` at module top
 
 // App version — increment with each commit
 const TENALI_VERSION = '1.0.86'
@@ -4705,7 +4708,18 @@ function AdaptiveMixedApp({ studentName }) {
                   <button onClick={() => nextQuestion()}>
                     {questionNum >= TOTAL_QUESTIONS ? 'Finish' : 'Next'}
                   </button>
-                </div>
+                
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
               )}
             </>
           )}
@@ -38799,7 +38813,8 @@ function ComicAdditionApp({ onBack }) {
         <div style={{ textAlign: 'center', marginTop: 40 }}>
           <button className="btn" onClick={startQuiz}>Start Reading</button>
         </div>
-      </QuizLayout>
+            
+    </QuizLayout>
     )
   }
 
@@ -38855,6 +38870,28 @@ function ComicAdditionApp({ onBack }) {
           <button className="btn" onClick={handleSubmitOrNext} disabled={loading || (!revealed && !answer)}>
             {revealed ? 'Next Question' : 'Submit'}
           </button>
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
 
         {revealed && (
@@ -38869,6 +38906,7 @@ function ComicAdditionApp({ onBack }) {
           </div>
         )}
       </div>
+          
     </QuizLayout>
   )
 }
@@ -38974,7 +39012,8 @@ function DragDropCountingApp({ onBack }) {
         <div style={{ textAlign: 'center', marginTop: 40 }}>
           <button className="btn" onClick={startQuiz}>Start Practice</button>
         </div>
-      </QuizLayout>
+            
+    </QuizLayout>
     )
   }
 
@@ -39027,6 +39066,28 @@ function DragDropCountingApp({ onBack }) {
           <button className="btn" onClick={handleSubmitOrNext} disabled={loading || (!revealed && targetItems.length === 0)}>
             {revealed ? 'Next Question' : 'Submit'}
           </button>
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
 
         {revealed && (
@@ -39035,6 +39096,7 @@ function DragDropCountingApp({ onBack }) {
           </div>
         )}
       </div>
+          
     </QuizLayout>
   )
 }
@@ -39220,7 +39282,8 @@ function CoordGeomInteractiveApp({ onBack }) {
     return (
       <QuizLayout title="Coordinate Geometry" onBack={onBack}>
         <ResultsView score={score} total={Number(numQuestions)} results={results} onRetry={startGame} />
-      </QuizLayout>
+            
+    </QuizLayout>
     );
   }
 
@@ -39282,6 +39345,61 @@ function CoordGeomInteractiveApp({ onBack }) {
               Next Question
             </button>
           )}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
 
         {revealed && (
@@ -39290,6 +39408,7 @@ function CoordGeomInteractiveApp({ onBack }) {
           </div>
         )}
       </div>
+          
     </QuizLayout>
   );
 }
@@ -39467,7 +39586,8 @@ function DartBoardApp({ onBack }) {
             <button className="primary-button" onClick={startGame}>Start</button>
           </div>
         </div>
-      </QuizLayout>
+            
+    </QuizLayout>
     );
   }
 
@@ -39475,7 +39595,8 @@ function DartBoardApp({ onBack }) {
     return (
       <QuizLayout title="Dart Board" onBack={onBack}>
         <ResultsView score={score} total={Number(numQuestions)} results={results} onRetry={startGame} />
-      </QuizLayout>
+            
+    </QuizLayout>
     );
   }
 
@@ -39558,6 +39679,7 @@ function DartBoardApp({ onBack }) {
           </div>
         )}
       </div>
+          
     </QuizLayout>
   );
 }
@@ -39755,7 +39877,8 @@ function BalanceScaleApp({ onBack }) {
             </button>
           </div>
         </div>
-      </QuizLayout>
+            
+    </QuizLayout>
     )
   }
 
@@ -39822,13 +39945,25 @@ function BalanceScaleApp({ onBack }) {
         <button className="btn" onClick={() => handleCheck(false)} disabled={loading || (!revealed && rightBlocks.length === 0)}>
           {revealed ? 'Next Question' : 'Check Balance'}
         </button>
-      </div>
+      
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
 
       {revealed && (
         <div style={{ marginTop: 20 }}>
           {renderFeedback(feedback, isCorrect)}
         </div>
       )}
+          
     </QuizLayout>
   )
 }
@@ -39845,7 +39980,7 @@ function App() {
 
   useEffect(() => {
     const fetchProgress = async () => {
-      const API = import.meta.env.VITE_API_BASE_URL || '';
+      
       try {
         const token = localStorage.getItem('tenali-token');
         if (token) {
@@ -40607,7 +40742,18 @@ function App() {
               <button onClick={handleSolve} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
               {isAdaptive && <button onClick={handleSkip} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-text-soft)', color: 'var(--clr-text-soft)' }}>Skip</button>}
             </> : <button onClick={advance}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>}
-          </div>
+          
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
           {isAdaptive && <div style={{ textAlign: 'center', margin: '10px 0 4px' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--clr-text-soft)', marginRight: '8px' }}>How are you feeling?</span>
             <button onClick={() => { setAdaptScore(prev => { const next = Math.min(3, prev + 0.3); adaptScoreRef.current = next; return next }); if (!revealed) handleSkip(); else advance() }} style={{ fontSize: '0.78rem', padding: '5px 14px', borderRadius: '8px', marginRight: '6px', background: 'transparent', border: '1px solid var(--clr-correct)', color: 'var(--clr-correct)', cursor: 'pointer' }}>Too Easy</button>
@@ -40622,7 +40768,8 @@ function App() {
           <ResultsTable results={results} />
           <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
         </div>}
-      </QuizLayout>
+            
+    </QuizLayout>
     )
   }
 
@@ -41099,9 +41246,21 @@ function App() {
           <div className="button-row">
             <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
             <button onClick={onBack} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Back to Mission</button>
-          </div>
+          
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
         </div>}
-      </QuizLayout>
+            
+    </QuizLayout>
     )
   }
 
@@ -42984,6 +43143,17 @@ function MixedLabApp({ onBack, selectedActivities, initialDifficulty, initialNum
           ) : (
             <button className="kid-btn-primary" onClick={handleSubmitOrNext}>{questionNumber >= totalQ ? 'Finish Lab 🏁' : 'Next Question ➡️'}</button>
           )}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -42993,6 +43163,7 @@ function MixedLabApp({ onBack, selectedActivities, initialDifficulty, initialNum
         <ResultsTable results={results} />
         <button className="kid-btn-primary" style={{ marginTop: '20px' }} onClick={onBack}>Play Again</button>
       </div>}
+          
     </QuizLayout>
   )
 }
@@ -43046,6 +43217,7 @@ function GKApp({ onBack, isGoalMode = false }) {
   }, [isGoalMode]);
   // Timer for tracking response time per question
   const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp('gk', finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
   // Guard ref: prevents double-fetch from React StrictMode concurrent effect invocations
   const fetchingRef = useRef(false)
 
@@ -43283,6 +43455,17 @@ function GKApp({ onBack, isGoalMode = false }) {
             <button onClick={handleSubmitOrNext} disabled={loading || !selected}>Submit</button>
             <button onClick={handleSolve} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
           </> : <button onClick={handleSubmitOrNext}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -43292,6 +43475,7 @@ function GKApp({ onBack, isGoalMode = false }) {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+    
     </QuizLayout>
   )
 }
@@ -43932,6 +44116,17 @@ const fetchQuestion = async (selectedDifficulty = difficulty) => {
           ) : (
             <button onClick={handleSubmitOrNext}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>
           )}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -43943,6 +44138,7 @@ const fetchQuestion = async (selectedDifficulty = difficulty) => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+          
     </QuizLayout>
   )
 }
@@ -45152,6 +45348,17 @@ const fetchQuestion = async () => {
             <button onClick={handleSubmitOrNext} disabled={loading || answer === ''}>Submit</button>
             <button onClick={handleSolve} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
           </> : <button onClick={handleSubmitOrNext}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -45162,6 +45369,7 @@ const fetchQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+          
     </QuizLayout>
   )
 }
@@ -45481,6 +45689,17 @@ const fetchQuestion = async (selectedDifficulty = difficulty) => {
             <button onClick={handleSubmitOrNext} disabled={loading || answer === ''}>Submit</button>
             <button onClick={handleSolve} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
           </> : <button onClick={handleSubmitOrNext}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -45491,6 +45710,7 @@ const fetchQuestion = async (selectedDifficulty = difficulty) => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+          
     </QuizLayout>
   )
 }
@@ -46200,8 +46420,20 @@ function VisualMathApp({ onBack }) {
           <input className="answer-input question-count-input" type="number" min="1" max="30"
             value={numQ} onChange={e => setNumQ(Math.max(1, Number(e.target.value)))} />
         </div>
-        <div className="button-row"><button onClick={startQuiz}>Start Lab 🚀</button></div>
+        <div className="button-row"><button onClick={startQuiz}>Start Lab 🚀</button>
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
       </div>
+          
     </QuizLayout>
   )
 
@@ -46236,8 +46468,20 @@ function VisualMathApp({ onBack }) {
         </div>
         <div className="button-row">
           <button onClick={() => { setPhase('setup'); setQuestion(null) }}>Play Again 🔄</button>
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
-      </QuizLayout>
+            
+    </QuizLayout>
     )
   }
 
@@ -46280,7 +46524,19 @@ function VisualMathApp({ onBack }) {
             {qIndex + 1 >= numQ ? 'See Results 🏆' : 'Next →'}
           </button>
         )}
-      </div>
+      
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
+          
     </QuizLayout>
   )
 }
@@ -46715,9 +46971,21 @@ function MultiplyApp({ onBack }) {
           <ResultsTable results={results} />
           <div className="button-row" style={{ marginTop: 12 }}>
             <button onClick={() => setPhase('picker')}>Back to levels</button>
-          </div>
+          
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
         </div>
       )}
+          
     </QuizLayout>
   )
 }
@@ -47071,6 +47339,17 @@ const loadQuestion = async (excludeIds) => {
             <button onClick={handleSubmitOrNext} disabled={loading || !selected}>Submit</button>
             <button onClick={handleSolve} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
           </> : <button onClick={handleSubmitOrNext}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -47081,6 +47360,7 @@ const loadQuestion = async (excludeIds) => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+          
     </QuizLayout>
   )
 }
@@ -47170,6 +47450,7 @@ function makeMCQuizApp({ title, subtitle, apiPath, diffLabels, tip, adaptiveOnly
     const [results, setResults] = useState([])
     const [correctOption, setCorrectOption] = useState('')
     const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp(apiPath.split('-')[0], finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
     const advanceFnRef = useRef(null)
     const adaptScoreRef = useRef(0)
     const submittedRef = useRef(false)
@@ -47447,7 +47728,18 @@ function makeMCQuizApp({ title, subtitle, apiPath, diffLabels, tip, adaptiveOnly
             ) : (
               <button onClick={advance}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>
             )}
-          </div>
+          
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
           {results.length > 0 && <ResultsTable results={results} />}
         </>}
         {finished && <div className="welcome-box">
@@ -47456,7 +47748,8 @@ function makeMCQuizApp({ title, subtitle, apiPath, diffLabels, tip, adaptiveOnly
           <ResultsTable results={results} />
           <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
         </div>}
-      </QuizLayout>
+      
+    </QuizLayout>
     )
   }
 }
@@ -47489,6 +47782,7 @@ function makeQuizApp({ title, subtitle, apiPath, diffLabels, placeholders, tip, 
   }, [isGoalMode]);
     const [results, setResults] = useState([])
     const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp(apiPath.split('-')[0], finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
     const advanceFnRef = useRef(null)
     // Keep a ref for adaptive score so loadQuestion always sees latest
     const adaptScoreRef = useRef(0)
@@ -47756,6 +48050,16 @@ function makeQuizApp({ title, subtitle, apiPath, diffLabels, placeholders, tip, 
               <button onClick={handleSolve} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
               {isAdaptive && <button onClick={handleSkip} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-text-soft)', color: 'var(--clr-text-soft)' }}>Skip</button>}
             </> : <button onClick={advance}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>}
+            <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+              questionId={typeof question !== 'undefined' && question ? question._id : null}
+              questionData={typeof question !== 'undefined' ? question : null}
+              answerData={{
+                answer: typeof answer !== 'undefined' ? answer : '',
+                correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+                isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+              }}
+              revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+            />
           </div>
           {isAdaptive && <div style={{ textAlign: 'center', margin: '10px 0 4px' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--clr-text-soft)', marginRight: '8px' }}>How are you feeling?</span>
@@ -47770,7 +48074,19 @@ function makeQuizApp({ title, subtitle, apiPath, diffLabels, placeholders, tip, 
           <p className="final-score">Final score: {score}/{totalQ}</p>
           {isAdaptive && <p style={{ fontSize: '0.9rem', color: 'var(--clr-dim)' }}>Reached level: <strong style={{ color: ADAPT_COLORS[curAdaptLevel] }}>{ADAPT_LABELS[curAdaptLevel]}</strong></p>}
           <ResultsTable results={results} />
-          <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
+          <div className="button-row">
+            <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
+            <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+              questionId={typeof question !== 'undefined' && question ? question._id : null}
+              questionData={typeof question !== 'undefined' ? question : null}
+              answerData={{
+                answer: typeof answer !== 'undefined' ? answer : '',
+                correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+                isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+              }}
+              revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+            />
+          </div>
         </div>}
       </QuizLayout>
     )
@@ -48218,6 +48534,16 @@ const loadQuestion = async () => {
             </>
           )
             : <button onClick={advance}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>}
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+            questionId={typeof question !== 'undefined' && question ? question._id : null}
+            questionData={typeof question !== 'undefined' ? question : null}
+            answerData={{
+              answer: typeof answer !== 'undefined' ? answer : '',
+              correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+              isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+            }}
+            revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+          />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -48226,7 +48552,19 @@ const loadQuestion = async () => {
         <p className="final-score">Final score: {score}/{totalQ}</p>
         {isAdaptive && <p style={{ fontSize: '0.9rem', color: 'var(--clr-dim)' }}>Reached level: <strong style={{ color: ADAPT_COLORS[curAdaptLevel] }}>{ADAPT_LABELS[curAdaptLevel]}</strong></p>}
         <ResultsTable results={results} />
-        <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
+        <div className="button-row">
+          <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+            questionId={typeof question !== 'undefined' && question ? question._id : null}
+            questionData={typeof question !== 'undefined' ? question : null}
+            answerData={{
+              answer: typeof answer !== 'undefined' ? answer : '',
+              correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+              isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+            }}
+            revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+          />
+        </div>
       </div>}
     </QuizLayout>
   )
@@ -48720,6 +49058,7 @@ function GymApp({ onBack }) {
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState('')
   const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp('gym', finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
   const advanceFnRef = useRef(null)
   const submittedRef = useRef(false)
   const advancedRef = useRef(false)
@@ -49146,6 +49485,17 @@ function GymApp({ onBack }) {
           ) : (
             <button onClick={advance}>Next Question</button>
           )}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -49162,6 +49512,7 @@ function GymApp({ onBack }) {
           <button onClick={() => setPhase('setup')}>Workout Again</button>
         </div>
       )}
+          
     </QuizLayout>
   )
 }
@@ -50107,6 +50458,17 @@ const loadQuestion = async () => {
             <button onClick={handleSubmit} disabled={loading || !question || !isComplete()}>Submit</button>
             <button onClick={handleSolve} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
           </> : <button onClick={advance}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -50117,6 +50479,7 @@ const loadQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+          
     </QuizLayout>
   )
 }
@@ -50381,6 +50744,7 @@ function RandomMixApp({ onBack, isGoalMode = false }) {
     }
   }, [isGoalMode]);
   const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp('mix', finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
   const advanceFnRef = useRef(null)
   const submittedRef = useRef(false)
   const advancedRef = useRef(false)
@@ -50708,9 +51072,32 @@ function RandomMixApp({ onBack, isGoalMode = false }) {
           </p>
           <div className="button-row">
             <button onClick={startQuiz}>Start Random Mix</button>
-          </div>
+          
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
-      </QuizLayout>
+        </div>
+      
+    </QuizLayout>
     )
   }
 
@@ -50749,7 +51136,8 @@ function RandomMixApp({ onBack, isGoalMode = false }) {
             Play Again
           </button>
         </div>
-      </QuizLayout>
+            
+    </QuizLayout>
     )
   }
 
@@ -50824,7 +51212,18 @@ function RandomMixApp({ onBack, isGoalMode = false }) {
                 {questionNumber >= totalQuestions ? 'Finish' : 'Next'}
               </button>
             )}
-          </div>
+          
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
 
           {/* Always-visible Easy/Difficult self-report buttons */}
           <div style={{ textAlign: 'center', margin: '10px 0 4px' }}>
@@ -50852,6 +51251,7 @@ function RandomMixApp({ onBack, isGoalMode = false }) {
         </>
       )}
       {results.length > 0 && <ResultsTable results={results} />}
+          
     </QuizLayout>
   )
 }
@@ -50882,6 +51282,7 @@ function SetsApp({ onBack, isGoalMode = false }) {
     }
   }, [isGoalMode]);
   const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp('sets', finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
   const advanceFnRef = useRef(null)
   const advancedRef = useRef(false)
   const submittedRef = useRef(false)
@@ -51076,6 +51477,17 @@ const loadQuestion = async () => {
             <button onClick={handleSubmit} disabled={loading || !answer.trim()}>Submit</button>
             <button onClick={handleSolve} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
           </> : <button onClick={advance}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -51086,6 +51498,7 @@ const loadQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+    
     </QuizLayout>
   )
 }
@@ -51116,6 +51529,7 @@ function SequencesApp({ onBack, isGoalMode = false }) {
     }
   }, [isGoalMode]);
   const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp('sequences', finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
   const advanceFnRef = useRef(null)
   const advancedRef = useRef(false)
   const submittedRef = useRef(false)
@@ -51302,6 +51716,17 @@ const loadQuestion = async () => {
             <button onClick={handleSubmit} disabled={loading || !answer.trim()}>Submit</button>
             <button onClick={handleSolve} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
           </> : <button onClick={advance}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -51312,6 +51737,7 @@ const loadQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+    
     </QuizLayout>
   )
 }
@@ -51342,6 +51768,7 @@ function RatioApp({ onBack, isGoalMode = false }) {
     }
   }, [isGoalMode]);
   const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp('ratio', finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
   const advanceFnRef = useRef(null)
   const advancedRef = useRef(false)
   const submittedRef = useRef(false)
@@ -51544,6 +51971,17 @@ const loadQuestion = async () => {
             <button onClick={handleSubmit} disabled={loading || !answer.trim()}>Submit</button>
             <button onClick={handleSolve} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
           </> : <button onClick={advance}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -51554,6 +51992,7 @@ const loadQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+    
     </QuizLayout>
   )
 }
@@ -51584,6 +52023,7 @@ function PercentApp({ onBack, isGoalMode = false }) {
     }
   }, [isGoalMode]);
   const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp('percent', finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
   const advanceFnRef = useRef(null)
   const advancedRef = useRef(false)
   const submittedRef = useRef(false)
@@ -51785,6 +52225,17 @@ const loadQuestion = async () => {
             <button onClick={handleSubmit} disabled={loading || !answer.trim()}>Submit</button>
             <button onClick={handleSolve} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
           </> : <button onClick={advance}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -51795,6 +52246,7 @@ const loadQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+    
     </QuizLayout>
   )
 }
@@ -51836,6 +52288,7 @@ function IndicesApp({ onBack, isGoalMode = false }) {
     }
   }, [isGoalMode]);
   const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp('indices', finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
   const advanceFnRef = useRef(null)
 
   const effectiveDiff = () => (isAdaptive) ? adaptiveLevel(adaptScoreRef.current) : difficulty
@@ -52070,6 +52523,17 @@ const loadQuestion = async () => {
           ) : (
             <button onClick={advance}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>
           )}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -52083,6 +52547,7 @@ const loadQuestion = async () => {
           <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
         </div>
       )}
+    
     </QuizLayout>
   )
 }
@@ -52125,6 +52590,7 @@ function SurdsApp({ onBack, isGoalMode = false }) {
     }
   }, [isGoalMode]);
   const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp('surds', finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
   const advanceFnRef = useRef(null)
 
   const effectiveDiff = () => (isAdaptive) ? adaptiveLevel(adaptScoreRef.current) : difficulty
@@ -52392,6 +52858,17 @@ const loadQuestion = async () => {
           ) : (
             <button onClick={advance}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>
           )}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -52405,6 +52882,7 @@ const loadQuestion = async () => {
           <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
         </div>
       )}
+    
     </QuizLayout>
   )
 }
@@ -52448,6 +52926,7 @@ function FractionAddApp({ onBack, isGoalMode = false }) {
   }, [isGoalMode]);
   // Timer for per-question timing
   const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp('fractionadd', finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
 
   // ── Refs for auto-advance ────────────────────────────────────────────
   const advanceFnRef = useRef(null)
@@ -52802,6 +53281,17 @@ const loadQuestion = async () => {
           ) : (
             <button onClick={advance}>{questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question'}</button>
           )}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
 
         {results.length > 0 && <ResultsTable results={results} />}
@@ -52817,6 +53307,7 @@ const loadQuestion = async () => {
           <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
         </div>
       )}
+    
     </QuizLayout>
   )
 }
@@ -53134,7 +53625,18 @@ const generateRound = (n) => {
           </div>
           <div className="button-row">
             <button onClick={startGame}>Start Game</button>
-          </div>
+          
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
         </div>
       )}
       {started && !finished && <>
@@ -53175,6 +53677,7 @@ const generateRound = (n) => {
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
       {started && !finished && results.length > 0 && <ResultsTable results={results} />}
+          
     </QuizLayout>
   )
 }
@@ -53234,6 +53737,7 @@ function SqrtApp({ onBack, isGoalMode = false }) {
   }, [isGoalMode]);
   // Timer instance for tracking time per question
   const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp('sqrt', finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
   const advanceFnRef = useRef(null)
 
   const effectiveDiff = () => (isAdaptive) ? adaptiveLevel(adaptScoreRef.current) : difficulty
@@ -53466,6 +53970,17 @@ const fetchQuestion = async (step) => {
         <div className="button-row">
           {!revealed && <button onClick={handleSolve} disabled={loading || answer === ''} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>}
           <button onClick={handleSubmitOrNext} disabled={loading || (!revealed && answer === '')}>{revealed ? (questionNumber >= totalQ ? 'Finish Quiz' : 'Next Question') : 'Submit'}</button>
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -53476,6 +53991,7 @@ const fetchQuestion = async (step) => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+    
     </QuizLayout>
   )
 }
@@ -53776,6 +54292,17 @@ const loadQuestion = async () => {
             <button onClick={handleSubmit} disabled={loading || userCoeffs.some(c => c === '')}>Submit</button>
             <button onClick={handleSolve} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>
           </> : <button onClick={advance}>{questionNumber >= totalQ ? 'Finish' : 'Next'}</button>}
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -53786,6 +54313,7 @@ const loadQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+          
     </QuizLayout>
   )
 }
@@ -54087,6 +54615,17 @@ const loadQuestion = async () => {
           <button onClick={revealed ? () => advanceRef.current() : handleSubmit} disabled={loading || (!revealed && (!userP || !userQ || !userR || !userS))}>
             {revealed ? (questionNumber >= totalQ ? 'Finish' : 'Next') : 'Submit'}
           </button>
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -54097,6 +54636,7 @@ const loadQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+          
     </QuizLayout>
   )
 }
@@ -54425,6 +54965,17 @@ const loadQuestion = async () => {
         {renderFeedback(feedback, isCorrect)}
         {revealed && <div className="button-row">
           <button onClick={() => advanceFnRef.current()}>{questionNumber >= totalQ ? 'Finish' : 'Next'}</button>
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>}
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -54435,6 +54986,7 @@ const loadQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+          
     </QuizLayout>
   )
 }
@@ -54744,6 +55296,17 @@ const loadQuestion = async () => {
           <button onClick={revealed ? () => advanceFnRef.current() : handleSubmit} disabled={loading || (!revealed && !userR1)}>
             {revealed ? (questionNumber >= totalQ ? 'Finish' : 'Next') : 'Submit'}
           </button>
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -54754,6 +55317,7 @@ const loadQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+          
     </QuizLayout>
   )
 }
@@ -55076,6 +55640,17 @@ const loadQuestion = async () => {
           <button onClick={revealed ? () => advanceFnRef.current() : handleSubmit} disabled={loading || (!revealed && (!userX || !userY || (is3x3 && !userZ)))}>
             {revealed ? (questionNumber >= totalQ ? 'Finish' : 'Next') : 'Submit'}
           </button>
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -55086,6 +55661,7 @@ const loadQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+          
     </QuizLayout>
   )
 }
@@ -55145,6 +55721,7 @@ function FuncEvalApp({ onBack, isGoalMode = false }) {
   }, [isGoalMode]);
   // Timer instance for tracking elapsed time per question
   const timer = useTimer()
+  const { hintsUsedCount, xpBreakdown, bonusLoading } = useQuizHintsAndXp('funceval', finished, score, totalQ, typeof isCorrect !== 'undefined' ? (isCorrect || false) : false, results);
   const advanceFnRef = useRef(null)
 
   const effectiveDiff = () => (isAdaptive) ? adaptiveLevel(adaptScoreRef.current) : difficulty
@@ -55363,6 +55940,17 @@ const loadQuestion = async () => {
           <button onClick={revealed ? () => advanceFnRef.current() : handleSubmit} disabled={loading || (!revealed && !answer)}>
             {revealed ? (questionNumber >= totalQ ? 'Finish' : 'Next') : 'Submit'}
           </button>
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -55373,6 +55961,7 @@ const loadQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+    
     </QuizLayout>
   )
 }
@@ -55656,6 +56245,17 @@ const loadQuestion = async () => {
           <button onClick={revealed ? () => advanceFnRef.current() : handleSubmit} disabled={loading || (!revealed && (!userM || !userC))}>
             {revealed ? (questionNumber >= totalQ ? 'Finish' : 'Next') : 'Submit'}
           </button>
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </>}
@@ -55666,6 +56266,7 @@ const loadQuestion = async () => {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+          
     </QuizLayout>
   )
 }
@@ -56931,6 +57532,16 @@ const startQuiz = async () => {
         </div>
         <div className="button-row">
           <button onClick={startQuiz} disabled={selected.length === 0}>Start Custom Quiz</button>
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+            questionId={typeof question !== 'undefined' && question ? question._id : null}
+            questionData={typeof question !== 'undefined' ? question : null}
+            answerData={{
+              answer: typeof answer !== 'undefined' ? answer : '',
+              correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+              isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+            }}
+            revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+          />
         </div>
       </QuizLayout>
     )
@@ -56953,6 +57564,16 @@ const startQuiz = async () => {
           <button onClick={revealed ? () => advanceRef.current() : handleSubmit} disabled={loading}>
             {revealed ? (qIndex + 1 >= totalQ ? 'Finish' : 'Next') : 'Submit'}
           </button>
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+            questionId={typeof question !== 'undefined' && question ? question._id : null}
+            questionData={typeof question !== 'undefined' ? question : null}
+            answerData={{
+              answer: typeof answer !== 'undefined' ? answer : '',
+              correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+              isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+            }}
+            revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+          />
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
       </QuizLayout>
@@ -56965,7 +57586,30 @@ const startQuiz = async () => {
       <div className="welcome-box">
         <p className="final-score">Final score: {score}/{totalQ}</p>
         <ResultsTable results={results} />
-        <button onClick={() => setPhase('setup')}>Play Again</button>
+        <div className="button-row" style={{ marginTop: '16px' }}>
+          <button onClick={() => setPhase('setup')}>Play Again</button>
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+            questionId={typeof question !== 'undefined' && question ? question._id : null}
+            questionData={typeof question !== 'undefined' ? question : null}
+            answerData={{
+              answer: typeof answer !== 'undefined' ? answer : '',
+              correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+              isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+            }}
+            revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+          />
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
       </div>
     </QuizLayout>
   )
@@ -58469,7 +59113,8 @@ function Tatsavit1App({ onBack, isGoalMode = false }) {
           <button className="submit-btn" onClick={handleRestart}>Play Again</button>
         </div>
         {results.length > 0 && <ResultsTable results={results} />}
-      </QuizLayout>
+            
+    </QuizLayout>
     )
   }
 
@@ -58527,7 +59172,41 @@ function Tatsavit1App({ onBack, isGoalMode = false }) {
             ← Previous
           </button>
         )}
-      </div>
+      
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
+          
     </QuizLayout>
   )
 }
@@ -59376,7 +60055,8 @@ const startQuiz = () => {
             </div>
           ))}
         </div>
-      </QuizLayout>
+            
+    </QuizLayout>
     )
   }
 
@@ -59421,7 +60101,8 @@ const startQuiz = () => {
             </button>
           </div>
         </div>
-      </QuizLayout>
+            
+    </QuizLayout>
     )
   }
 
@@ -59512,7 +60193,19 @@ const startQuiz = () => {
           style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>
           {showSolve ? 'Hide Explanation' : 'Explanation'}
         </button>
-      </div>
+      
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
+        </div>
+          
     </QuizLayout>
   )
 }
@@ -59981,8 +60674,20 @@ function TatsavitLineApp({ onBack }) {
             style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>
             {showAnswer ? 'Hide answer' : 'Show answer'}
           </button>
+        
+          <HintModal concept={typeof apiPath !== 'undefined' && apiPath ? apiPath.split('-')[0] : 'gk'}
+        questionId={typeof question !== 'undefined' && question ? question._id : null}
+        questionData={typeof question !== 'undefined' ? question : null}
+        answerData={{
+          answer: typeof answer !== 'undefined' ? answer : '',
+          correctOption: typeof correctOption !== 'undefined' ? correctOption : '',
+          isCorrect: typeof isCorrect !== 'undefined' ? (isCorrect || false) : false
+        }}
+        revealed={typeof isCorrect !== 'undefined' ? (isCorrect !== null) : false}
+      />
         </div>
       </div>
+          
     </QuizLayout>
   )
 }
@@ -60073,7 +60778,10 @@ export function QuizLayout({ title, subtitle, onBack, children, timer, sessionGo
         </div>
       </div>
       <h1 style={{ fontSize: 'clamp(1.8rem, 3.8vw, 2.4rem)' }}>{title}</h1>
-      {processedChildren}
+      <div className="quiz-layout-content" style={{ display: 'flex', flexDirection: 'column' }}>
+        {children}
+        <div id="hint-portal-wrapper"></div>
+      </div>
     </>
   )
 }
@@ -61396,6 +62104,23 @@ function MensurationLabApp({ onBack, initialDifficulty, initialNumQuestions, ini
   };
 
   return <GenericLabApp title="Mensuration" subtitle="Geometry & Shape Puzzles" endpoint="/api/mensuration-lab" onBack={onBack} renderQuestionCustom={renderCustom} initialDifficulty={initialDifficulty} initialNumQuestions={initialNumQuestions} initialStarted={initialStarted} />;
+}
+
+
+export function getLocalXp() {
+  try {
+    const val = localStorage.getItem('tenali_xp');
+    return val ? parseInt(val, 10) : 0;
+  } catch { return 0; }
+}
+export function setLocalXp(val) {
+  try { localStorage.setItem('tenali_xp', val.toString()); } catch {}
+}
+export function changeXp(delta) {
+  const current = getLocalXp();
+  const next = Math.max(0, current + delta);
+  setLocalXp(next);
+  return next;
 }
 
 export default App

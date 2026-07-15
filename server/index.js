@@ -68,8 +68,10 @@ app.use(express.static(clientDistPath));
 // serves; only the auth endpoints will return 503.
 const auth = require('./auth');
 const progress = require('./progress');
+const hints = require('./hints');
 app.use('/api/auth', auth.router);
 app.use('/api/progress', progress.router);
+app.use('/api/hints', hints);
 auth.seedUsers().catch(() => {});  // always populate in-memory fallback
 auth.connectMongo()
   .then(() => auth.seedUsers())
@@ -301,6 +303,7 @@ app.use(async (req, res, next) => {
 
 
 const { generateExplanation } = require('./explanations');
+global.generateExplanation = generateExplanation;
 
 /**
  * Generate a random integer between min and max (inclusive)

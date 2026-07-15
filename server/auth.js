@@ -28,6 +28,36 @@ const JWT_TTL = process.env.JWT_TTL || '14d';
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
   passwordHash: { type: String, required: true },
+  xp: { type: Number, default: 500 },
+  hintLogs: [{
+    concept: String,
+    questionId: String,
+    level: Number,
+    unlockedAt: { type: Date, default: Date.now }
+  }],
+  lessonStats: [{
+    concept: String,
+    questionsCount: Number,
+    correctCount: { type: Number, default: 0 },
+    hintsUsed: Number,
+    bonusAwarded: Boolean,
+    perfectScoreBonusAwarded: { type: Boolean, default: false },
+    completedAt: { type: Date, default: Date.now }
+  }],
+  // Reward-system fields (v2 hint feature)
+  // lastDailyCheckin: date string 'YYYY-MM-DD' (server local) for the most recent
+  // day the user was awarded a daily check-in bonus. Compared against today
+  // before granting +5 XP.
+  lastDailyCheckin: { type: String, default: null },
+  dailyCheckinCount: { type: Number, default: 0 },
+  // correctStats: ring buffer (most recent ~200 entries) of per-correct-answer
+  // +1 XP events. Powers future analytics and the anti-cheese cap.
+  correctStats: [{
+    concept: String,
+    at: { type: Date, default: Date.now }
+  }],
+  firstMergeDone: { type: Boolean, default: false },
+  lessonsCompleted: { type: [String], default: [] },
   createdAt: { type: Date, default: Date.now },
   gradeLevel: { type: String, default: 'Grade 3' },
   coinBalance: { type: Number, default: 0 },

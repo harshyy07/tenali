@@ -3016,3 +3016,267 @@ button:disabled {
   }
 }
 
+/* ═══════════════════════════════════════════════════════
+   PROGRESSIVE HINTS PANEL
+   ═══════════════════════════════════════════════════════ */
+
+@keyframes hintFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes wobble-anim {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-5px); }
+  40%     { transform: translateX(5px); }
+  60%     { transform: translateX(-4px); }
+  80%     { transform: translateX(4px); }
+}
+
+.wobble-anim { animation: wobble-anim 0.45s ease; }
+
+.hint-fade-in {
+  animation: hintFadeIn 0.22s ease-out;
+}
+
+/* ── Accordion list ── */
+.hint-accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Individual card ── */
+.hint-accordion-card {
+  background: #211e1b;
+  border: 1px solid rgba(255,245,230,0.07);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+/* Next-available card: orange border glow */
+.hint-accordion-card.active {
+  border-color: #e07b39;
+}
+
+/* ── Header row ── */
+.hint-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+  gap: 12px;
+}
+
+.hint-accordion-card.locked .hint-accordion-header {
+  cursor: default;
+}
+
+.hint-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* ── Numbered circle ── */
+.hint-circle-num {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  background: #4a4540;
+  color: #a89e94;
+  transition: background 0.2s, color 0.2s;
+}
+
+.hint-accordion-card.unlocked .hint-circle-num {
+  background: #e07b39;
+  color: #fff;
+}
+
+/* Active (next to unlock) also gets the orange circle */
+.hint-accordion-card.active .hint-circle-num {
+  background: #4a4540;
+  color: #c0b8b0;
+}
+
+/* ── Title text ── */
+.hint-title-text {
+  font-size: 0.97rem;
+  font-weight: 600;
+  color: #e8e2dc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hint-accordion-card.locked .hint-title-text {
+  color: #7a7370;
+  font-weight: 500;
+}
+
+/* ── Status badge (right side) ── */
+.hint-status-indicator {
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hint-status-indicator.used {
+  color: #8a8480;
+}
+
+.hint-status-indicator.cost {
+  color: #e07b39;
+}
+
+.hint-status-indicator.locked {
+  color: #6a6460;
+}
+
+/* ── Chevron ── */
+.hint-chevron {
+  color: #8a8480;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.hint-accordion-card.open .hint-chevron {
+  transform: rotate(180deg);
+}
+
+/* ── Accordion body ── */
+.hint-accordion-body {
+  padding: 0 16px 16px 16px;
+  animation: hintFadeIn 0.18s ease-out;
+}
+
+.hint-inner-content {
+  font-size: 0.9rem;
+  color: #d4cdc7;
+  line-height: 1.6;
+}
+
+.hint-sub-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #e07b39;
+  margin-bottom: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(224,123,57,0.12);
+}
+
+.hint-locked-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hint-locked-text {
+  font-size: 0.85rem;
+  color: #8a8480;
+}
+
+/* ── Reveal button ── */
+.hint-reveal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid rgba(224,123,57,0.5);
+  background: transparent;
+  color: #e07b39;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+
+.hint-reveal-btn:hover:not(:disabled) {
+  background: rgba(224,123,57,0.15);
+  border-color: #e07b39;
+}
+
+.hint-reveal-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── nudge chip styles ── */
+.nudge-chips-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nudge-chip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(255,245,230,0.04);
+  border: 1px solid rgba(255,245,230,0.07);
+  border-radius: 8px;
+  padding: 10px 12px;
+  animation: hintFadeIn 0.2s ease-out both;
+}
+
+.nudge-chip-icon {
+  flex-shrink: 0;
+  color: #e07b39;
+  margin-top: 1px;
+}
+
+.nudge-chip-text {
+  font-size: 0.9rem;
+  color: #d4cdc7;
+  line-height: 1.5;
+}
+
+mark.nudge-keyword {
+  background: rgba(224,123,57,0.18);
+  color: #f0a060;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+/* ── SVG hint block ── */
+.hint-svg-block svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Trigger button (inline "Hints" button) ── */
+.progressive-hint-toggle {
+  background: transparent;
+  color: var(--clr-accent, #e07b39);
+  border: 1.5px solid var(--clr-accent, #e07b39);
+  border-radius: 8px;
+  padding: 9px 22px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.18s, color 0.18s;
+}
+
+.progressive-hint-toggle:hover {
+  background: rgba(224,123,57,0.12);
+}

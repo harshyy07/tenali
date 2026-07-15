@@ -1,4 +1,4 @@
-/**
+﻿/**
  * VITE BUILD CONFIGURATION - MAIN CLIENT
  *
  * Configuration file for Vite (build tool and development server) for the main Tenali client.
@@ -17,7 +17,7 @@
  * - Proxying: Redirects API calls to backend services on port 4000
  *
  * API Proxy Routes:
- * All API requests are proxied to a central backend at http://127.0.0.1:4000
+ * All API requests are proxied to a central backend at http://127.0.0.1:4001
  * This allows the dev server and different modules to be served from a single origin
  * without CORS issues during development.
  */
@@ -38,88 +38,107 @@ export default defineConfig({
     // API proxy configuration: Forward API requests to backend services
     proxy: {
       // Primary API endpoint - routes to main quiz service
-      '/api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // General Knowledge quiz API
-      '/gk-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/gk-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Word Creator quiz API
-      '/wordcreator-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/wordcreator-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Addition quiz API
-      '/addition-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/addition-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Quadratic equations quiz API
-      '/quadratic-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/quadratic-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Square root estimation quiz API
-      '/sqrt-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/sqrt-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Multiplication quiz API
-      '/multiply-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/multiply-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Visual Math Lab API (visual multiplication & division)
-      '/visual-math-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/visual-math-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Vocabulary quiz API
-      '/vocab-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/vocab-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Concept Matching API
-      '/concept-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/concept-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Polynomial multiplication quiz API
-      '/polymul-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/polymul-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Polynomial factoring quiz API
-      '/polyfactor-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/polyfactor-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Prime factorization quiz API
-      '/primefactor-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/primefactor-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Quadratic formula quiz API
-      '/qformula-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/qformula-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Systems of equations quiz API
-      '/simul-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/simul-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Function evaluation quiz API
-      '/funceval-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/funceval-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Linear equations quiz API
-      '/lineq-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/lineq-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Basic arithmetic quiz API
-      '/basicarith-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/basicarith-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Fraction addition quiz API
-      '/fractionadd-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/fractionadd-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Surds quiz API
-      '/surds-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/surds-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Indices quiz API
-      '/indices-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/indices-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Sequences & Series quiz API
-      '/sequences-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/sequences-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Ratio & Proportion quiz API
-      '/ratio-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/ratio-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Percentages quiz API
-      '/percent-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/percent-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
       // Sets quiz API
-      '/sets-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/trig-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/ineq-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/coordgeom-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/prob-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/stats-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/matrix-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/vectors-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/transform-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/mensur-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/bearings-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/log-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/diff-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/bases-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/circle-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/integ-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/stdform-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/bounds-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/sdt-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/variation-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/hcflcm-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/profitloss-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/rounding-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/binomial-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/complex-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/angles-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/triangles-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/congruence-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/pythag-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/polygons-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/similarity-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/linearalgebra-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/la-mission-quiz-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
-      '/darts-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      '/sets-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/trig-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/ineq-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/coordgeom-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/prob-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/stats-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/matrix-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/vectors-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/transform-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/mensur-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/bearings-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/log-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/diff-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/bases-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/circle-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/integ-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/stdform-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/bounds-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/sdt-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/variation-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/hcflcm-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/profitloss-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/rounding-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/binomial-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/complex-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/angles-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/triangles-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/congruence-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/pythag-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/polygons-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/similarity-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/dotprod-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/squaring-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/tatsavit-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/lineareq-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/decimals-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/permcomb-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/limits-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/invtrig-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/remfactor-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/heron-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/shares-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/banking-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/gst-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/section-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/linprog-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/circmeasure-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/conics-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/diffeq-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/linearalgebra-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/la-mission-quiz-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
+      '/darts-api': { target: 'http://127.0.0.1:4001', changeOrigin: true },
     },
   },
 })
+
