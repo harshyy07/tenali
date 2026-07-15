@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+Version 2 - 2026-07-15
+Overview
+Improved the Percentages learning and quiz experience with a clearer step-by-step explanation flow and a refreshed kid-friendly adventure theme.
+
+1. Explanation Flow Improvements
+
+- Updated the concept theory section to reveal one idea at a time with progress indicators.
+- Updated the worked example to reveal one step at a time, including a separate final answer card.
+- Added Previous and Next navigation within the theory and worked-example sections.
+- Increased step-card spacing and text size for improved readability.
+- Simplified the section progress label to show the current section number.
+
+2. Percentages Quiz UI Redesign
+
+- Replaced the previous percentages color palette with a polished dark/light adventure theme.
+- Added centralized theme variables for backgrounds, text, borders, accents, status colors, and shadows.
+- Refreshed the quiz shell, progress area, buttons, mute control, animations, stars, and card styling.
+- Improved responsive layout behavior and fixed the quiz header mute-button overlap.
+
+Status
+
+Implemented for the Percentages explanation and quiz flows.
+
 Version 1 — 2026-07-08
 Overview
 This release delivers a complete learning loop for Percentages — Level 1: Find a Percentage: a 5-part explanation screen (interactive visual → click-through theory → worked example → AI study assistant prompt → understanding check) feeding into a brand-new, kid-friendly graded quiz, tied together by an escalation system that sends struggling students back to the exact part of the explanation they need.
