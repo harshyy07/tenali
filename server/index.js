@@ -2489,7 +2489,10 @@ app.post('/fractionadd-api/check', (req, res) => {
     // Hard: expect answer as mixed number {ansWhole, ansNum, ansDen}
     const mixed = toMixed(simplified.num, simplified.den);
     // User answer: convert to improper fraction for comparison
-    const userTotal = (Number(body.ansWhole) || 0) * (Number(body.ansDen) || 1) + (Number(body.ansNum) || 0);
+    const whole = Number(body.ansWhole) || 0;
+    const den = Number(body.ansDen) || 1;
+    const num = Number(body.ansNum) || 0;
+    const userTotal = whole < 0 ? (whole * den - num) : (whole * den + num);
     const userDen = Number(body.ansDen) || 1;
     const userSimp = simplifyFraction(userTotal, userDen);
     correct = userSimp.num === simplified.num && userSimp.den === simplified.den;
@@ -2873,7 +2876,7 @@ app.post('/surds-api/check', express.json(), (req, res) => {
   } else if (userParsed && cDen !== 1) {
     // User might type e.g. "2√3/3" — parse fraction form
     // Try parsing as "X/Y" where X is a surd expression
-    const fracMatch = (body.answer || '').replace(/\s+/g, '').match(/^\(?(.+?)\)?\/?(\d+)$/);
+    const fracMatch = (body.answer || '').replace(/\s+/g, '').match(/^\(?(.+?)\)?\/(\d+)$/);
     if (fracMatch) {
       const numParsed = parseSurd(fracMatch[1]);
       const userDen = parseInt(fracMatch[2]);
@@ -3163,7 +3166,7 @@ app.get('/sequences-api/question', (req, res) => {
   if (difficulty === 'easy') {
     // Arithmetic: a, a+d, a+2d, ... Find the nth term
     const a = seqRand(-10, 20);
-    const d = seqRand(-8, 8);
+    let d = seqRand(-8, 8);
     if (d === 0) d = seqPick([1, -1, 2, -2, 3, 5]);
     const n = seqRand(5, 20);
     const terms = [a, a + d, a + 2 * d, a + 3 * d];
@@ -3938,7 +3941,7 @@ app.get('/ineq-api/question', (req, res) => {
   }
   else {
     // Represent on number line: find integer solutions to compound inequality
-    const a = triRand(-3, 3); if (a === 0) a = 1;
+    let a = triRand(-3, 3); if (a === 0) a = 1;
     const b = triRand(-5, 5);
     const lo = triRand(-10, 0);
     const hi = triRand(1, 10);
@@ -4519,7 +4522,7 @@ app.get('/stats-api/question', (req, res) => {
       data = [modeVal, modeVal, modeVal];
       while (data.length < n) {
         const v = triRand(1, 25);
-        if (v !== modeVal || data.filter(x => x === v).length < 2) data.push(v);
+        if (v !== modeVal && data.filter(x => x === v).length < 2) data.push(v);
       }
       // Shuffle
       for (let i = data.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [data[i], data[j]] = [data[j], data[i]]; }
@@ -4601,7 +4604,7 @@ app.get('/matrix-api/question', (req, res) => {
   }
   else if (difficulty === 'medium') {
     // Scalar multiplication
-    const k = triRand(-3, 5); if (k === 0) k = 2;
+    let k = triRand(-3, 5); if (k === 0) k = 2;
     const A = [[triRand(-5,9), triRand(-5,9)], [triRand(-5,9), triRand(-5,9)]];
     const R = [[k*A[0][0], k*A[0][1]], [k*A[1][0], k*A[1][1]]];
     const fmtM = (m) => `[${m[0][0]},${m[0][1]};${m[1][0]},${m[1][1]}]`;
@@ -4672,7 +4675,7 @@ app.get('/vectors-api/question', (req, res) => {
   }
   else if (difficulty === 'medium') {
     // Scalar multiplication
-    const k = triRand(-3, 5); if (k === 0) k = 2;
+    let k = triRand(-3, 5); if (k === 0) k = 2;
     const a = [triRand(-6,6), triRand(-6,6)];
     const ans = [k*a[0], k*a[1]];
     const prompt = `a = (${a[0]}, ${a[1]}). Find ${k}a.`;
@@ -5036,7 +5039,7 @@ app.get('/bearings-api/question', (req, res) => {
   }
   else if (difficulty === 'hard') {
     // Find bearing given coordinates
-    const dx = triRand(-10, 10); const dy = triRand(-10, 10);
+    let dx = triRand(-10, 10); const dy = triRand(-10, 10);
     if (dx === 0 && dy === 0) dx = 1;
     // Bearing = angle measured clockwise from North
     let angle = Math.atan2(dx, dy) * 180 / Math.PI;
@@ -5179,7 +5182,7 @@ app.get('/diff-api/question', (req, res) => {
   }
   else if (difficulty === 'medium') {
     // Differentiate polynomial: ax² + bx + c
-    const a = triRand(-5, 5); const b = triRand(-8, 8); const c = triRand(-10, 10);
+    let a = triRand(-5, 5); const b = triRand(-8, 8); const c = triRand(-10, 10);
     if (a === 0) a = 2;
     const x = triRand(-3, 3);
     const deriv = 2 * a * x + b;

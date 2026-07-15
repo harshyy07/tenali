@@ -1997,7 +1997,7 @@ function ScaffoldedTablesApp({ studentName, defaultTable = 2 }) {
               {['🎉', '🏆', '⭐', '🌟', '🎊'][Math.floor(Math.random() * 5)]}
             </p>
             <p className="welcome-text" style={{ fontSize: '1.3rem', color: 'var(--clr-accent)' }}>
-              Fantastic work! You nailed {PHASE3_MASTERY_STREAK} in a row!
+              Fantastic work! You nailed {MASTERY_STREAK} in a row!
             </p>
             <p className="final-score">Score: {score}/{questionNum}</p>
             <p style={{ fontSize: '1.1rem', margin: '0.5rem 0', color: 'var(--clr-accent)' }}>
@@ -43098,14 +43098,12 @@ function GKApp({ onBack, isGoalMode = false }) {
     setQuestionNumber(0)
     setResults([])
     fetchingRef.current = false
-    // Don't clear seenIds — keep the localStorage history for no-repeat
-    loadQuestion(seenIds)
   }
 
   // Load first question only if started
   useEffect(() => {
     if (started && !finished && questionNumber === 0) {
-      loadQuestion([])
+      loadQuestion(seenIds)
     }
   }, [started, finished, questionNumber])
 
@@ -54103,7 +54101,7 @@ const loadQuestion = async () => {
         {renderFeedback(feedback, isCorrect)}
         <div className="button-row">
           {!revealed && <button onClick={handleSolve} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Solve</button>}
-          <button onClick={revealed ? () => advanceRef.current() : handleSubmit} disabled={loading || (!revealed && (!userP || !userQ || !userR || !userS))}>
+          <button onClick={revealed ? () => advanceFnRef.current() : handleSubmit} disabled={loading || (!revealed && (!userP || !userQ || !userR || !userS))}>
             {revealed ? (questionNumber >= totalQ ? 'Finish' : 'Next') : 'Submit'}
           </button>
         </div>
