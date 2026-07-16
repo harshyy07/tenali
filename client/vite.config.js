@@ -45,6 +45,12 @@ export default defineConfig({
       '/wordcreator-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
       // Addition quiz API
       '/addition-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      // Column Addition quiz API
+      '/column-addition-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      // Column Multiplication quiz API
+      '/column-multiplication-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
+      // Column Subtraction quiz API
+      '/column-subtraction-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
       // Quadratic equations quiz API
       '/quadratic-api': { target: 'http://127.0.0.1:4000', changeOrigin: true },
       // Square root estimation quiz API

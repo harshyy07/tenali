@@ -449,11 +449,10 @@ export function useTimer() {
  * @returns {ReactElement|null} Table element or null if no results
  */
 function ResultsTable({ results }) {
-  // Hide table if empty or null
   if (!results || results.length === 0) return null
-  // Calculate summary stats
   const totalTime = results.reduce((sum, r) => sum + r.time, 0)
   const avgTime = (totalTime / results.length).toFixed(1)
+  const hasCarries = results.some(r => r.userCarries || r.correctCarries)
   return (
     <div className="results-table-wrapper">
       <table className="results-table">
@@ -463,24 +462,29 @@ function ResultsTable({ results }) {
             <th>Question</th>
             <th>Your Answer</th>
             <th>Result</th>
+            {hasCarries && <th>Carries</th>}
             <th>Time</th>
           </tr>
         </thead>
         <tbody>
           {results.map((r, i) => (
-            // Row is highlighted green if correct, red if wrong
             <tr key={i} className={r.correct ? 'row-correct' : 'row-wrong'}>
               <td>{i + 1}</td>
               <td>{r.question}</td>
               <td>{r.userAnswer}</td>
-              {/* Show checkmark for correct, X with correct answer for wrong */}
-              <td>{r.correct ? '✓' : `✗ (${r.correctAnswer})`}</td>
+              <td>{r.correct ? `✓ (${r.correctAnswer})` : `✗ (${r.correctAnswer})`}</td>
+              {hasCarries && (
+                <td style={{ fontSize: '0.8rem', whiteSpace: 'pre-line' }}>
+                  {r.userCarries && <span>Yours: {r.userCarries}</span>}
+                  {r.userCarries && r.correctCarries && <br />}
+                  {r.correctCarries && <span style={{ color: 'var(--clr-correct)' }}>Ans: {r.correctCarries}</span>}
+                </td>
+              )}
               <td>{r.time}s</td>
             </tr>
           ))}
         </tbody>
       </table>
-      {/* Summary stats at bottom */}
       <div className="results-summary">
         Total time: {totalTime}s &middot; Average: {avgTime}s per question
       </div>
@@ -41119,6 +41123,9 @@ function App() {
     'comic-addition': ComicAdditionApp,
     gk: GKApp,                    // General Knowledge
     addition: AdditionApp,         // Basic addition
+    'column-addition': ColumnAdditionApp, // Column Addition with carries
+    'column-multiplication': ColumnMultiplicationApp, // Column Multiplication with carries
+    'column-subtraction': ColumnSubtractionApp, // Column Subtraction with borrows
     quadratic: QuadraticApp,       // Quadratic substitution
     multiply: MultiplyApp,         // Multiplication tables
     'visual-math': VisualMathApp,  // Visual Math Lab (mult/div visual)
@@ -41315,6 +41322,10 @@ function App() {
 
   return (
     <div className="app-shell">
+      {showTour && <OnboardingTour onFinish={() => { localStorage.setItem('tenali_tour_seen', 'true'); setShowTour(false) }} mode={mode} />}
+      <button className="guide-toggle" onClick={() => setShowTour(true)} title="Take a Tour">
+        🧭 Guide
+      </button>
       <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
         {theme === 'dark' ? '☀️' : '🌙'}
       </button>
@@ -41356,6 +41367,9 @@ function Home({ onSelect, isGoalSelection = false, onBack }) {
   const regularApps = [
     { key: 'comic-addition', name: 'Comic Addition', subtitle: 'Story Mode', color: 'purple' },
     { key: 'addition', name: 'Addition', subtitle: '20-question addition practice', color: 'blue' },
+    { key: 'column-addition', name: 'Column Addition', subtitle: 'Vertical addition with carrying', color: 'blue' },
+    { key: 'column-multiplication', name: 'Column Multiplication', subtitle: 'Vertical multiplication with carrying', color: 'blue' },
+    { key: 'column-subtraction', name: 'Column Subtraction', subtitle: 'Vertical subtraction with borrowing', color: 'blue' },
     { key: 'angles', name: 'Angles', subtitle: 'Lines, points, parallel lines', color: 'green' },
     { key: 'basicarith', name: 'Arithmetic', subtitle: '+, −, ×, ÷ with positive & negative', color: 'purple' },
     { key: 'banking', name: 'Banking (RD)', subtitle: 'Interest & recurring deposits', color: 'blue' },
@@ -41634,7 +41648,7 @@ function Home({ onSelect, isGoalSelection = false, onBack }) {
           onChange={e => setSearch(e.target.value)}
         />
       </div>
-      <div className="menu-grid" ref={gridRef}>
+      <div id="tour-home-grid" className="menu-grid" ref={gridRef}>
         {displayGridApps.map((app) => (
           <button key={app.key} className={`menu-card ${app.color}`} onClick={() => onSelect(app.key)}>
             <span className="menu-title">{app.name}</span>
@@ -43292,6 +43306,1635 @@ function GKApp({ onBack, isGoalMode = false }) {
         <ResultsTable results={results} />
         <button onClick={() => { setStarted(false); setFinished(false) }}>Play Again</button>
       </div>}
+    </QuizLayout>
+  )
+}
+
+/**
+ * ColumnAdditionApp Component
+ * Vertical column addition with manual carry input.
+ * Numbers are stacked like on paper; user fills answer digits + carry digits.
+ */
+function ColumnAdditionApp({ onBack, initialDifficulty, initialNumQuestions, initialStarted, isGoalMode = false }) {
+  const [difficulty, setDifficulty] = useState(initialDifficulty || 'easy')
+  const [numQuestions, setNumQuestions] = useState(initialNumQuestions || String(DEFAULT_TOTAL))
+  const [started, setStarted] = useState(initialStarted || false)
+  const [finished, setFinished] = useState(false)
+  const [question, setQuestion] = useState(null)
+  const [score, setScore] = useState(0)
+  const [questionNumber, setQuestionNumber] = useState(0)
+  const [totalQ, setTotalQ] = useState(DEFAULT_TOTAL)
+  const [feedback, setFeedback] = useState('')
+  const [isCorrect, setIsCorrect] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [revealed, setRevealed] = useState(false)
+  const [results, setResults] = useState([])
+  const timer = useTimer()
+  const [sessionGoal, setSessionGoal] = useState(isGoalMode ? 'speed' : 'standard')
+
+  const [answerInputs, setAnswerInputs] = useState([])
+  const [carryInputs, setCarryInputs] = useState([])
+  const [correctAnswerDigits, setCorrectAnswerDigits] = useState(null)
+  const [correctCarryDigits, setCorrectCarryDigits] = useState(null)
+  const answerRefs = useRef([])
+  const carryRefs = useRef([])
+  const advanceTimerRef = useRef(null)
+
+  useEffect(() => { if (!isGoalMode) setSessionGoal('standard') }, [isGoalMode])
+
+  const startQuiz = async () => {
+    const q = Number(numQuestions) || DEFAULT_TOTAL
+    setTotalQ(q); setScore(0); setQuestionNumber(1); setResults([])
+    setFinished(false); setStarted(true); setFeedback(''); setIsCorrect(null); setRevealed(false)
+    setCorrectAnswerDigits(null); setCorrectCarryDigits(null)
+    timer.reset(); timer.start()
+    await fetchQuestion()
+  }
+
+  const fetchQuestion = async (diff) => {
+    setLoading(true)
+    try {
+      const r = await fetch(`${API}/column-addition-api/question?difficulty=${diff || difficulty}`)
+      const data = await r.json()
+      setQuestion(data)
+      setAnswerInputs(new Array(data.answerDigits.length).fill(''))
+      setCarryInputs(new Array(data.carries.length).fill(''))
+      setCorrectAnswerDigits(null); setCorrectCarryDigits(null)
+      setTimeout(() => { if (answerRefs.current[data.answerDigits.length - 1]) answerRefs.current[data.answerDigits.length - 1].focus() }, 100)
+    } catch (e) { console.error('Fetch column addition question failed:', e) }
+    setLoading(false)
+  }
+
+  const handleInput = (idx, val, isCarry) => {
+    if (revealed) return
+    if (val !== '' && !/^\d$/.test(val)) return
+    const setter = isCarry ? setCarryInputs : setAnswerInputs
+    const arr = isCarry ? carryInputs : answerInputs
+    const next = [...arr]; next[idx] = val; setter(next)
+
+    // Paper-addition focus flow on digit entry:
+    // answer[ansLen-1] -> carry[ansLen-2] -> answer[ansLen-2] -> carry[ansLen-3] -> ...
+    if (!val) return
+    if (!isCarry && idx > 0 && carryRefs.current[idx - 1]) {
+      carryRefs.current[idx - 1].focus()
+    } else if (!isCarry && idx === 0) {
+      // Leftmost answer: nothing more to fill, stay
+    } else if (isCarry && answerRefs.current[idx]) {
+      answerRefs.current[idx].focus()
+    }
+  }
+
+  const focusAnswer = (i) => { if (answerRefs.current[i]) answerRefs.current[i].focus() }
+  const focusCarry = (i) => { if (carryRefs.current[i]) carryRefs.current[i].focus() }
+
+  const handleKeyDown = (idx, e, isCarry) => {
+
+    if (e.key === 'Backspace') {
+      if (e.currentTarget.value) return
+      e.preventDefault()
+      // Paper-flow reverse navigation:
+      //   answer[i] previous = carry[i]        (the box above, if visible)
+      //   carry[i]  previous = answer[i+1]     (next-right answer digit)
+      if (!isCarry) {
+        if (idx < carryInputs.length - 1 && carryRefs.current[idx]) {
+          carryRefs.current[idx].focus()
+        }
+      } else {
+        if (idx < answerInputs.length - 1 && answerRefs.current[idx + 1]) {
+          answerRefs.current[idx + 1].focus()
+        }
+      }
+      return
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (!isCarry && idx < carryInputs.length - 1) focusCarry(idx)
+      else if (isCarry) focusAnswer(idx)
+      return
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      if (isCarry) focusAnswer(idx)
+      else if (idx < carryInputs.length - 1) focusCarry(idx)
+      return
+    }
+
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      if (!isCarry) {
+        if (idx > 0) focusAnswer(idx - 1)
+      } else {
+        if (idx > 0) focusCarry(idx - 1)
+        else if (idx === 0) focusAnswer(0)
+      }
+      return
+    }
+
+    if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      if (!isCarry) {
+        if (idx < answerInputs.length - 1) focusAnswer(idx + 1)
+      } else {
+        if (idx < carryInputs.length - 2) focusCarry(idx + 1)
+        else if (idx === carryInputs.length - 2) focusAnswer(idx + 1)
+      }
+      return
+    }
+  }
+
+  const handleSubmit = async () => {
+    if (revealed || loading || !question) return
+    timer.stop()
+    const userAnswer = answerInputs.map(v => v === '' ? null : Number(v))
+    const userCarries = carryInputs.map(v => v === '' ? 0 : Number(v))
+    try {
+      const r = await fetch(`${API}/column-addition-api/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': authGetToken() ? `Bearer ${authGetToken()}` : '' },
+        body: JSON.stringify({ a: question.a, b: question.b, userAnswer, userCarries, sessionGoal })
+      })
+      const data = await r.json()
+      setCorrectAnswerDigits(data.answerDigits)
+      setCorrectCarryDigits(data.correctCarries)
+      setIsCorrect(data.correct); setRevealed(true)
+
+      let explanation = ''
+      try {
+        const sr = await fetch(`${API}/column-addition-api/check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': authGetToken() ? `Bearer ${authGetToken()}` : '' },
+          body: JSON.stringify({ a: question.a, b: question.b, userAnswer: [], userCarries: [], solve: true })
+        })
+        const sd = await sr.json()
+        explanation = sd.explanation || ''
+      } catch (_) {}
+
+      const resultLine = data.correct ? '✓ Correct!' : `✗ ${data.message || 'Incorrect'}`
+      setFeedback(explanation ? `${resultLine}\n\n— Step-by-step solution —\n${explanation}` : resultLine)
+      const userCarriesStr = carryInputs.filter(v => v !== '').join(', ') || '—'
+      const correctCarriesStr = (data.correctCarries || []).filter(v => v !== 0 && v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} + ${question.b}`, userAnswer: Number(userAnswer.filter(v => v !== null).join('')) || '', correct: data.correct, correctAnswer: data.correctAnswer, time: timer.elapsed, userCarries: userCarriesStr, correctCarries: correctCarriesStr }])
+      if (data.correct) setScore(s => s + 1)
+    } catch (e) { console.error('Check failed:', e); setFeedback('Error checking answer') }
+  }
+
+  const handleSolve = async () => {
+    if (revealed || loading || !question) return
+    timer.stop()
+    try {
+      const r = await fetch(`${API}/column-addition-api/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': authGetToken() ? `Bearer ${authGetToken()}` : '' },
+        body: JSON.stringify({ a: question.a, b: question.b, userAnswer: [], userCarries: [], solve: true })
+      })
+      const data = await r.json()
+      setCorrectAnswerDigits(data.answerDigits)
+      setCorrectCarryDigits(data.correctCarries)
+      setIsCorrect(false); setRevealed(true)
+      setAnswerInputs(data.answerDigits ? data.answerDigits.map(String) : question.answerDigits.map(String))
+      setCarryInputs(data.correctCarries ? data.correctCarries.map(String) : question.carries.map(String))
+      setFeedback(data.explanation || 'Solved — study the carries above each column.')
+      const correctCarriesStr = (data.correctCarries || []).filter(v => v !== 0 && v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} + ${question.b}`, userAnswer: data.correctAnswer, correct: false, correctAnswer: data.correctAnswer, time: timer.elapsed, userCarries: '—', correctCarries: correctCarriesStr }])
+    } catch (e) {
+      console.error('Solve failed:', e)
+      setCorrectAnswerDigits(question.answerDigits)
+      setCorrectCarryDigits(question.carries)
+      setRevealed(true); setIsCorrect(false)
+      setAnswerInputs(question.answerDigits.map(String))
+      setCarryInputs(question.carries.map(String))
+      setFeedback('Solved — study the carries above each column.')
+      setResults(prev => [...prev, { question: `${question.a} + ${question.b}`, userAnswer: question.answer, correct: false, correctAnswer: question.answer, time: timer.elapsed }])
+    }
+  }
+
+  const advanceQuestion = () => {
+    if (advanceTimerRef.current) { clearTimeout(advanceTimerRef.current); advanceTimerRef.current = null }
+    setRevealed(false); setIsCorrect(null); setFeedback(''); setAnswerInputs([]); setCarryInputs([])
+    setCorrectAnswerDigits(null); setCorrectCarryDigits(null)
+    if (questionNumber >= totalQ) { setFinished(true); timer.stop() }
+    else { setQuestionNumber(qn => qn + 1); timer.reset(); timer.start(); fetchQuestion() }
+  }
+
+  const diffLabels = { easy: 'Easy — 1 digit', medium: 'Medium — 2 digits', hard: 'Hard — 3 digits', extrahard: 'Extra Hard — 4 digits' }
+
+  if (!started && !finished) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--clr-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ background: 'var(--clr-card)', border: '1.5px solid var(--clr-border)', borderRadius: '28px', boxShadow: '0 20px 40px rgba(0,0,0,.45)', padding: '48px 40px', maxWidth: '720px', width: '100%', textAlign: 'center', position: 'relative' }}>
+          <button onClick={onBack} style={{ position: 'absolute', top: '24px', left: '24px', background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '6px 14px', color: 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>← Home</button>
+          <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '48px', color: 'var(--clr-text)', margin: '0 0 12px', lineHeight: 1.1 }}>Column Addition</h1>
+          <p style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem', margin: '0 0 24px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>Add numbers vertically with carrying</p>
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ color: 'var(--clr-text)', fontSize: '0.9rem', margin: '0 0 16px', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>Select Difficulty:</h3>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {['easy', 'medium', 'hard', 'extrahard'].map(d => (
+                <button key={d} onClick={() => setDifficulty(d)} style={{ background: difficulty === d ? 'var(--clr-accent)' : 'transparent', border: difficulty === d ? '1px solid var(--clr-accent)' : '1px solid var(--clr-border)', borderRadius: '50px', padding: '8px 16px', color: difficulty === d ? '#FFF' : 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>{diffLabels[d]}</button>
+              ))}
+            </div>
+          </div>
+          <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <label style={{ color: 'var(--clr-text-soft)', fontSize: '0.85rem', margin: '0 0 12px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>How many questions? (max 100)</label>
+            <input type="text" value={numQuestions} onChange={(e) => { const v = e.target.value; if (v === '' || (/^\d+$/.test(v) && Number(v) <= 100)) setNumQuestions(v) }} style={{ background: 'var(--clr-input)', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '10px', color: 'var(--clr-text)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9rem', width: '100px', textAlign: 'center', outline: 'none' }} placeholder={String(DEFAULT_TOTAL)} />
+          </div>
+          <button onClick={startQuiz} style={{ background: 'var(--clr-accent)', border: 'none', borderRadius: '6px', padding: '10px 24px', color: '#FFF', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Start Quiz</button>
+        </div>
+      </div>
+    )
+  }
+
+  const ansLen = question ? question.answerDigits.length : 1
+  const opLen = question ? question.digits : 1
+
+  return (
+    <QuizLayout title="Column Addition" onBack={onBack} timer={timer}>
+      {started && !finished && <>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
+          <div className="progress-pill center">Question {questionNumber}/{totalQ}</div>
+        </div>
+        {loading || !question ? <div className="question-box">Loading question…</div> : (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '16px 0', fontFamily: '"Courier New", monospace', fontSize: '1.8rem', fontWeight: 700 }}>
+              {/* Carry row: ansLen columns, skip last (ones=always 0), show boxes at [0..ansLen-2] */}
+              <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+                <span style={{ width: '44px' }} />
+                {question.carries.map((c, i) => {
+                  if (i === question.carries.length - 1) return <span key={i} style={{ width: '40px' }} />
+                  const correct = revealed && correctCarryDigits ? String(correctCarryDigits[i]) : '';
+                  const isRight = revealed && correct !== '' && String(carryInputs[i] || '') === correct;
+                  const isWrong = revealed && correct !== '' && !isRight;
+                  const shown = revealed ? correct : carryInputs[i] || '';
+                  return (
+                    <input key={i} ref={el => carryRefs.current[i] = el} type="text" maxLength={1}
+                      value={shown}
+                      onChange={e => handleInput(i, e.target.value, true)}
+                      onKeyDown={e => handleKeyDown(i, e, true)}
+                      disabled={revealed}
+                      style={{ width: '40px', height: '36px', textAlign: 'center', fontSize: '1rem', fontWeight: 700, background: isRight ? 'var(--clr-correct-bg)' : isWrong ? 'var(--clr-wrong-bg)' : 'var(--clr-input)', border: `2px solid ${isRight ? 'var(--clr-correct)' : isWrong ? 'var(--clr-wrong)' : 'var(--clr-border)'}`, borderRadius: '8px', color: isRight ? 'var(--clr-correct)' : isWrong ? 'var(--clr-wrong)' : 'var(--clr-text)', fontFamily: '"Courier New", monospace', outline: 'none' }}
+                    />
+                  )
+                })}
+              </div>
+              {/* First number: right-aligned in ansLen columns */}
+              <div style={{ display: 'flex', gap: '4px', marginBottom: '2px' }}>
+                <span style={{ width: '44px' }} />
+                {question.aDigits.map((d, i) => (
+                  <span key={i} style={{ width: '40px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--clr-text)' }}>{d !== null ? d : ''}</span>
+                ))}
+              </div>
+              {/* Second number: right-aligned in ansLen columns */}
+              <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+                <span style={{ width: '44px', textAlign: 'center', color: 'var(--clr-text-soft)', fontSize: '1.4rem' }}>+</span>
+                {question.bDigits.map((d, i) => (
+                  <span key={i} style={{ width: '40px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--clr-text)' }}>{d !== null ? d : ''}</span>
+                ))}
+              </div>
+              {/* Line separator: full width of answer */}
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <span style={{ width: '44px' }} />
+                <div style={{ width: `${ansLen * 44}px`, height: '3px', background: 'var(--clr-border)', borderRadius: '2px' }} />
+              </div>
+              {/* Answer row: ansLen input boxes */}
+              <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
+                <span style={{ width: '44px' }} />
+                {question.answerDigits.map((d, i) => {
+                  const correctDigit = revealed && correctAnswerDigits ? String(correctAnswerDigits[i]) : '';
+                  const isRight = revealed && correctDigit !== '' && String(answerInputs[i] || '') === correctDigit;
+                  const isWrong = revealed && correctDigit !== '' && !isRight;
+                  const shown = revealed ? correctDigit : answerInputs[i] || '';
+                  return (
+                    <input key={i} ref={el => answerRefs.current[i] = el} type="text" maxLength={1}
+                      value={shown}
+                      onChange={e => handleInput(i, e.target.value, false)}
+                      onKeyDown={e => handleKeyDown(i, e, false)}
+                      disabled={revealed}
+                      style={{ width: '40px', height: '48px', textAlign: 'center', fontSize: '1.4rem', fontWeight: 700, background: isRight ? 'var(--clr-correct-bg)' : isWrong ? 'var(--clr-wrong-bg)' : 'var(--clr-input)', border: `2px solid ${isRight ? 'var(--clr-correct)' : isWrong ? 'var(--clr-wrong)' : 'var(--clr-border)'}`, borderRadius: '8px', color: isRight ? 'var(--clr-correct)' : isWrong ? 'var(--clr-wrong)' : 'var(--clr-text)', fontFamily: '"Courier New", monospace', outline: 'none' }}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+            {feedback && (
+              <div style={{
+                textAlign: 'left', padding: '12px 16px', borderRadius: '8px', margin: '8px 0',
+                background: isCorrect ? 'rgba(92, 184, 122, 0.25)' : 'rgba(224, 90, 74, 0.25)',
+                color: isCorrect ? 'var(--clr-correct)' : 'var(--clr-wrong)',
+                fontWeight: 600, fontSize: '0.9rem',
+                whiteSpace: 'pre-line', lineHeight: '1.6',
+                maxHeight: '300px', overflowY: 'auto',
+                border: isCorrect ? '2px solid var(--clr-correct)' : '2px solid var(--clr-wrong)'
+              }}>{feedback}</div>
+            )}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '12px 0', flexWrap: 'wrap' }}>
+              {!revealed && <button onClick={handleSubmit} disabled={loading} style={{ background: 'var(--clr-accent)', border: 'none', borderRadius: '8px', padding: '10px 24px', color: '#FFF', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Submit</button>}
+              {!revealed && <button onClick={handleSolve} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '8px', padding: '10px 24px', color: 'var(--clr-text-soft)', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Solve</button>}
+              {revealed && <button onClick={advanceQuestion} style={{ background: 'var(--clr-accent)', border: 'none', borderRadius: '8px', padding: '10px 24px', color: '#FFF', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Next Question →</button>}
+            </div>
+          </>
+        )}
+        {results.length > 0 && <ResultsTable results={results} />}
+      </>}
+      {finished && (
+        <div style={{ textAlign: 'center', padding: '24px' }}>
+          <h2 style={{ color: 'var(--clr-text)', marginBottom: '16px' }}>Score: {score}/{totalQ}</h2>
+          <ResultsTable results={results} />
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '24px' }}>
+            <button onClick={() => { setStarted(false); setFinished(false) }} style={{ background: 'var(--clr-accent)', border: 'none', borderRadius: '8px', padding: '10px 24px', color: '#FFF', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Play Again</button>
+          </div>
+        </div>
+      )}
+    </QuizLayout>
+  )
+}
+
+function ColumnMultiplicationApp({ onBack, initialDifficulty, initialNumQuestions, initialStarted, isGoalMode = false }) {
+  const [difficulty, setDifficulty] = useState(initialDifficulty || 'easy')
+  const [numQuestions, setNumQuestions] = useState(initialNumQuestions || String(DEFAULT_TOTAL))
+  const [started, setStarted] = useState(initialStarted || false)
+  const [finished, setFinished] = useState(false)
+  const [question, setQuestion] = useState(null)
+  const [score, setScore] = useState(0)
+  const [questionNumber, setQuestionNumber] = useState(0)
+  const [totalQ, setTotalQ] = useState(DEFAULT_TOTAL)
+  const [feedback, setFeedback] = useState('')
+  const [isCorrect, setIsCorrect] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [revealed, setRevealed] = useState(false)
+  const [results, setResults] = useState([])
+  const timer = useTimer()
+  const [sessionGoal, setSessionGoal] = useState(isGoalMode ? 'speed' : 'standard')
+  const [showHelp, setShowHelp] = useState(false)
+
+  const [answerInputs, setAnswerInputs] = useState([])
+  const [carryInputs, setCarryInputs] = useState([])
+  const [correctAnswerDigits, setCorrectAnswerDigits] = useState(null)
+  const [correctCarryDigits, setCorrectCarryDigits] = useState(null)
+  const answerRefs = useRef([])
+  const carryRefs = useRef([])
+  const advanceTimerRef = useRef(null)
+
+  const [isMulti, setIsMulti] = useState(false)
+  const [currentPP, setCurrentPP] = useState(0)
+  const [ppInputs, setPpInputs] = useState([])
+  const [ppCarryInputs, setPpCarryInputs] = useState([])
+  const ppRefs = useRef([])
+  const ppCarryRefs = useRef([])
+  const [correctPPDigits, setCorrectPPDigits] = useState(null)
+  const [correctPPCarries, setCorrectPPCarries] = useState(null)
+
+  const COL = 36
+  const GAP = 3
+  const LEFT_MARGIN = 40
+
+  useEffect(() => { if (!isGoalMode) setSessionGoal('standard') }, [isGoalMode])
+
+  const startQuiz = async () => {
+    const q = Number(numQuestions) || DEFAULT_TOTAL
+    setTotalQ(q); setScore(0); setQuestionNumber(1); setResults([])
+    setFinished(false); setStarted(true); setFeedback(''); setIsCorrect(null); setRevealed(false)
+    setCorrectAnswerDigits(null); setCorrectCarryDigits(null)
+    setCorrectPPDigits(null); setCorrectPPCarries(null)
+    setIsMulti(false); setCurrentPP(0); setPpInputs([]); setPpCarryInputs([])
+    timer.reset(); timer.start()
+    await fetchQuestion()
+  }
+
+  const fetchQuestion = async (diff) => {
+    setLoading(true)
+    try {
+      const r = await fetch(`${API}/column-multiplication-api/question?difficulty=${diff || difficulty}`)
+      const data = await r.json()
+      setQuestion(data)
+      const multi = !!data.multiDigitMultiplier
+      setIsMulti(multi)
+
+      setAnswerInputs(new Array(data.answerDigits.length).fill(''))
+      setCorrectAnswerDigits(null); setCorrectCarryDigits(null)
+      setCorrectPPDigits(null); setCorrectPPCarries(null)
+
+      if (multi) {
+        setCarryInputs([])
+        setCurrentPP(0)
+        setPpInputs(data.partialProducts.map(pp => pp.digits.map(d => d === null ? null : '')))
+        setPpCarryInputs(data.partialProducts.map(pp => pp.carries.map(c => c === null ? null : '')))
+        setTimeout(() => {
+          for (let j = data.answerDigits.length - 1; j >= 0; j--) {
+            if (ppCarryRefs.current[0]?.[j]) { ppCarryRefs.current[0][j].focus(); return }
+          }
+        }, 100)
+      } else {
+        setCarryInputs(new Array(data.carries.length).fill(''))
+        setPpInputs([]); setPpCarryInputs([])
+        setTimeout(() => {
+          const lastIdx = data.answerDigits.length - 1
+          if (answerRefs.current[lastIdx]) answerRefs.current[lastIdx].focus()
+        }, 100)
+      }
+    } catch (e) { console.error('Fetch column multiplication question failed:', e) }
+    setLoading(false)
+  }
+
+  const handleSingleInput = (idx, val, isCarry) => {
+    if (revealed) return
+    if (val !== '' && !/^\d{1,2}$/.test(val)) return
+    const setter = isCarry ? setCarryInputs : setAnswerInputs
+    const arr = isCarry ? carryInputs : answerInputs
+    const next = [...arr]; next[idx] = val; setter(next)
+    if (!val) return
+    if (!isCarry && idx > 0 && carryRefs.current[idx - 1]) {
+      carryRefs.current[idx - 1].focus()
+    } else if (isCarry && answerRefs.current[idx]) {
+      answerRefs.current[idx].focus()
+    }
+  }
+
+  const handleMultiPpInput = (ppIdx, colIdx, val) => {
+    if (revealed || ppIdx !== currentPP) return
+    if (val !== '' && !/^\d{1,2}$/.test(val)) return
+    const next = ppInputs.map(row => [...row])
+    if (next[ppIdx][colIdx] === null) return
+    next[ppIdx][colIdx] = val
+    setPpInputs(next)
+    if (!val) return
+    const carries = question.partialProducts[ppIdx].carries
+    const shift = question.bDigits.length - 1 - ppIdx
+    const trailingCol = question.answerDigits.length - 1 - shift
+    for (let j = colIdx - 1; j >= 0; j--) {
+      if (carries[j] !== null && j !== trailingCol && ppCarryRefs.current[ppIdx]?.[j]) {
+        ppCarryRefs.current[ppIdx][j].focus()
+        return
+      }
+    }
+    checkAndAdvancePP(next)
+  }
+
+  const checkAndAdvancePP = (updatedPPInputs) => {
+    const pp = question.partialProducts
+    const idx = currentPP
+    const digits = pp[idx].digits
+    const allFilled = digits.every((d, j) => d === null || (updatedPPInputs[idx][j] !== '' && updatedPPInputs[idx][j] !== null && updatedPPInputs[idx][j] !== undefined))
+    if (!allFilled) return
+    if (idx < pp.length - 1) {
+      setTimeout(() => {
+        setCurrentPP(idx + 1)
+        setTimeout(() => {
+          const ansLen = question.answerDigits.length
+          for (let j = ansLen - 1; j >= 0; j--) {
+            if (ppCarryRefs.current[idx + 1]?.[j]) { ppCarryRefs.current[idx + 1][j].focus(); return }
+          }
+        }, 50)
+      }, 400)
+    } else {
+      setCurrentPP(pp.length)
+      setTimeout(() => {
+        const lastIdx = question.answerDigits.length - 1
+        if (answerRefs.current[lastIdx]) answerRefs.current[lastIdx].focus()
+      }, 100)
+    }
+  }
+
+  const handleMultiPpCarryInput = (ppIdx, colIdx, val) => {
+    if (revealed) return
+    if (val !== '' && !/^\d{1,2}$/.test(val)) return
+    const next = ppCarryInputs.map(row => [...row])
+    if (next[ppIdx][colIdx] === null) return
+    next[ppIdx][colIdx] = val
+    setPpCarryInputs(next)
+    if (!val) return
+    const digits = question.partialProducts[ppIdx].digits
+    if (digits[colIdx] !== null && ppRefs.current[ppIdx]?.[colIdx]) {
+      ppRefs.current[ppIdx][colIdx].focus()
+      return
+    }
+    const carries = question.partialProducts[ppIdx].carries
+    const shift = question.bDigits.length - 1 - ppIdx
+    const trailingCol = question.answerDigits.length - 1 - shift
+    for (let j = colIdx - 1; j >= 0; j--) {
+      if (carries[j] !== null && j !== trailingCol && ppCarryRefs.current[ppIdx]?.[j]) {
+        ppCarryRefs.current[ppIdx][j].focus()
+        return
+      }
+    }
+  }
+
+  const focusAnswer = (i) => { if (answerRefs.current[i]) answerRefs.current[i].focus() }
+  const focusCarry = (i) => { if (carryRefs.current[i]) carryRefs.current[i].focus() }
+  const focusPp = (ppIdx, colIdx) => { if (ppRefs.current[ppIdx] && ppRefs.current[ppIdx][colIdx]) ppRefs.current[ppIdx][colIdx].focus() }
+  const focusPpCarry = (ppIdx, colIdx) => { if (ppCarryRefs.current[ppIdx] && ppCarryRefs.current[ppIdx][colIdx]) ppCarryRefs.current[ppIdx][colIdx].focus() }
+
+  const handleSingleKeyDown = (idx, e, isCarry) => {
+    if (e.key === 'Backspace') {
+      if (e.currentTarget.value) return
+      e.preventDefault()
+      if (!isCarry) {
+        if (idx < carryInputs.length - 1 && carryRefs.current[idx]) carryRefs.current[idx].focus()
+      } else {
+        if (idx < answerInputs.length - 1 && answerRefs.current[idx + 1]) answerRefs.current[idx + 1].focus()
+      }
+      return
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (!isCarry && idx < carryInputs.length - 1 && carryRefs.current[idx]) focusCarry(idx)
+      else if (isCarry) focusAnswer(idx)
+      return
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      if (isCarry) focusAnswer(idx)
+      else if (idx < carryInputs.length - 1 && carryRefs.current[idx]) focusCarry(idx)
+      return
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      if (!isCarry) { if (idx > 0) focusAnswer(idx - 1) }
+      else { if (idx > 0) focusCarry(idx - 1); else if (idx === 0) focusAnswer(0) }
+      return
+    }
+    if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      if (!isCarry) { if (idx < answerInputs.length - 1) focusAnswer(idx + 1) }
+      else { if (idx < answerInputs.length - 1) focusAnswer(idx + 1) }
+      return
+    }
+  }
+
+  const handleMultiKeyDown = (e, { isCarry, isAnswer, isPp, ppIdx, colIdx }) => {
+    if (revealed) return
+
+    if (e.key === 'Backspace') {
+      if (e.currentTarget.value) return
+      e.preventDefault()
+      if (isCarry) {
+        for (let j = colIdx - 1; j >= 0; j--) {
+          if (ppCarryRefs.current[ppIdx]?.[j]) { ppCarryRefs.current[ppIdx][j].focus(); return }
+        }
+      } else if (isPp) {
+        for (let j = colIdx - 1; j >= 0; j--) {
+          if (ppRefs.current[ppIdx]?.[j]) { ppRefs.current[ppIdx][j].focus(); return }
+        }
+        for (let j = question.answerDigits.length - 1; j >= 0; j--) {
+          if (ppCarryRefs.current[ppIdx]?.[j]) { ppCarryRefs.current[ppIdx][j].focus(); return }
+        }
+      }
+      return
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      if (isCarry) {
+        for (let j = colIdx - 1; j >= 0; j--) { if (ppCarryRefs.current[ppIdx]?.[j]) { ppCarryRefs.current[ppIdx][j].focus(); return } }
+      } else if (isPp) {
+        for (let j = colIdx - 1; j >= 0; j--) { if (ppRefs.current[ppIdx]?.[j]) { ppRefs.current[ppIdx][j].focus(); return } }
+      }
+      return
+    }
+    if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      const max = question.answerDigits.length
+      if (isCarry) {
+        for (let j = colIdx + 1; j < max; j++) { if (ppCarryRefs.current[ppIdx]?.[j]) { ppCarryRefs.current[ppIdx][j].focus(); return } }
+      } else if (isPp) {
+        for (let j = colIdx + 1; j < max; j++) { if (ppRefs.current[ppIdx]?.[j]) { ppRefs.current[ppIdx][j].focus(); return } }
+      }
+      return
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      if (isCarry) {
+        if (ppRefs.current[ppIdx]?.[colIdx]) { ppRefs.current[ppIdx][colIdx].focus(); return }
+      } else if (isPp) {
+        if (currentPP >= question.partialProducts.length) {
+          const lastIdx = question.answerDigits.length - 1
+          if (answerRefs.current[lastIdx]) answerRefs.current[lastIdx].focus()
+        }
+      }
+      return
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (isPp) {
+        if (ppCarryRefs.current[ppIdx]?.[colIdx]) { ppCarryRefs.current[ppIdx][colIdx].focus(); return }
+      }
+      return
+    }
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      if (currentPP < question.partialProducts.length - 1) {
+        const nextPP = currentPP + 1
+        for (let j = question.answerDigits.length - 1; j >= 0; j--) {
+          if (ppCarryRefs.current[nextPP]?.[j]) { ppCarryRefs.current[nextPP][j].focus(); return }
+        }
+      } else {
+        const lastIdx = question.answerDigits.length - 1
+        if (answerRefs.current[lastIdx]) answerRefs.current[lastIdx].focus()
+      }
+    }
+  }
+
+  const handleAnswerKeyDown = (idx, e) => {
+    const ansLen = question.answerDigits.length
+    if (e.key === 'Backspace') {
+      if (e.currentTarget.value) return
+      e.preventDefault()
+      if (idx > 0) { focusAnswer(idx - 1); return }
+      if (isMulti && question.partialProducts.length > 0) {
+        const lastPp = question.partialProducts.length - 1
+        for (let j = question.partialProducts[lastPp].digits.length - 1; j >= 0; j--) {
+          if (ppRefs.current[lastPp] && ppRefs.current[lastPp][j]) { ppRefs.current[lastPp][j].focus(); return }
+        }
+      }
+      return
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      if (idx > 0) focusAnswer(idx - 1)
+      return
+    }
+    if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      if (idx < ansLen - 1) focusAnswer(idx + 1)
+      return
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (isMulti && question.partialProducts.length > 0) {
+        const lastPp = question.partialProducts.length - 1
+        for (let j = question.partialProducts[lastPp].digits.length - 1; j >= 0; j--) {
+          if (ppRefs.current[lastPp] && ppRefs.current[lastPp][j]) { ppRefs.current[lastPp][j].focus(); return }
+        }
+      }
+      return
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      return
+    }
+  }
+
+  const handleAnswerInput = (idx, val) => {
+    if (revealed) return
+    if (val !== '' && !/^\d{1,2}$/.test(val)) return
+    const next = [...answerInputs]; next[idx] = val; setAnswerInputs(next)
+    if (!val) return
+    if (idx > 0) focusAnswer(idx - 1)
+  }
+
+  const handleSubmit = async () => {
+    if (revealed || loading || !question) return
+    if (isMulti && currentPP < (question.partialProducts?.length || 0)) {
+      setFeedback('Complete all partial products before submitting.')
+      return
+    }
+    timer.stop()
+    try {
+      let body
+      if (isMulti) {
+        const userAnswer = answerInputs.map(v => v === '' ? null : Number(v))
+        const userPartialProducts = ppInputs.map(row => row.map(v => v === '' || v === null ? null : Number(v)))
+        const userCarries = ppCarryInputs.map(row => row.map(v => v === '' || v === null ? null : Number(v)))
+        body = JSON.stringify({ a: question.a, b: question.b, userAnswer, userPartialProducts, userCarries, sessionGoal })
+      } else {
+        const userAnswer = answerInputs.map(v => v === '' ? null : Number(v))
+        const userCarries = carryInputs.map(v => v === '' ? '' : v)
+        body = JSON.stringify({ a: question.a, b: question.b, userAnswer, userCarries, sessionGoal })
+      }
+      const r = await fetch(`${API}/column-multiplication-api/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': authGetToken() ? `Bearer ${authGetToken()}` : '' },
+        body
+      })
+      const data = await r.json()
+      setCorrectAnswerDigits(data.answerDigits)
+      if (isMulti) {
+        setCorrectCarryDigits(null)
+        setCorrectPPDigits(data.partialProducts ? data.partialProducts.map(pp => pp.digits) : null)
+        setCorrectPPCarries(data.partialProducts ? data.partialProducts.map(pp => pp.carries) : null)
+      } else {
+        setCorrectCarryDigits(data.correctCarries)
+        setCorrectPPDigits(null); setCorrectPPCarries(null)
+      }
+      setIsCorrect(data.correct); setRevealed(true)
+      let explanation = ''
+      try {
+        const sr = await fetch(`${API}/column-multiplication-api/check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': authGetToken() ? `Bearer ${authGetToken()}` : '' },
+          body: JSON.stringify({ a: question.a, b: question.b, userAnswer: [], userCarries: [], userPartialProducts: [], solve: true })
+        })
+        const sd = await sr.json()
+        explanation = sd.explanation || ''
+      } catch (_) {}
+      const resultLine = data.correct ? '✓ Correct!' : `✗ ${data.message || 'Incorrect'}`
+      setFeedback(explanation ? `${resultLine}\n\n— Step-by-step solution —\n${explanation}` : resultLine)
+      const ansVal = isMulti ? Number(answerInputs.filter(v => v !== '' && v !== null).join('') || '') : Number(answerInputs.filter(v => v !== null).join('')) || ''
+      let userCarriesStr = '—', correctCarriesStr = '—'
+      if (isMulti) {
+        const uc = ppCarryInputs.flat().filter(v => v !== '' && v !== null)
+        const cc = data.partialProducts ? data.partialProducts.flatMap(pp => (pp.carries || []).filter(v => v !== null && v !== 0)) : []
+        userCarriesStr = uc.length ? uc.join(', ') : '—'
+        correctCarriesStr = cc.length ? cc.join(', ') : '—'
+      } else {
+        userCarriesStr = carryInputs.filter(v => v !== '').join(', ') || '—'
+        correctCarriesStr = (data.correctCarries || []).filter(v => v !== 0 && v !== null && v !== '').join(', ') || '—'
+      }
+      setResults(prev => [...prev, { question: `${question.a} × ${question.b}`, userAnswer: ansVal, correct: data.correct, correctAnswer: data.correctAnswer, time: timer.elapsed, userCarries: userCarriesStr, correctCarries: correctCarriesStr }])
+      if (data.correct) setScore(s => s + 1)
+    } catch (e) { console.error('Check failed:', e); setFeedback('Error checking answer') }
+  }
+
+  const handleSolve = async () => {
+    if (revealed || loading || !question) return
+    timer.stop()
+    try {
+      const r = await fetch(`${API}/column-multiplication-api/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': authGetToken() ? `Bearer ${authGetToken()}` : '' },
+        body: JSON.stringify({ a: question.a, b: question.b, userAnswer: [], userCarries: [], userPartialProducts: [], solve: true })
+      })
+      const data = await r.json()
+      setCorrectAnswerDigits(data.answerDigits)
+      setIsCorrect(false); setRevealed(true)
+      setAnswerInputs(data.answerDigits ? data.answerDigits.map(String) : question.answerDigits.map(String))
+      if (isMulti) {
+        setCorrectCarryDigits(null)
+        const correctPP = data.partialProducts ? data.partialProducts.map(pp => pp.digits) : (question.partialProducts || []).map(pp => pp.digits)
+        const correctPC = data.partialProducts ? data.partialProducts.map(pp => pp.carries) : (question.partialProducts || []).map(pp => pp.carries)
+        setCorrectPPDigits(correctPP)
+        setCorrectPPCarries(correctPC)
+        const filledPP = correctPP.map(row => row.map(d => d === null ? null : String(d)))
+        const filledPC = correctPC.map(row => row.map(c => c === null ? null : String(c)))
+        setPpInputs(filledPP)
+        setPpCarryInputs(filledPC)
+        setCarryInputs([])
+      } else {
+        setCorrectCarryDigits(data.correctCarries || question.carries)
+        setCorrectPPDigits(null); setCorrectPPCarries(null)
+        setCarryInputs((data.correctCarries || question.carries).map(String))
+        setPpInputs([]); setPpCarryInputs([])
+      }
+      setFeedback(data.explanation || (isMulti ? 'Solved — study the partial products and carries.' : 'Solved — study the carries above each column.'))
+      const solveCC = isMulti
+        ? (data.partialProducts ? data.partialProducts.flatMap(pp => (pp.carries || []).filter(v => v !== null && v !== 0)) : []).join(', ') || '—'
+        : (data.correctCarries || []).filter(v => v !== 0 && v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} × ${question.b}`, userAnswer: data.correctAnswer, correct: false, correctAnswer: data.correctAnswer, time: timer.elapsed, userCarries: '—', correctCarries: solveCC }])
+    } catch (e) {
+      console.error('Solve failed:', e)
+      setCorrectAnswerDigits(question.answerDigits)
+      setIsCorrect(false); setRevealed(true)
+      setAnswerInputs(question.answerDigits.map(String))
+      if (isMulti && question.partialProducts) {
+        setCorrectPPDigits(question.partialProducts.map(pp => pp.digits))
+        setCorrectPPCarries(question.partialProducts.map(pp => pp.carries))
+        setPpInputs(question.partialProducts.map(pp => pp.digits.map(d => d === null ? null : String(d))))
+        setPpCarryInputs(question.partialProducts.map(pp => pp.carries.map(c => c === null ? null : String(c))))
+      } else {
+        setCorrectCarryDigits(question.carries)
+        setCarryInputs(question.carries.map(String))
+      }
+      setFeedback(isMulti ? 'Solved — study the partial products and carries.' : 'Solved — study the carries above each column.')
+      const fallbackCC = isMulti
+        ? (question.partialProducts || []).flatMap(pp => (pp.carries || []).filter(v => v !== null && v !== 0)).join(', ') || '—'
+        : (question.carries || []).filter(v => v !== 0 && v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} × ${question.b}`, userAnswer: question.answer, correct: false, correctAnswer: question.answer, time: timer.elapsed, userCarries: '—', correctCarries: fallbackCC }])
+    }
+  }
+
+  const advanceQuestion = () => {
+    if (advanceTimerRef.current) { clearTimeout(advanceTimerRef.current); advanceTimerRef.current = null }
+    setRevealed(false); setIsCorrect(null); setFeedback(''); setAnswerInputs([]); setCarryInputs([])
+    setCorrectAnswerDigits(null); setCorrectCarryDigits(null)
+    setCorrectPPDigits(null); setCorrectPPCarries(null)
+    setIsMulti(false); setCurrentPP(0); setPpInputs([]); setPpCarryInputs([])
+    if (questionNumber >= totalQ) { setFinished(true); timer.stop() }
+    else { setQuestionNumber(qn => qn + 1); timer.reset(); timer.start(); fetchQuestion() }
+  }
+
+  const diffLabels = {
+    easy: 'Easy — 1 × 1 digit',
+    medium: 'Medium — 1 × 2 digits',
+    hard: 'Hard — 2 × 2 digits',
+    extrahard: 'Extra Hard — 3×3 / 4×3 digits'
+  }
+
+  const inputStyle = (isRight, isWrong) => ({
+    width: `${COL}px`, height: '38px', textAlign: 'center', fontSize: '1rem', fontWeight: 700,
+    background: isRight ? 'var(--clr-correct-bg)' : isWrong ? 'var(--clr-wrong-bg)' : 'var(--clr-input)',
+    border: `2px solid ${isRight ? 'var(--clr-correct)' : isWrong ? 'var(--clr-wrong)' : 'var(--clr-border)'}`,
+    borderRadius: '8px', color: isRight ? 'var(--clr-correct)' : isWrong ? 'var(--clr-wrong)' : 'var(--clr-text)',
+    fontFamily: '"Courier New", monospace', outline: 'none'
+  })
+
+  if (!started && !finished) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--clr-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ background: 'var(--clr-card)', border: '1.5px solid var(--clr-border)', borderRadius: '28px', boxShadow: '0 20px 40px rgba(0,0,0,.45)', padding: '48px 40px', maxWidth: '720px', width: '100%', textAlign: 'center', position: 'relative' }}>
+          <button onClick={onBack} style={{ position: 'absolute', top: '24px', left: '24px', background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '6px 14px', color: 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>← Home</button>
+          <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '48px', color: 'var(--clr-text)', margin: '0 0 12px', lineHeight: 1.1 }}>Column Multiplication</h1>
+          <p style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem', margin: '0 0 24px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>Multiply vertically with carrying</p>
+
+          {/* Help toggle */}
+          <div style={{ marginBottom: '20px' }}>
+            <button onClick={() => setShowHelp(h => !h)} style={{ background: showHelp ? 'var(--clr-input)' : 'transparent', border: '1px solid var(--clr-border)', borderRadius: '50px', padding: '6px 16px', color: 'var(--clr-accent)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}>{showHelp ? '✕ Close' : '? How to play'}</button>
+          </div>
+
+          {showHelp && (
+            <div style={{ textAlign: 'left', background: 'var(--clr-surface)', border: '1px solid var(--clr-border)', borderRadius: '16px', padding: '28px 28px', marginBottom: '24px', maxWidth: '580px', margin: '0 auto 24px' }}>
+              <h3 style={{ color: 'var(--clr-accent)', fontSize: '1.05rem', margin: '0 0 20px', fontFamily: 'Inter, sans-serif', fontWeight: 700, textAlign: 'center' }}>How Column Multiplication Works</h3>
+
+              {/* Step 1 */}
+              <div style={{ display: 'flex', gap: '14px', marginBottom: '18px', alignItems: 'flex-start' }}>
+                <div style={{ minWidth: '28px', height: '28px', borderRadius: '50%', background: 'var(--clr-accent)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>1</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: 'var(--clr-text)', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'Inter, sans-serif', marginBottom: '6px' }}>Multiply by the rightmost digit first</div>
+                  <div style={{ color: 'var(--clr-text-soft)', fontSize: '0.82rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.5', marginBottom: '10px' }}>Take the <strong style={{ color: 'var(--clr-accent)' }}>rightmost digit</strong> of the multiplier and multiply it by each digit of the top number. Write carries above and products below the line.</div>
+                  <div style={{ background: 'var(--clr-card)', borderRadius: '10px', padding: '14px 16px', fontFamily: '"Courier New", monospace', fontSize: '1.1rem', fontWeight: 700, lineHeight: '1.6', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--clr-accent)', fontFamily: 'Inter, sans-serif', marginBottom: '2px' }}>Step 1: multiply by 9</div>
+                    <div>31</div>
+                    <div style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem' }}>× <span style={{ color: 'var(--clr-accent)', border: '1.5px solid var(--clr-accent)', borderRadius: '4px', padding: '0 3px' }}>4</span>9</div>
+                    <div style={{ width: '60px', height: '2px', background: 'var(--clr-border)', margin: '4px auto' }} />
+                    <div style={{ color: 'var(--clr-accent)' }}>_ _</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div style={{ display: 'flex', gap: '14px', marginBottom: '18px', alignItems: 'flex-start' }}>
+                <div style={{ minWidth: '28px', height: '28px', borderRadius: '50%', background: 'var(--clr-accent)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>2</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: 'var(--clr-text)', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'Inter, sans-serif', marginBottom: '6px' }}>Move to the next digit (shift left)</div>
+                  <div style={{ color: 'var(--clr-text-soft)', fontSize: '0.82rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.5', marginBottom: '10px' }}>Multiply by the <strong style={{ color: 'var(--clr-text)' }}>next digit</strong> to the left. The result shifts one place to the left. The app highlights which digit you're working on.</div>
+                  <div style={{ background: 'var(--clr-card)', borderRadius: '10px', padding: '14px 16px', fontFamily: '"Courier New", monospace', fontSize: '1.1rem', fontWeight: 700, lineHeight: '1.6', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--clr-text)', fontFamily: 'Inter, sans-serif', marginBottom: '2px' }}>Step 2: multiply by 4</div>
+                    <div>31</div>
+                    <div style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem' }}>× <span style={{ color: 'var(--clr-text)', border: '1.5px solid var(--clr-text)', borderRadius: '4px', padding: '0 3px' }}>4</span>9</div>
+                    <div style={{ width: '60px', height: '2px', background: 'var(--clr-border)', margin: '4px auto' }} />
+                    <div>2 7 9</div>
+                    <div style={{ color: 'var(--clr-accent)' }}>1 2 4 _</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div style={{ display: 'flex', gap: '14px', marginBottom: '18px', alignItems: 'flex-start' }}>
+                <div style={{ minWidth: '28px', height: '28px', borderRadius: '50%', background: 'var(--clr-accent)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>3</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: 'var(--clr-text)', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'Inter, sans-serif', marginBottom: '6px' }}>Add all partial products for the final answer</div>
+                  <div style={{ color: 'var(--clr-text-soft)', fontSize: '0.82rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.5' }}>After all partial products are entered, add them up to get the final answer. Work right to left, carrying as needed.</div>
+                </div>
+              </div>
+
+              {/* Keyboard shortcuts */}
+              <div style={{ borderTop: '1px solid var(--clr-border)', paddingTop: '14px', marginTop: '14px' }}>
+                <div style={{ color: 'var(--clr-text)', fontSize: '0.82rem', fontWeight: 600, fontFamily: 'Inter, sans-serif', marginBottom: '8px' }}>Keyboard shortcuts:</div>
+                <div style={{ color: 'var(--clr-text-soft)', fontSize: '0.78rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.7' }}>
+                  <strong>↑ / ↓</strong> — move between carry and digit rows &nbsp;&nbsp;
+                  <strong>← / →</strong> — move between columns &nbsp;&nbsp;
+                  <strong>Tab</strong> — jump to next partial product<br />
+                  <strong>Backspace</strong> — clear and move back
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ color: 'var(--clr-text)', fontSize: '0.9rem', margin: '0 0 16px', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>Select Difficulty:</h3>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {['easy', 'medium', 'hard', 'extrahard'].map(d => (
+                <button key={d} onClick={() => setDifficulty(d)} style={{ background: difficulty === d ? 'var(--clr-accent)' : 'transparent', border: difficulty === d ? '1px solid var(--clr-accent)' : '1px solid var(--clr-border)', borderRadius: '50px', padding: '8px 16px', color: difficulty === d ? '#FFF' : 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>{diffLabels[d]}</button>
+              ))}
+            </div>
+          </div>
+          <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <label style={{ color: 'var(--clr-text-soft)', fontSize: '0.85rem', margin: '0 0 12px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>How many questions? (max 100)</label>
+            <input type="text" value={numQuestions} onChange={(e) => { const v = e.target.value; if (v === '' || (/^\d+$/.test(v) && Number(v) <= 100)) setNumQuestions(v) }} style={{ background: 'var(--clr-input)', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '10px', color: 'var(--clr-text)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9rem', width: '100px', textAlign: 'center', outline: 'none' }} placeholder={String(DEFAULT_TOTAL)} />
+          </div>
+          <button onClick={startQuiz} style={{ background: 'var(--clr-accent)', border: 'none', borderRadius: '6px', padding: '10px 24px', color: '#FFF', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Start Quiz</button>
+        </div>
+      </div>
+    )
+  }
+
+  const ansLen = question ? question.answerDigits.length : 1
+
+  const renderSingleDigit = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '16px 0', fontFamily: '"Courier New", monospace', fontSize: '1.8rem', fontWeight: 700 }}>
+      <div style={{ display: 'flex', gap: `${GAP}px`, marginBottom: '4px' }}>
+        <span style={{ width: `${LEFT_MARGIN}px` }} />
+        {question.carries.map((c, i) => {
+          if (i === question.carries.length - 1) return <span key={i} style={{ width: `${COL}px` }} />
+          const correct = revealed && correctCarryDigits ? String(correctCarryDigits[i]) : ''
+          const isRight = revealed && correct !== '' && String(carryInputs[i] || '') === correct
+          const isWrong = revealed && correct !== '' && !isRight
+          const shown = revealed ? correct : carryInputs[i] || ''
+          return (
+            <input key={i} ref={el => carryRefs.current[i] = el} type="text" maxLength={1}
+              value={shown}
+              onChange={e => handleSingleInput(i, e.target.value, true)}
+              onKeyDown={e => handleSingleKeyDown(i, e, true)}
+              disabled={revealed}
+              style={inputStyle(isRight, isWrong)}
+            />
+          )
+        })}
+      </div>
+      <div style={{ display: 'flex', gap: `${GAP}px`, marginBottom: '2px' }}>
+        <span style={{ width: `${LEFT_MARGIN}px` }} />
+        {question.aDigits.map((d, i) => (
+          <span key={i} style={{ width: `${COL}px`, height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--clr-text)', fontSize: '1.4rem' }}>{d !== null ? d : ''}</span>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: `${GAP}px`, marginBottom: '4px' }}>
+        <span style={{ width: `${LEFT_MARGIN}px`, textAlign: 'center', color: 'var(--clr-text-soft)', fontSize: '1.4rem' }}>×</span>
+        {question.aDigits.map((_, i) => (
+          <span key={i} style={{ width: `${COL}px`, height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: i === question.aDigits.length - 1 ? 'var(--clr-text)' : 'transparent', fontSize: '1.4rem' }}>{i === question.aDigits.length - 1 ? question.b : ''}</span>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: `${GAP}px` }}>
+        <span style={{ width: `${LEFT_MARGIN}px` }} />
+        <div style={{ width: `${ansLen * (COL + GAP) - GAP}px`, height: '3px', background: 'var(--clr-border)', borderRadius: '2px' }} />
+      </div>
+      <div style={{ display: 'flex', gap: `${GAP}px`, marginTop: '8px' }}>
+        <span style={{ width: `${LEFT_MARGIN}px` }} />
+        {question.answerDigits.map((d, i) => {
+          const correctDigit = revealed && correctAnswerDigits ? String(correctAnswerDigits[i]) : ''
+          const isRight = revealed && correctDigit !== '' && String(answerInputs[i] || '') === correctDigit
+          const isWrong = revealed && correctDigit !== '' && !isRight
+          const shown = revealed ? correctDigit : answerInputs[i] || ''
+          return (
+            <input key={i} ref={el => answerRefs.current[i] = el} type="text" maxLength={1}
+              value={shown}
+              onChange={e => handleAnswerInput(i, e.target.value)}
+              onKeyDown={e => handleAnswerKeyDown(i, e)}
+              disabled={revealed}
+              style={{ ...inputStyle(isRight, isWrong), width: `${COL}px`, height: '42px', fontSize: '1.4rem' }}
+            />
+          )
+        })}
+      </div>
+    </div>
+  )
+
+  const renderMultiDigit = () => {
+    const pp = question.partialProducts
+    const allDone = currentPP >= pp.length
+    const ansLen = question.answerDigits.length
+    const padCount = ansLen - question.aDigits.length
+    const paddedADigits = [...Array(padCount).fill(null), ...question.aDigits]
+    const bPadCount = ansLen - (question.bDigits ? question.bDigits.length : 0)
+    const paddedBDigits = [...Array(Math.max(0, bPadCount)).fill(null), ...(question.bDigits || [])]
+    const shift = allDone ? 0 : currentPP
+    const trailingCol = allDone ? -1 : ansLen - 1 - shift
+
+    const isPpRight = (ppIdx, j) => {
+      if (!revealed || !correctPPDigits) return false
+      const correct = correctPPDigits[ppIdx][j]
+      if (correct === null || correct === undefined) return false
+      const user = ppInputs[ppIdx] && ppInputs[ppIdx][j]
+      return user !== null && user !== undefined && String(user) === String(correct)
+    }
+    const isPpWrong = (ppIdx, j) => {
+      if (!revealed || !correctPPDigits) return false
+      const correct = correctPPDigits[ppIdx][j]
+      if (correct === null || correct === undefined) return false
+      const user = ppInputs[ppIdx] && ppInputs[ppIdx][j]
+      return (user !== null && user !== undefined && user !== '' && String(user) !== String(correct))
+    }
+    const ppCorrectVal = (ppIdx, j) => {
+      if (!revealed || !correctPPDigits) return ''
+      const v = correctPPDigits[ppIdx][j]
+      return v !== null && v !== undefined ? String(v) : ''
+    }
+
+    const emptyCell = (key) => <div key={key} style={{ width: `${COL}px` }} />
+    const rowGap = { display: 'flex', gap: `${GAP}px` }
+    const labelSpan = <span style={{ width: `${LEFT_MARGIN}px` }} />
+    const labelX = <span style={{ width: `${LEFT_MARGIN}px`, textAlign: 'center', color: 'var(--clr-text-soft)', fontSize: '1.4rem' }}>×</span>
+    const digitDisplay = (d, i, extra) => (
+      <div key={i} style={{ width: `${COL}px`, height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--clr-text)', fontSize: '1.4rem', ...extra }}>
+        {d !== null ? d : ''}
+      </div>
+    )
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '12px 0', fontFamily: '"Courier New", monospace', fontWeight: 700 }}>
+
+        {/* Carry row above multiplicand (currentPP only) */}
+        {!allDone && (
+          <div style={{ ...rowGap, marginBottom: '2px' }}>
+            {labelSpan}
+            {paddedADigits.map((_, m) => {
+              const carryCol = m - shift
+              const carries = pp[currentPP].carries
+              if (carryCol < 0 || carryCol >= carries.length || carries[carryCol] === null || carryCol === trailingCol) {
+                return emptyCell(m)
+              }
+              const val = revealed
+                ? (correctPPCarries && correctPPCarries[currentPP] && correctPPCarries[currentPP][carryCol] != null ? String(correctPPCarries[currentPP][carryCol]) : '')
+                : (ppCarryInputs[currentPP] && ppCarryInputs[currentPP][carryCol]) || ''
+              return (
+                <div key={m} style={{ width: `${COL}px` }}>
+                  <input
+                    ref={el => { if (!ppCarryRefs.current[currentPP]) ppCarryRefs.current[currentPP] = []; ppCarryRefs.current[currentPP][carryCol] = el }}
+                    type="text" inputMode="numeric" maxLength={2}
+                    value={val}
+                    onChange={e => handleMultiPpCarryInput(currentPP, carryCol, e.target.value)}
+                    onKeyDown={e => handleMultiKeyDown(e, { isCarry: true, ppIdx: currentPP, colIdx: carryCol })}
+                    disabled={revealed}
+                    style={{ width: `${COL}px`, height: '38px', textAlign: 'center', fontSize: '1rem', fontWeight: 700,
+                      background: 'var(--clr-input)', border: '2px solid var(--clr-border)', borderRadius: '8px',
+                      color: 'var(--clr-text)', fontFamily: '"Courier New", monospace', outline: 'none' }}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Multiplicand row */}
+        <div style={{ ...rowGap, marginBottom: '2px' }}>
+          {labelSpan}
+          {paddedADigits.map((d, i) => digitDisplay(d, i))}
+        </div>
+
+        {/* Multiplier row */}
+        <div style={{ ...rowGap, marginBottom: '4px' }}>
+          {labelX}
+          {paddedBDigits.map((d, i) => {
+            const activeMIdx = !allDone && d !== null && (paddedBDigits.length - 1 - i) === currentPP
+            return (
+              <div key={i} style={{ width: `${COL}px`, height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: activeMIdx ? 'var(--clr-accent)' : 'var(--clr-text)', fontSize: '1.4rem', fontWeight: activeMIdx ? 900 : 700, background: activeMIdx ? 'var(--clr-accent-bg, rgba(79,140,255,0.12))' : 'transparent', borderRadius: activeMIdx ? '6px' : '0', border: activeMIdx ? '1.5px solid var(--clr-accent)' : 'none' }}>
+                {d !== null ? d : ''}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Step progress + operation hint */}
+        {!allDone && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '4px 0 6px' }}>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '4px' }}>
+              {pp.map((_, i) => (
+                <div key={i} style={{ width: '10px', height: '10px', borderRadius: '50%', background: i < currentPP ? 'var(--clr-correct)' : i === currentPP ? 'var(--clr-accent)' : 'var(--clr-border)', transition: 'background 0.3s' }} />
+              ))}
+              <span style={{ fontSize: '0.72rem', color: 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, marginLeft: '4px' }}>Step {currentPP + 1} of {pp.length}</span>
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--clr-accent)', fontFamily: '"Courier New", monospace', fontWeight: 700, background: 'var(--clr-accent-bg, rgba(79,140,255,0.08))', padding: '4px 14px', borderRadius: '8px', border: '1px solid var(--clr-accent)', opacity: 0.9 }}>
+              Now: {pp[currentPP].multiplierDigit} × {question.a} = ?
+            </div>
+          </div>
+        )}
+
+        {/* Separator line */}
+        <div style={rowGap}>
+          {labelSpan}
+          <div style={{ width: `${ansLen * (COL + GAP) - GAP}px`, height: '3px', background: 'var(--clr-border)', borderRadius: '2px' }} />
+        </div>
+
+        {/* Partial products */}
+        {pp.map((ppRow, idx) => {
+          if (idx > currentPP && !allDone) return null
+          const isActive = idx === currentPP && !allDone
+          const isDone = idx < currentPP
+
+          return (
+            <div key={idx} style={{ ...rowGap, marginTop: '6px', padding: isDone ? '2px 4px' : isActive ? '2px 4px' : '0', borderRadius: '8px', background: isDone ? 'var(--clr-correct-bg)' : 'transparent', borderLeft: isActive ? '3px solid var(--clr-accent)' : 'none' }}>
+              <span style={{ width: `${LEFT_MARGIN}px`, textAlign: 'center', color: 'var(--clr-text-soft)', fontSize: '1.4rem' }}>+</span>
+              {ppRow.digits.map((d, j) => {
+                if (d === null) return emptyCell(j)
+                if (isDone) {
+                  const val = ppInputs[idx]?.[j] ?? ''
+                  return <div key={j} style={{ width: `${COL}px`, height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 700, color: 'var(--clr-correct)' }}>{val}</div>
+                }
+                const isRight = isPpRight(idx, j)
+                const isWrong = isPpWrong(idx, j)
+                const shown = revealed ? ppCorrectVal(idx, j) : (ppInputs[idx] && ppInputs[idx][j]) || ''
+                return (
+                  <div key={j} style={{ width: `${COL}px` }}>
+                    <input
+                      ref={el => { if (!ppRefs.current[idx]) ppRefs.current[idx] = []; ppRefs.current[idx][j] = el }}
+                      type="text" inputMode="numeric" maxLength={1}
+                      value={shown}
+                      onChange={e => handleMultiPpInput(idx, j, e.target.value)}
+                      onKeyDown={e => handleMultiKeyDown(e, { isPp: true, ppIdx: idx, colIdx: j })}
+                      disabled={revealed}
+                      style={{ width: `${COL}px`, height: '38px', textAlign: 'center', fontSize: '1rem', fontWeight: 700,
+                        background: isRight ? 'var(--clr-correct-bg)' : isWrong ? 'var(--clr-wrong-bg)' : 'var(--clr-input)',
+                        border: `2px solid ${isRight ? 'var(--clr-correct)' : isWrong ? 'var(--clr-wrong)' : 'var(--clr-border)'}`,
+                        borderRadius: '8px', color: isRight ? 'var(--clr-correct)' : isWrong ? 'var(--clr-wrong)' : 'var(--clr-text)',
+                        fontFamily: '"Courier New", monospace', outline: 'none' }}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })}
+
+        {/* Separator line before answer — always visible */}
+        <div style={{ ...rowGap, marginTop: '6px' }}>
+          {labelSpan}
+          <div style={{ width: `${ansLen * (COL + GAP) - GAP}px`, height: '3px', background: 'var(--clr-border)', borderRadius: '2px' }} />
+        </div>
+
+        {/* Answer row */}
+        <div style={{ ...rowGap, marginTop: '8px' }}>
+          {labelSpan}
+          {question.answerDigits.map((d, i) => {
+            const correctDigit = revealed && correctAnswerDigits ? String(correctAnswerDigits[i]) : ''
+            const isRight = revealed && correctDigit !== '' && String(answerInputs[i] || '') === correctDigit
+            const isWrong = revealed && correctDigit !== '' && !isRight
+            const shown = revealed ? correctDigit : answerInputs[i] || ''
+            return (
+              <input key={i} ref={el => answerRefs.current[i] = el} type="text" maxLength={1} value={shown}
+                onChange={e => handleAnswerInput(i, e.target.value)}
+                onKeyDown={e => handleAnswerKeyDown(i, e)}
+                disabled={revealed || !allDone}
+                style={Object.assign({ width: COL + 'px', height: '42px', textAlign: 'center', fontSize: '1.4rem', fontWeight: 700,
+                  background: isRight ? 'var(--clr-correct-bg)' : isWrong ? 'var(--clr-wrong-bg)' : 'var(--clr-input)',
+                  borderRadius: '8px', color: isRight ? 'var(--clr-correct)' : isWrong ? 'var(--clr-wrong)' : 'var(--clr-text)',
+                  fontFamily: '"Courier New", monospace', outline: 'none', opacity: allDone ? 1 : 0.5 },
+                  isRight ? { border: '2px solid var(--clr-correct)' } : isWrong ? { border: '2px solid var(--clr-wrong)' } : { border: '2px solid var(--clr-border)' })}
+              />
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <QuizLayout title="Column Multiplication" onBack={onBack} timer={timer}>
+      {started && !finished && <>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
+          <div className="progress-pill center">Question {questionNumber}/{totalQ}</div>
+        </div>
+        {loading || !question ? <div className="question-box">Loading question…</div> : (
+          <>
+            {isMulti ? renderMultiDigit() : renderSingleDigit()}
+            {feedback && (
+              <div style={{
+                textAlign: 'left', padding: '12px 16px', borderRadius: '8px', margin: '8px 0',
+                background: isCorrect ? 'rgba(92, 184, 122, 0.25)' : 'rgba(224, 90, 74, 0.25)',
+                color: isCorrect ? 'var(--clr-correct)' : 'var(--clr-wrong)',
+                fontWeight: 600, fontSize: '0.9rem',
+                whiteSpace: 'pre-line', lineHeight: '1.6',
+                maxHeight: '300px', overflowY: 'auto',
+                border: isCorrect ? '2px solid var(--clr-correct)' : '2px solid var(--clr-wrong)'
+              }}>{feedback}</div>
+            )}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '12px 0', flexWrap: 'wrap' }}>
+              {!revealed && <button onClick={handleSubmit} disabled={loading} style={{ background: 'var(--clr-accent)', border: 'none', borderRadius: '8px', padding: '10px 24px', color: '#FFF', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Submit</button>}
+              {!revealed && <button onClick={handleSolve} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '8px', padding: '10px 24px', color: 'var(--clr-text-soft)', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Solve</button>}
+              {revealed && <button onClick={advanceQuestion} style={{ background: 'var(--clr-accent)', border: 'none', borderRadius: '8px', padding: '10px 24px', color: '#FFF', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Next Question →</button>}
+            </div>
+          </>
+        )}
+        {results.length > 0 && <ResultsTable results={results} />}
+      </>}
+      {finished && (
+        <div style={{ textAlign: 'center', padding: '24px' }}>
+          <h2 style={{ color: 'var(--clr-text)', marginBottom: '16px' }}>Score: {score}/{totalQ}</h2>
+          <ResultsTable results={results} />
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '24px' }}>
+            <button onClick={() => { setStarted(false); setFinished(false) }} style={{ background: 'var(--clr-accent)', border: 'none', borderRadius: '8px', padding: '10px 24px', color: '#FFF', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Play Again</button>
+          </div>
+        </div>
+      )}
+    </QuizLayout>
+  )
+}
+
+/**
+ * ColumnSubtractionApp Component
+ * Vertical column subtraction: minuend − subtrahend.
+ * User fills borrow boxes above each column + the difference digits below.
+ */
+function ColumnSubtractionApp({ onBack, initialDifficulty, initialNumQuestions, initialStarted, isGoalMode = false }) {
+  const [difficulty, setDifficulty] = useState(initialDifficulty || 'easy')
+  const [numQuestions, setNumQuestions] = useState(initialNumQuestions || String(DEFAULT_TOTAL))
+  const [started, setStarted] = useState(initialStarted || false)
+  const [finished, setFinished] = useState(false)
+  const [question, setQuestion] = useState(null)
+  const [score, setScore] = useState(0)
+  const [questionNumber, setQuestionNumber] = useState(0)
+  const [totalQ, setTotalQ] = useState(DEFAULT_TOTAL)
+  const [feedback, setFeedback] = useState('')
+  const [isCorrect, setIsCorrect] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [revealed, setRevealed] = useState(false)
+  const [results, setResults] = useState([])
+  const timer = useTimer()
+  const [sessionGoal, setSessionGoal] = useState(isGoalMode ? 'speed' : 'standard')
+  const [showHelp, setShowHelp] = useState(false)
+
+  const [answerInputs, setAnswerInputs] = useState([])
+  const [borrowInputs, setBorrowInputs] = useState([])
+  const [correctAnswerDigits, setCorrectAnswerDigits] = useState(null)
+  const [correctBorrowDigits, setCorrectBorrowDigits] = useState(null)
+  const [activeBorrows, setActiveBorrows] = useState(new Set())
+  const answerRefs = useRef([])
+  const borrowRefs = useRef([])
+  const advanceTimerRef = useRef(null)
+
+  useEffect(() => { if (!isGoalMode) setSessionGoal('standard') }, [isGoalMode])
+
+  const startQuiz = async () => {
+    const q = Number(numQuestions) || DEFAULT_TOTAL
+    setTotalQ(q); setScore(0); setQuestionNumber(1); setResults([])
+    setFinished(false); setStarted(true); setFeedback(''); setIsCorrect(null); setRevealed(false)
+    setCorrectAnswerDigits(null); setCorrectBorrowDigits(null); setActiveBorrows(new Set())
+    timer.reset(); timer.start();
+    await fetchQuestion()
+  }
+
+  const fetchQuestion = async (diff) => {
+    setLoading(true)
+    try {
+      const r = await fetch(`${API}/column-subtraction-api/question?difficulty=${diff || difficulty}`)
+      const data = await r.json()
+      setQuestion(data)
+      setAnswerInputs(new Array(data.answerDigits.length).fill(''))
+      setBorrowInputs(new Array(data.borrows.length).fill(''))
+      setCorrectAnswerDigits(null); setCorrectBorrowDigits(null); setActiveBorrows(new Set())
+      setTimeout(() => {
+        const lastIdx = data.answerDigits.length - 1
+        if (answerRefs.current[lastIdx]) answerRefs.current[lastIdx].focus()
+      }, 100)
+    } catch (e) { console.error('Fetch column subtraction question failed:', e) }
+    setLoading(false)
+  }
+
+  const activateBorrow = (idx, isCurrentlyActive) => {
+    if (isCurrentlyActive) {
+      setActiveBorrows(prev => { const next = new Set(prev); next.delete(idx); return next })
+      setBorrowInputs(prev => { const a = [...prev]; a[idx] = ''; return a })
+    } else {
+      setActiveBorrows(prev => { const next = new Set(prev); next.add(idx); return next })
+      setTimeout(() => { if (borrowRefs.current[idx]) borrowRefs.current[idx].focus() }, 50)
+    }
+  }
+
+  const handleInput = (idx, val, isBorrow) => {
+    if (revealed) return
+    if (val !== '' && !(isBorrow ? /^\d{1,2}$/.test(val) : /^\d$/.test(val))) return
+    const setter = isBorrow ? setBorrowInputs : setAnswerInputs
+    const arr = isBorrow ? borrowInputs : answerInputs
+    const next = [...arr]; next[idx] = val; setter(next)
+  }
+
+  const focusAnswer = (i) => { if (answerRefs.current[i]) answerRefs.current[i].focus() }
+  const focusBorrow = (i) => { if (borrowRefs.current[i]) borrowRefs.current[i].focus() }
+
+  const handleKeyDown = (idx, e, isBorrow) => {
+
+    if (e.key === 'Backspace') {
+      if (e.currentTarget.value) return
+      e.preventDefault()
+      if (isBorrow) {
+        focusAnswer(idx)
+      } else if (idx < answerInputs.length - 1) {
+        focusAnswer(idx + 1)
+      }
+      return
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (!isBorrow && activeBorrows.has(idx) && borrowRefs.current[idx]) focusBorrow(idx)
+      return
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      if (isBorrow) focusAnswer(idx)
+      return
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      if (!isBorrow) { if (idx > 0) focusAnswer(idx - 1) }
+      else { focusAnswer(idx) }
+      return
+    }
+    if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      if (!isBorrow) { if (idx < answerInputs.length - 1) focusAnswer(idx + 1) }
+      else { focusAnswer(idx) }
+      return
+    }
+  }
+
+  const handleSubmit = async () => {
+    if (revealed || loading || !question) return
+    timer.stop()
+    const userAnswer = answerInputs.map(v => v === '' ? null : Number(v))
+    const userBorrows = borrowInputs.map(v => v === '' ? '' : v)
+    try {
+      const r = await fetch(`${API}/column-subtraction-api/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': authGetToken() ? `Bearer ${authGetToken()}` : '' },
+        body: JSON.stringify({ a: question.a, b: question.b, userAnswer, userBorrows, sessionGoal })
+      })
+      const data = await r.json()
+      const allBorrows = new Set(activeBorrows)
+      if (data.correctBorrows && question.aDigits) {
+        data.correctBorrows.forEach((v, i) => { if (question.aDigits[i] != null && String(v) !== String(question.aDigits[i])) allBorrows.add(i) })
+      }
+      setCorrectAnswerDigits(data.answerDigits)
+      setCorrectBorrowDigits(data.correctBorrows)
+      setIsCorrect(data.correct); setRevealed(true); setActiveBorrows(allBorrows)
+      let explanation = ''
+      try {
+        const sr = await fetch(`${API}/column-subtraction-api/check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': authGetToken() ? `Bearer ${authGetToken()}` : '' },
+          body: JSON.stringify({ a: question.a, b: question.b, userAnswer: [], userBorrows: [], solve: true })
+        })
+        const sd = await sr.json()
+        explanation = sd.explanation || ''
+      } catch (_) {}
+      const resultLine = data.correct ? '✓ Correct!' : `✗ ${data.message || 'Incorrect'}`
+      setFeedback(explanation ? `${resultLine}\n\n— Step-by-step solution —\n${explanation}` : resultLine)
+      const userBorrowsStr = borrowInputs.filter(v => v !== '').join(', ') || '—'
+      const correctBorrowsStr = (data.correctBorrows || []).filter(v => v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} − ${question.b}`, userAnswer: Number(userAnswer.filter(v => v !== null).join('')) || '', correct: data.correct, correctAnswer: data.correctAnswer, time: timer.elapsed, userCarries: userBorrowsStr, correctCarries: correctBorrowsStr }])
+      if (data.correct) setScore(s => s + 1)
+    } catch (e) { console.error('Check failed:', e); setFeedback('Error checking answer') }
+  }
+
+  const handleSolve = async () => {
+    if (revealed || loading || !question) return
+    timer.stop()
+    const allBorrows = new Set()
+    try {
+      const r = await fetch(`${API}/column-subtraction-api/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': authGetToken() ? `Bearer ${authGetToken()}` : '' },
+        body: JSON.stringify({ a: question.a, b: question.b, userAnswer: [], userBorrows: [], solve: true })
+      })
+      const data = await r.json()
+      if (data.correctBorrows && question.aDigits) {
+        data.correctBorrows.forEach((v, i) => { if (question.aDigits[i] != null && String(v) !== String(question.aDigits[i])) allBorrows.add(i) })
+      }
+      setCorrectAnswerDigits(data.answerDigits)
+      setCorrectBorrowDigits(data.correctBorrows)
+      setIsCorrect(false); setRevealed(true); setActiveBorrows(allBorrows)
+      setAnswerInputs(data.answerDigits ? data.answerDigits.map(String) : question.answerDigits.map(String))
+      setBorrowInputs(data.correctBorrows ? data.correctBorrows.map(String) : question.borrows.map(String))
+      setFeedback(data.explanation || 'Solved — study the borrows above each column.')
+      const solveBorrowStr = (data.correctBorrows || []).filter(v => v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} − ${question.b}`, userAnswer: data.correctAnswer, correct: false, correctAnswer: data.correctAnswer, time: timer.elapsed, userCarries: '—', correctCarries: solveBorrowStr }])
+    } catch (e) {
+      console.error('Solve failed:', e)
+      if (question.borrows && question.aDigits) {
+        question.borrows.forEach((v, i) => { if (question.aDigits[i] != null && String(v) !== String(question.aDigits[i])) allBorrows.add(i) })
+      }
+      setCorrectAnswerDigits(question.answerDigits)
+      setCorrectBorrowDigits(question.borrows)
+      setRevealed(true); setIsCorrect(false); setActiveBorrows(allBorrows)
+      setAnswerInputs(question.answerDigits.map(String))
+      setBorrowInputs(question.borrows.map(String))
+      setFeedback('Solved — study the borrows above each column.')
+      const fallbackBorrowStr = (question.borrows || []).filter(v => v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} − ${question.b}`, userAnswer: question.answer, correct: false, correctAnswer: question.answer, time: timer.elapsed, userCarries: '—', correctCarries: fallbackBorrowStr }])
+    }
+  }
+
+  const advanceQuestion = () => {
+    if (advanceTimerRef.current) { clearTimeout(advanceTimerRef.current); advanceTimerRef.current = null }
+    setRevealed(false); setIsCorrect(null); setFeedback(''); setCorrectAnswerDigits(null); setCorrectBorrowDigits(null); setActiveBorrows(new Set())
+    if (questionNumber >= totalQ) { setFinished(true); timer.stop() }
+    else { setQuestionNumber(qn => qn + 1); setAnswerInputs([]); setBorrowInputs([]); timer.reset(); timer.start(); fetchQuestion() }
+  }
+
+  const diffLabels = { easy: 'Easy — 2 digit', medium: 'Medium — 2 digit', hard: 'Hard — 3 digit', extrahard: 'Extra Hard — 4 digit' }
+
+  if (!started && !finished) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--clr-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ background: 'var(--clr-card)', border: '1.5px solid var(--clr-border)', borderRadius: '28px', boxShadow: '0 20px 40px rgba(0,0,0,.45)', padding: '48px 40px', maxWidth: '720px', width: '100%', textAlign: 'center', position: 'relative' }}>
+          <button onClick={onBack} style={{ position: 'absolute', top: '24px', left: '24px', background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '6px 14px', color: 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>← Home</button>
+          <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '48px', color: 'var(--clr-text)', margin: '0 0 12px', lineHeight: 1.1 }}>Column Subtraction</h1>
+          <p style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem', margin: '0 0 24px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>Subtract vertically with borrowing</p>
+
+          {/* Help toggle */}
+          <div style={{ marginBottom: '20px' }}>
+            <button onClick={() => setShowHelp(h => !h)} style={{ background: showHelp ? 'var(--clr-input)' : 'transparent', border: '1px solid var(--clr-border)', borderRadius: '50px', padding: '6px 16px', color: 'var(--clr-accent)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}>{showHelp ? '✕ Close' : '? How to play'}</button>
+          </div>
+
+          {showHelp && (
+            <div style={{ textAlign: 'left', background: 'var(--clr-surface)', border: '1px solid var(--clr-border)', borderRadius: '16px', padding: '28px 28px', marginBottom: '24px', maxWidth: '580px', margin: '0 auto 24px' }}>
+              <h3 style={{ color: 'var(--clr-accent)', fontSize: '1.05rem', margin: '0 0 20px', fontFamily: 'Inter, sans-serif', fontWeight: 700, textAlign: 'center' }}>How Column Subtraction Works</h3>
+
+              {/* Step 1 */}
+              <div style={{ display: 'flex', gap: '14px', marginBottom: '18px', alignItems: 'flex-start' }}>
+                <div style={{ minWidth: '28px', height: '28px', borderRadius: '50%', background: 'var(--clr-accent)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>1</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: 'var(--clr-text)', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'Inter, sans-serif', marginBottom: '6px' }}>See the problem</div>
+                  <div style={{ color: 'var(--clr-text-soft)', fontSize: '0.82rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.5', marginBottom: '10px' }}>The problem appears vertically. Start from the <strong style={{ color: 'var(--clr-text)' }}>rightmost column</strong> and work left.</div>
+                  <div style={{ background: 'var(--clr-card)', borderRadius: '10px', padding: '14px 16px', fontFamily: '"Courier New", monospace', fontSize: '1.2rem', fontWeight: 700, lineHeight: '1.5', textAlign: 'center' }}>
+                    <div><span style={{ color: 'var(--clr-text)' }}>2</span><span style={{ color: 'var(--clr-text)' }}>3</span></div>
+                    <div><span style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem' }}>− </span><span style={{ color: 'var(--clr-text)' }}>1</span><span style={{ color: 'var(--clr-text)' }}>8</span></div>
+                    <div style={{ width: '80px', height: '2px', background: 'var(--clr-border)', margin: '4px auto' }} />
+                    <div><span style={{ color: 'var(--clr-text)' }}>_</span><span style={{ color: 'var(--clr-text)' }}>_</span></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div style={{ display: 'flex', gap: '14px', marginBottom: '18px', alignItems: 'flex-start' }}>
+                <div style={{ minWidth: '28px', height: '28px', borderRadius: '50%', background: 'var(--clr-accent)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>2</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: 'var(--clr-text)', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'Inter, sans-serif', marginBottom: '6px' }}>Can't subtract? Click the top digit to borrow</div>
+                  <div style={{ color: 'var(--clr-text-soft)', fontSize: '0.82rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.5', marginBottom: '10px' }}>3 − 8 is not possible, so click the <strong style={{ color: 'var(--clr-accent)' }}>3</strong> above. It gets a <span style={{ textDecoration: 'line-through', color: 'var(--clr-accent)' }}>strikethrough</span> and a box appears above it.</div>
+                  <div style={{ background: 'var(--clr-card)', borderRadius: '10px', padding: '14px 16px', fontFamily: '"Courier New", monospace', fontSize: '1.2rem', fontWeight: 700, lineHeight: '1.5', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--clr-accent)', marginBottom: '2px', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>↑ box appears here</div>
+                    <div><span style={{ color: 'var(--clr-text-soft)', opacity: 0.5, textDecoration: 'line-through' }}>2</span><span style={{ color: 'var(--clr-accent)', border: '1.5px solid var(--clr-accent)', borderRadius: '4px', padding: '0 4px' }}>3</span></div>
+                    <div><span style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem' }}>− </span><span style={{ color: 'var(--clr-text)' }}>1</span><span style={{ color: 'var(--clr-text)' }}>8</span></div>
+                    <div style={{ width: '80px', height: '2px', background: 'var(--clr-border)', margin: '4px auto' }} />
+                    <div><span style={{ color: 'var(--clr-text)' }}>_</span><span style={{ color: 'var(--clr-text)' }}>_</span></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div style={{ display: 'flex', gap: '14px', marginBottom: '18px', alignItems: 'flex-start' }}>
+                <div style={{ minWidth: '28px', height: '28px', borderRadius: '50%', background: 'var(--clr-accent)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>3</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: 'var(--clr-text)', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'Inter, sans-serif', marginBottom: '6px' }}>Type the converted value</div>
+                  <div style={{ color: 'var(--clr-text-soft)', fontSize: '0.82rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.5', marginBottom: '10px' }}>3 becomes <strong style={{ color: 'var(--clr-text)' }}>13</strong> after borrowing. Type <strong style={{ color: 'var(--clr-text)' }}>13</strong> in the box. Now 13 − 8 = <strong style={{ color: 'var(--clr-text)' }}>5</strong>.</div>
+                  <div style={{ background: 'var(--clr-card)', borderRadius: '10px', padding: '14px 16px', fontFamily: '"Courier New", monospace', fontSize: '1.2rem', fontWeight: 700, lineHeight: '1.5', textAlign: 'center' }}>
+                    <div style={{ marginBottom: '2px' }}><span style={{ fontSize: '1.1rem', color: 'var(--clr-accent)', border: '1.5px solid var(--clr-accent)', borderRadius: '4px', padding: '2px 6px' }}>13</span></div>
+                    <div><span style={{ color: 'var(--clr-text-soft)', textDecoration: 'line-through', opacity: 0.5 }}>2</span><span style={{ color: 'var(--clr-text-soft)' }}>3</span></div>
+                    <div><span style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem' }}>− </span><span style={{ color: 'var(--clr-text)' }}>1</span><span style={{ color: 'var(--clr-text)' }}>8</span></div>
+                    <div style={{ width: '80px', height: '2px', background: 'var(--clr-border)', margin: '4px auto' }} />
+                    <div><span style={{ color: 'var(--clr-text)' }}>_</span><span style={{ color: 'var(--clr-correct)' }}>5</span></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 4 */}
+              <div style={{ display: 'flex', gap: '14px', marginBottom: '18px', alignItems: 'flex-start' }}>
+                <div style={{ minWidth: '28px', height: '28px', borderRadius: '50%', background: 'var(--clr-accent)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>4</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: 'var(--clr-text)', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'Inter, sans-serif', marginBottom: '6px' }}>Move left, subtract next column</div>
+                  <div style={{ color: 'var(--clr-text-soft)', fontSize: '0.82rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.5', marginBottom: '10px' }}>The 2 became <strong style={{ color: 'var(--clr-text)' }}>1</strong> after lending. Now 1 − 1 = <strong style={{ color: 'var(--clr-text)' }}>0</strong>. Answer is <strong style={{ color: 'var(--clr-correct)' }}>05</strong> = 5. Correct!</div>
+                  <div style={{ background: 'var(--clr-card)', borderRadius: '10px', padding: '14px 16px', fontFamily: '"Courier New", monospace', fontSize: '1.2rem', fontWeight: 700, lineHeight: '1.5', textAlign: 'center' }}>
+                    <div style={{ marginBottom: '2px' }}><span style={{ fontSize: '1.1rem', color: 'var(--clr-text-soft)' }}>  </span></div>
+                    <div><span style={{ color: 'var(--clr-text-soft)', textDecoration: 'line-through', opacity: 0.5 }}>2</span><span style={{ color: 'var(--clr-text-soft)', textDecoration: 'line-through', opacity: 0.5 }}>3</span></div>
+                    <div><span style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem' }}>− </span><span style={{ color: 'var(--clr-text)' }}>1</span><span style={{ color: 'var(--clr-text)' }}>8</span></div>
+                    <div style={{ width: '80px', height: '2px', background: 'var(--clr-border)', margin: '4px auto' }} />
+                    <div><span style={{ color: 'var(--clr-correct)' }}>0</span><span style={{ color: 'var(--clr-correct)' }}>5</span></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigation tips */}
+              <div style={{ background: 'var(--clr-card)', borderRadius: '10px', padding: '14px 18px', marginTop: '4px' }}>
+                <div style={{ color: 'var(--clr-text)', fontSize: '0.82rem', fontWeight: 600, fontFamily: 'Inter, sans-serif', marginBottom: '8px' }}>Keyboard shortcuts</div>
+                <div style={{ color: 'var(--clr-text-soft)', fontSize: '0.78rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.8' }}>
+                  <div><span style={{ color: 'var(--clr-accent)', fontFamily: '"Courier New", monospace', background: 'var(--clr-input)', padding: '1px 6px', borderRadius: '3px', fontSize: '0.75rem' }}>← →</span> Move between answer digits</div>
+                  <div><span style={{ color: 'var(--clr-accent)', fontFamily: '"Courier New", monospace', background: 'var(--clr-input)', padding: '1px 6px', borderRadius: '3px', fontSize: '0.75rem' }}>↑ ↓</span> Jump between answer and borrow box</div>
+                  <div><span style={{ color: 'var(--clr-accent)', fontFamily: '"Courier New", monospace', background: 'var(--clr-input)', padding: '1px 6px', borderRadius: '3px', fontSize: '0.75rem' }}>Backspace</span> Clear and move right</div>
+                </div>
+                <div style={{ color: 'var(--clr-text-soft)', fontSize: '0.78rem', fontFamily: 'Inter, sans-serif', marginTop: '8px', lineHeight: '1.5' }}>Click a top digit again to <strong>cancel</strong> the borrow. If a column doesn't need borrowing, just fill the answer directly.</div>
+              </div>
+            </div>
+          )}
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ color: 'var(--clr-text)', fontSize: '0.9rem', margin: '0 0 16px', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>Select Difficulty:</h3>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {['easy', 'medium', 'hard', 'extrahard'].map(d => (
+                <button key={d} onClick={() => setDifficulty(d)} style={{ background: difficulty === d ? 'var(--clr-accent)' : 'transparent', border: difficulty === d ? '1px solid var(--clr-accent)' : '1px solid var(--clr-border)', borderRadius: '50px', padding: '8px 16px', color: difficulty === d ? '#FFF' : 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>{diffLabels[d]}</button>
+              ))}
+            </div>
+          </div>
+          <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <label style={{ color: 'var(--clr-text-soft)', fontSize: '0.85rem', margin: '0 0 12px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>How many questions? (max 100)</label>
+            <input type="text" value={numQuestions} onChange={(e) => { const v = e.target.value; if (v === '' || (/^\d+$/.test(v) && Number(v) <= 100)) setNumQuestions(v) }} style={{ background: 'var(--clr-input)', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '10px', color: 'var(--clr-text)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9rem', width: '100px', textAlign: 'center', outline: 'none' }} placeholder={String(DEFAULT_TOTAL)} />
+          </div>
+          <button onClick={startQuiz} style={{ background: 'var(--clr-accent)', border: 'none', borderRadius: '6px', padding: '10px 24px', color: '#FFF', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Start Quiz</button>
+        </div>
+      </div>
+    )
+  }
+
+  const ansLen = question ? question.answerDigits.length : 1
+
+  return (
+    <QuizLayout title="Column Subtraction" onBack={onBack} timer={timer}>
+      {started && !finished && <>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
+          <div className="progress-pill center">Question {questionNumber}/{totalQ}</div>
+        </div>
+        {loading || !question ? <div className="question-box">Loading question…</div> : (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '16px 0', fontFamily: '"Courier New", monospace', fontSize: '1.8rem', fontWeight: 700 }}>
+              {/* Borrow row: only visible for activated columns */}
+              <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+                <span style={{ width: '44px' }} />
+                {question.borrows.map((_, i) => {
+                  if (!activeBorrows.has(i) && !revealed) {
+                    return <span key={i} style={{ width: '40px', height: '36px' }} />
+                  }
+                  const correct = revealed && correctBorrowDigits ? String(correctBorrowDigits[i]) : '';
+                  const isOptional = question.aDigits && question.aDigits[i] != null && correct === String(question.aDigits[i]);
+                  const isRight = revealed && correct !== '' && (String(borrowInputs[i] || '') === correct || (isOptional && (!borrowInputs[i] || borrowInputs[i] === '')));
+                  const isWrong = revealed && correct !== '' && !isRight;
+                  const shown = revealed ? (isOptional && (!borrowInputs[i] || borrowInputs[i] === '') ? '' : correct) : (borrowInputs[i] || '');
+                  return (
+                    <input key={i} ref={el => borrowRefs.current[i] = el} type="text" maxLength={2}
+                      value={shown}
+                      onChange={e => handleInput(i, e.target.value, true)}
+                      onKeyDown={e => handleKeyDown(i, e, true)}
+                      disabled={revealed}
+                      style={{ width: '40px', height: '36px', textAlign: 'center', fontSize: '1rem', fontWeight: 700, background: revealed ? (isRight ? 'var(--clr-correct-bg)' : (isWrong ? 'var(--clr-wrong-bg)' : 'var(--clr-input)')) : 'var(--clr-input)', border: `2px solid ${revealed && isRight ? 'var(--clr-correct)' : (revealed && isWrong ? 'var(--clr-wrong)' : 'var(--clr-border)')}`, borderRadius: '8px', color: revealed && isRight ? 'var(--clr-correct)' : (revealed && isWrong ? 'var(--clr-wrong)' : 'var(--clr-text)'), fontFamily: '"Courier New", monospace', outline: 'none' }}
+                    />
+                  );
+                })}
+              </div>
+              {/* Minuend (top number) — click a digit to strikethrough and reveal borrow box */}
+              <div style={{ display: 'flex', gap: '4px', marginBottom: '2px' }}>
+                <span style={{ width: '44px' }} />
+                {question.aDigits.map((d, i) => {
+                  const struck = activeBorrows.has(i) || (revealed && correctBorrowDigits && question.aDigits[i] != null && String(correctBorrowDigits[i]) !== String(question.aDigits[i]));
+                  return (
+                    <span key={i}
+                      onClick={() => { if (!revealed && d != null) activateBorrow(i, activeBorrows.has(i)) }}
+                      style={{
+                        width: '40px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: struck ? 'var(--clr-text-soft)' : 'var(--clr-text)',
+                        textDecoration: struck ? 'line-through' : 'none',
+                        cursor: revealed || d == null ? 'default' : 'pointer',
+                        opacity: struck ? 0.5 : 1,
+                        transition: 'all 0.15s ease',
+                      }}>
+                      {d !== null ? d : ''}
+                    </span>
+                  );
+                })}
+              </div>
+              {/* Subtrahend */}
+              <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+                <span style={{ width: '44px', textAlign: 'center', color: 'var(--clr-text-soft)', fontSize: '1.4rem' }}>−</span>
+                {question.bDigits.map((d, i) => (
+                  <span key={i} style={{ width: '40px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--clr-text)' }}>{d !== null ? d : ''}</span>
+                ))}
+              </div>
+              {/* Line */}
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <span style={{ width: '44px' }} />
+                <div style={{ width: `${ansLen * 44}px`, height: '3px', background: 'var(--clr-border)', borderRadius: '2px' }} />
+              </div>
+              {/* Difference row */}
+              <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
+                <span style={{ width: '44px' }} />
+                {question.answerDigits.map((d, i) => {
+                  const correctDigit = revealed && correctAnswerDigits ? String(correctAnswerDigits[i]) : '';
+                  const isRight = revealed && correctDigit !== '' && String(answerInputs[i] || '') === correctDigit;
+                  const isWrong = revealed && correctDigit !== '' && !isRight;
+                  const shown = revealed ? correctDigit : answerInputs[i] || '';
+                  return (
+                    <input key={i} ref={el => answerRefs.current[i] = el} type="text" maxLength={1}
+                      value={shown}
+                      onChange={e => handleInput(i, e.target.value, false)}
+                      onKeyDown={e => handleKeyDown(i, e, false)}
+                      disabled={revealed}
+                      style={{ width: '40px', height: '48px', textAlign: 'center', fontSize: '1.4rem', fontWeight: 700, background: isRight ? 'var(--clr-correct-bg)' : isWrong ? 'var(--clr-wrong-bg)' : 'var(--clr-input)', border: `2px solid ${isRight ? 'var(--clr-correct)' : isWrong ? 'var(--clr-wrong)' : 'var(--clr-border)'}`, borderRadius: '8px', color: isRight ? 'var(--clr-correct)' : isWrong ? 'var(--clr-wrong)' : 'var(--clr-text)', fontFamily: '"Courier New", monospace', outline: 'none' }}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+            {feedback && (
+              <div style={{
+                textAlign: 'left', padding: '12px 16px', borderRadius: '8px', margin: '8px 0',
+                background: isCorrect ? 'rgba(92, 184, 122, 0.25)' : 'rgba(224, 90, 74, 0.25)',
+                color: isCorrect ? 'var(--clr-correct)' : 'var(--clr-wrong)',
+                fontWeight: 600, fontSize: '0.9rem',
+                whiteSpace: 'pre-line', lineHeight: '1.6',
+                maxHeight: '300px', overflowY: 'auto',
+                border: isCorrect ? '2px solid var(--clr-correct)' : '2px solid var(--clr-wrong)'
+              }}>{feedback}</div>
+            )}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '12px 0', flexWrap: 'wrap' }}>
+              {!revealed && <button onClick={handleSubmit} disabled={loading} style={{ background: 'var(--clr-accent)', border: 'none', borderRadius: '8px', padding: '10px 24px', color: '#FFF', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Submit</button>}
+              {!revealed && <button onClick={handleSolve} disabled={loading} style={{ background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '8px', padding: '10px 24px', color: 'var(--clr-text-soft)', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Solve</button>}
+              {revealed && <button onClick={advanceQuestion} style={{ background: 'var(--clr-accent)', border: 'none', borderRadius: '8px', padding: '10px 24px', color: '#FFF', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Next Question →</button>}
+            </div>
+          </>
+        )}
+        {results.length > 0 && <ResultsTable results={results} />}
+      </>}
+      {finished && (
+        <div style={{ textAlign: 'center', padding: '24px' }}>
+          <h2 style={{ color: 'var(--clr-text)', marginBottom: '16px' }}>Score: {score}/{totalQ}</h2>
+          <ResultsTable results={results} />
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '24px' }}>
+            <button onClick={() => { setStarted(false); setFinished(false) }} style={{ background: 'var(--clr-accent)', border: 'none', borderRadius: '8px', padding: '10px 24px', color: '#FFF', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>Play Again</button>
+          </div>
+        </div>
+      )}
     </QuizLayout>
   )
 }
@@ -47655,7 +49298,7 @@ function makeQuizApp({ title, subtitle, apiPath, diffLabels, placeholders, tip, 
 
     if (!started && !finished) {
       return (
-        <div style={{ minHeight: '100vh', background: '#181512', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--clr-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
           <div style={{
             background: '#2D2520', border: '1.5px solid #4A4038', borderRadius: '28px',
             boxShadow: '0 20px 40px rgba(0,0,0,.45)', padding: '48px 40px', maxWidth: '720px', width: '100%',
@@ -48720,6 +50363,19 @@ function GymApp({ onBack }) {
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState('')
   const timer = useTimer()
+  const sessionGoal = 'standard'
+  const isAdaptive = true
+  const handleTimeout = async () => {
+    if (revealed) return
+    setIsCorrect(false); setRevealed(true)
+    setFeedback('⏰ Time\'s up!')
+    setResults(prev => [...prev, {
+      question: `[${currentGym?.name || ''} · ${currentDifficulty}] ${question?.prompt || ''}`,
+      userAnswer: '—', correctAnswer: '', correct: false, time: 0,
+    }])
+    lastCorrectRef.current = false
+    consecCorrectRef.current = 0
+  }
   const advanceFnRef = useRef(null)
   const submittedRef = useRef(false)
   const advancedRef = useRef(false)
@@ -48788,7 +50444,7 @@ function GymApp({ onBack }) {
       setSelectedOption(''); setCorrectOption('')
       setFeedback(''); setIsCorrect(null); setRevealed(false)
       submittedRef.current = false; advancedRef.current = false
-      timer.start(sessionGoal, handleTimeout, getSpeedRunLimit(difficulty ?? 'easy', isAdaptive ?? false))
+      timer.start(sessionGoal, handleTimeout, getSpeedRunLimit(currentDifficulty ?? 'easy', isAdaptive ?? false))
     } catch (e) {
       console.error('Failed to load Gym question:', e)
       setQuestion(null)
