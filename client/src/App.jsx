@@ -449,11 +449,10 @@ export function useTimer() {
  * @returns {ReactElement|null} Table element or null if no results
  */
 function ResultsTable({ results }) {
-  // Hide table if empty or null
   if (!results || results.length === 0) return null
-  // Calculate summary stats
   const totalTime = results.reduce((sum, r) => sum + r.time, 0)
   const avgTime = (totalTime / results.length).toFixed(1)
+  const hasCarries = results.some(r => r.userCarries || r.correctCarries)
   return (
     <div className="results-table-wrapper">
       <table className="results-table">
@@ -463,24 +462,29 @@ function ResultsTable({ results }) {
             <th>Question</th>
             <th>Your Answer</th>
             <th>Result</th>
+            {hasCarries && <th>Carries</th>}
             <th>Time</th>
           </tr>
         </thead>
         <tbody>
           {results.map((r, i) => (
-            // Row is highlighted green if correct, red if wrong
             <tr key={i} className={r.correct ? 'row-correct' : 'row-wrong'}>
               <td>{i + 1}</td>
               <td>{r.question}</td>
               <td>{r.userAnswer}</td>
-              {/* Show checkmark for correct, X with correct answer for wrong */}
-              <td>{r.correct ? '✓' : `✗ (${r.correctAnswer})`}</td>
+              <td>{r.correct ? `✓ (${r.correctAnswer})` : `✗ (${r.correctAnswer})`}</td>
+              {hasCarries && (
+                <td style={{ fontSize: '0.8rem', whiteSpace: 'pre-line' }}>
+                  {r.userCarries && <span>Yours: {r.userCarries}</span>}
+                  {r.userCarries && r.correctCarries && <br />}
+                  {r.correctCarries && <span style={{ color: 'var(--clr-correct)' }}>Ans: {r.correctCarries}</span>}
+                </td>
+              )}
               <td>{r.time}s</td>
             </tr>
           ))}
         </tbody>
       </table>
-      {/* Summary stats at bottom */}
       <div className="results-summary">
         Total time: {totalTime}s &middot; Average: {avgTime}s per question
       </div>
@@ -43465,7 +43469,9 @@ function ColumnAdditionApp({ onBack, initialDifficulty, initialNumQuestions, ini
 
       const resultLine = data.correct ? '✓ Correct!' : `✗ ${data.message || 'Incorrect'}`
       setFeedback(explanation ? `${resultLine}\n\n— Step-by-step solution —\n${explanation}` : resultLine)
-      setResults(prev => [...prev, { question: `${question.a} + ${question.b}`, userAnswer: Number(userAnswer.filter(v => v !== null).join('')) || '', correct: data.correct, correctAnswer: data.correctAnswer, time: timer.elapsed }])
+      const userCarriesStr = carryInputs.filter(v => v !== '').join(', ') || '—'
+      const correctCarriesStr = (data.correctCarries || []).filter(v => v !== 0 && v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} + ${question.b}`, userAnswer: Number(userAnswer.filter(v => v !== null).join('')) || '', correct: data.correct, correctAnswer: data.correctAnswer, time: timer.elapsed, userCarries: userCarriesStr, correctCarries: correctCarriesStr }])
       if (data.correct) setScore(s => s + 1)
     } catch (e) { console.error('Check failed:', e); setFeedback('Error checking answer') }
   }
@@ -43486,7 +43492,8 @@ function ColumnAdditionApp({ onBack, initialDifficulty, initialNumQuestions, ini
       setAnswerInputs(data.answerDigits ? data.answerDigits.map(String) : question.answerDigits.map(String))
       setCarryInputs(data.correctCarries ? data.correctCarries.map(String) : question.carries.map(String))
       setFeedback(data.explanation || 'Solved — study the carries above each column.')
-      setResults(prev => [...prev, { question: `${question.a} + ${question.b}`, userAnswer: data.correctAnswer, correct: false, correctAnswer: data.correctAnswer, time: timer.elapsed }])
+      const correctCarriesStr = (data.correctCarries || []).filter(v => v !== 0 && v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} + ${question.b}`, userAnswer: data.correctAnswer, correct: false, correctAnswer: data.correctAnswer, time: timer.elapsed, userCarries: '—', correctCarries: correctCarriesStr }])
     } catch (e) {
       console.error('Solve failed:', e)
       setCorrectAnswerDigits(question.answerDigits)
@@ -44018,7 +44025,17 @@ function ColumnMultiplicationApp({ onBack, initialDifficulty, initialNumQuestion
       const resultLine = data.correct ? '✓ Correct!' : `✗ ${data.message || 'Incorrect'}`
       setFeedback(explanation ? `${resultLine}\n\n— Step-by-step solution —\n${explanation}` : resultLine)
       const ansVal = isMulti ? Number(answerInputs.filter(v => v !== '' && v !== null).join('') || '') : Number(answerInputs.filter(v => v !== null).join('')) || ''
-      setResults(prev => [...prev, { question: `${question.a} × ${question.b}`, userAnswer: ansVal, correct: data.correct, correctAnswer: data.correctAnswer, time: timer.elapsed }])
+      let userCarriesStr = '—', correctCarriesStr = '—'
+      if (isMulti) {
+        const uc = ppCarryInputs.flat().filter(v => v !== '' && v !== null)
+        const cc = data.partialProducts ? data.partialProducts.flatMap(pp => (pp.carries || []).filter(v => v !== null && v !== 0)) : []
+        userCarriesStr = uc.length ? uc.join(', ') : '—'
+        correctCarriesStr = cc.length ? cc.join(', ') : '—'
+      } else {
+        userCarriesStr = carryInputs.filter(v => v !== '').join(', ') || '—'
+        correctCarriesStr = (data.correctCarries || []).filter(v => v !== 0 && v !== null && v !== '').join(', ') || '—'
+      }
+      setResults(prev => [...prev, { question: `${question.a} × ${question.b}`, userAnswer: ansVal, correct: data.correct, correctAnswer: data.correctAnswer, time: timer.elapsed, userCarries: userCarriesStr, correctCarries: correctCarriesStr }])
       if (data.correct) setScore(s => s + 1)
     } catch (e) { console.error('Check failed:', e); setFeedback('Error checking answer') }
   }
@@ -44054,7 +44071,10 @@ function ColumnMultiplicationApp({ onBack, initialDifficulty, initialNumQuestion
         setPpInputs([]); setPpCarryInputs([])
       }
       setFeedback(data.explanation || (isMulti ? 'Solved — study the partial products and carries.' : 'Solved — study the carries above each column.'))
-      setResults(prev => [...prev, { question: `${question.a} × ${question.b}`, userAnswer: data.correctAnswer, correct: false, correctAnswer: data.correctAnswer, time: timer.elapsed }])
+      const solveCC = isMulti
+        ? (data.partialProducts ? data.partialProducts.flatMap(pp => (pp.carries || []).filter(v => v !== null && v !== 0)) : []).join(', ') || '—'
+        : (data.correctCarries || []).filter(v => v !== 0 && v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} × ${question.b}`, userAnswer: data.correctAnswer, correct: false, correctAnswer: data.correctAnswer, time: timer.elapsed, userCarries: '—', correctCarries: solveCC }])
     } catch (e) {
       console.error('Solve failed:', e)
       setCorrectAnswerDigits(question.answerDigits)
@@ -44070,7 +44090,10 @@ function ColumnMultiplicationApp({ onBack, initialDifficulty, initialNumQuestion
         setCarryInputs(question.carries.map(String))
       }
       setFeedback(isMulti ? 'Solved — study the partial products and carries.' : 'Solved — study the carries above each column.')
-      setResults(prev => [...prev, { question: `${question.a} × ${question.b}`, userAnswer: question.answer, correct: false, correctAnswer: question.answer, time: timer.elapsed }])
+      const fallbackCC = isMulti
+        ? (question.partialProducts || []).flatMap(pp => (pp.carries || []).filter(v => v !== null && v !== 0)).join(', ') || '—'
+        : (question.carries || []).filter(v => v !== 0 && v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} × ${question.b}`, userAnswer: question.answer, correct: false, correctAnswer: question.answer, time: timer.elapsed, userCarries: '—', correctCarries: fallbackCC }])
     }
   }
 
@@ -44628,7 +44651,9 @@ function ColumnSubtractionApp({ onBack, initialDifficulty, initialNumQuestions, 
       } catch (_) {}
       const resultLine = data.correct ? '✓ Correct!' : `✗ ${data.message || 'Incorrect'}`
       setFeedback(explanation ? `${resultLine}\n\n— Step-by-step solution —\n${explanation}` : resultLine)
-      setResults(prev => [...prev, { question: `${question.a} − ${question.b}`, userAnswer: Number(userAnswer.filter(v => v !== null).join('')) || '', correct: data.correct, correctAnswer: data.correctAnswer, time: timer.elapsed }])
+      const userBorrowsStr = borrowInputs.filter(v => v !== '').join(', ') || '—'
+      const correctBorrowsStr = (data.correctBorrows || []).filter(v => v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} − ${question.b}`, userAnswer: Number(userAnswer.filter(v => v !== null).join('')) || '', correct: data.correct, correctAnswer: data.correctAnswer, time: timer.elapsed, userCarries: userBorrowsStr, correctCarries: correctBorrowsStr }])
       if (data.correct) setScore(s => s + 1)
     } catch (e) { console.error('Check failed:', e); setFeedback('Error checking answer') }
   }
@@ -44653,7 +44678,8 @@ function ColumnSubtractionApp({ onBack, initialDifficulty, initialNumQuestions, 
       setAnswerInputs(data.answerDigits ? data.answerDigits.map(String) : question.answerDigits.map(String))
       setBorrowInputs(data.correctBorrows ? data.correctBorrows.map(String) : question.borrows.map(String))
       setFeedback(data.explanation || 'Solved — study the borrows above each column.')
-      setResults(prev => [...prev, { question: `${question.a} − ${question.b}`, userAnswer: data.correctAnswer, correct: false, correctAnswer: data.correctAnswer, time: timer.elapsed }])
+      const solveBorrowStr = (data.correctBorrows || []).filter(v => v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} − ${question.b}`, userAnswer: data.correctAnswer, correct: false, correctAnswer: data.correctAnswer, time: timer.elapsed, userCarries: '—', correctCarries: solveBorrowStr }])
     } catch (e) {
       console.error('Solve failed:', e)
       if (question.borrows && question.aDigits) {
@@ -44665,7 +44691,8 @@ function ColumnSubtractionApp({ onBack, initialDifficulty, initialNumQuestions, 
       setAnswerInputs(question.answerDigits.map(String))
       setBorrowInputs(question.borrows.map(String))
       setFeedback('Solved — study the borrows above each column.')
-      setResults(prev => [...prev, { question: `${question.a} − ${question.b}`, userAnswer: question.answer, correct: false, correctAnswer: question.answer, time: timer.elapsed }])
+      const fallbackBorrowStr = (question.borrows || []).filter(v => v !== null && v !== '').join(', ') || '—'
+      setResults(prev => [...prev, { question: `${question.a} − ${question.b}`, userAnswer: question.answer, correct: false, correctAnswer: question.answer, time: timer.elapsed, userCarries: '—', correctCarries: fallbackBorrowStr }])
     }
   }
 
