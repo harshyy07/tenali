@@ -61,7 +61,7 @@ const UserSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   completedTopics: { type: [String], default: [] },
   goldMastery: { type: [String], default: [] },
-  coins: { type: Number, default: 0 },
+  coins: { type: Number, default: 500 },
   achievements: {
     completedCollections: [
       {
@@ -83,8 +83,33 @@ const UserSchema = new mongoose.Schema({
     }
   ],
   gradeLevel: { type: String, default: 'Grade 3' },
-  coinBalance: { type: Number, default: 0 },
-  xpScore: { type: Number, default: 0 }
+  coinBalance: { type: Number, default: 500 },
+  xpScore: { type: Number, default: 500 }
+});
+
+UserSchema.pre('save', function (next) {
+  if (this.isModified('coins')) {
+    const val = this.coins;
+    this.xp = val;
+    this.coinBalance = val;
+    this.xpScore = val;
+  } else if (this.isModified('xp')) {
+    const val = this.xp;
+    this.coins = val;
+    this.coinBalance = val;
+    this.xpScore = val;
+  } else if (this.isModified('coinBalance')) {
+    const val = this.coinBalance;
+    this.coins = val;
+    this.xp = val;
+    this.xpScore = val;
+  } else if (this.isModified('xpScore')) {
+    const val = this.xpScore;
+    this.coins = val;
+    this.xp = val;
+    this.coinBalance = val;
+  }
+  next();
 });
 
 const ProgressSchema = new mongoose.Schema({
