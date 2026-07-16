@@ -192,15 +192,15 @@ function apply90PercentRule(hintText, level, concept, questionData, answerData, 
       const escapedAns = ansStr.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
       
       // Match "= value" or "is value" case-insensitively and replace with "? "
-      const eqRegex = new RegExp(`(=|is|to|equals|gives|get|be)\\s*\\$?${escapedAns}\\b`, 'gi');
+      const eqRegex = new RegExp(`(=|is|to|equals|gives|get|be)\\s*\\$?${escapedAns}(?!\\w)`, 'gi');
       text = text.replace(eqRegex, '$1 ?');
       
       // Stop exactly one step before final calculation on results
-      const finalRegex = new RegExp(`\\b${escapedAns}\\b$`, 'g');
+      const finalRegex = new RegExp(`(?<!\\w)${escapedAns}(?!\\w)$`, 'g');
       text = text.replace(finalRegex, '?');
       
       // Aggressively strip the exact answer from the very end of the explanation text
-      const endRegex = new RegExp(`\\b${escapedAns}[^a-zA-Z0-9]*$`, 'i');
+      const endRegex = new RegExp(`(?<!\\w)${escapedAns}[^a-zA-Z0-9]*$`, 'i');
       text = text.replace(endRegex, '?');
     }
   }
