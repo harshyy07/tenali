@@ -20,13 +20,21 @@ function bktUpdate(pMastery, isCorrect, params = DEFAULT_PARAMS) {
   validateParams(params);
   const { pTransit, pGuess, pSlip } = params;
   const pL = clamp(pMastery);
-  let posterior;
+  
+  // 1. Raw Bayesian update (posterior)
+  let rawPosterior;
   if (isCorrect) {
-    posterior = (pL * (1 - pSlip)) / (pL * (1 - pSlip) + (1 - pL) * pGuess);
+    rawPosterior = (pL * (1 - pSlip)) / (pL * (1 - pSlip) + (1 - pL) * pGuess);
   } else {
-    posterior = (pL * pSlip) / (pL * pSlip + (1 - pL) * (1 - pGuess));
+    rawPosterior = (pL * pSlip) / (pL * pSlip + (1 - pL) * (1 - pGuess));
   }
-  posterior = clamp(posterior);
+  rawPosterior = clamp(rawPosterior);
+
+  // 2. Apply smoothing layer (cap the jump distance to ~11% of the gap)
+  const SMOOTHING_FACTOR = 0.11;
+  const posterior = pL + (rawPosterior - pL) * SMOOTHING_FACTOR;
+
+  // 3. Transit to next state
   const pMasteryNext = clamp(posterior + (1 - posterior) * pTransit);
   return { posterior, pMasteryNext };
 }
