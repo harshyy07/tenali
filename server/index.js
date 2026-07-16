@@ -542,6 +542,342 @@ app.post('/addition-api/check', (req, res) => {
 });
 
 /**
+ * COLUMN ADDITION API
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Vertical column addition with carry boxes.
+ * GET  returns two numbers + precomputed carries
+ * POST validates answer digits and carry digits
+ */
+
+function computeColumnData(a, b) {
+  const sum = a + b;
+  const aStr = String(a);
+  const bStr = String(b);
+  const sStr = String(sum);
+  const opLen = Math.max(aStr.length, bStr.length);
+  const ansLen = sStr.length;
+  // Pad operands to ansLen so they align with answer columns
+  const aPad = aStr.padStart(ansLen, ' ');
+  const bPad = bStr.padStart(ansLen, ' ');
+  // carries[i] = carry INTO position i of the answer
+  // carries[0] is always 0 (ones column has no carry in)
+  const carries = new Array(ansLen).fill(0);
+  let carry = 0;
+  for (let i = ansLen - 1; i >= 0; i--) {
+    const da = parseInt(aPad[i]) || 0;
+    const db = parseInt(bPad[i]) || 0;
+    const colSum = da + db + carry;
+    carry = colSum >= 10 ? 1 : 0;
+    if (i > 0) carries[i - 1] = carry;
+  }
+  const answerDigits = sStr.split('').map(Number);
+  const aDigits = aPad.split('').map(d => d === ' ' ? null : Number(d));
+  const bDigits = bPad.split('').map(d => d === ' ' ? null : Number(d));
+  return { answerDigits, aDigits, bDigits, carries, digits: opLen };
+}
+
+app.get('/column-addition-api/question', (req, res) => {
+  const difficulty = req.query.difficulty || 'easy';
+  const digitMap = { easy: 1, medium: 2, hard: 3, extrahard: 4 };
+  const numDigits = digitMap[difficulty] || 1;
+  const range = digitRange(numDigits);
+  let a, b, data;
+  let attempts = 0;
+  do {
+    a = randomInt(Math.max(range.min, 1), range.max);
+    b = randomInt(Math.max(range.min, 1), range.max);
+    data = computeColumnData(a, b);
+    attempts++;
+  } while (data.carries.slice(1).every(c => c === 0) && attempts < 20);
+  res.json({
+    id: `ca-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    a, b,
+    answer: a + b,
+    ...data,
+  });
+});
+
+app.post('/column-addition-api/check', (req, res) => {
+  const { a, b, userAnswer, userCarries } = req.body || {};
+  const numA = Number(a), numB = Number(b);
+  const correctAnswer = numA + numB;
+  const data = computeColumnData(numA, numB);
+  const answerCorrect = Array.isArray(userAnswer) &&
+    userAnswer.map(Number).join('') === data.answerDigits.join('');
+  const carriesCorrect = Array.isArray(userCarries) &&
+    userCarries.map(Number).join('') === data.carries.join('');
+  const correct = answerCorrect && carriesCorrect;
+  res.json({
+    correct,
+    correctAnswer,
+    answerDigits: data.answerDigits,
+    correctCarries: data.carries,
+    message: correct ? 'Correct!' : carriesCorrect ? 'Answer digits wrong' : answerCorrect ? 'Carries wrong' : 'Try again',
+  });
+});
+
+/**
+ * COLUMN MULTIPLICATION API
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Vertical column multiplication: single-digit multiplier × N-digit multiplicand.
+ * Mirrors the column-addition UI: user fills carries above + product digits below.
+ * GET  returns numbers + precomputed carries/digits
+ * POST validates answer digits and carry digits
+ */
+
+function computeMulData(multiplicand, multiplier) {
+  const aStr = String(multiplicand);
+  const bStr = String(multiplier);
+  const aLen = aStr.length;
+  const bLen = bStr.length;
+  const product = multiplicand * multiplier;
+  const pStr = String(product);
+  const ansLen = pStr.length;
+  const aDigits = aStr.split('').map(Number);
+  const bDigits = bStr.split('').map(Number);
+
+  if (bLen === 1) {
+    const m = bDigits[0];
+    const aPad = aStr.padStart(ansLen, ' ');
+    const carries = new Array(ansLen).fill(0);
+    let carry = 0;
+    for (let i = ansLen - 1; i >= 0; i--) {
+      const da = parseInt(aPad[i]) || 0;
+      const colProd = da * m + carry;
+      carry = Math.floor(colProd / 10);
+      if (i > 0) carries[i - 1] = carry;
+    }
+    const answerDigits = pStr.split('').map(Number);
+    const aDigitsPadded = aPad.split('').map(d => d === ' ' ? null : Number(d));
+    return { answerDigits, aDigits: aDigitsPadded, carries, digits: aLen, multiDigitMultiplier: false };
+  }
+
+  const partialProducts = [];
+  for (let bi = bLen - 1; bi >= 0; bi--) {
+    const bDigit = bDigits[bi];
+    const shift = bLen - 1 - bi;
+    const pp = multiplicand * bDigit;
+    const ppStr = String(pp);
+    const ppLen = ppStr.length;
+    const carries = new Array(ppLen).fill(null);
+    let carry = 0;
+    for (let i = ppLen - 1; i >= 0; i--) {
+      const ai = aLen - 1 - (ppLen - 1 - i);
+      const da = ai >= 0 ? aDigits[ai] : 0;
+      const total = da * bDigit + carry;
+      carry = Math.floor(total / 10);
+      if (i > 0) carries[i - 1] = carry;
+    }
+    const paddedDigits = new Array(ansLen).fill(null);
+    const paddedCarries = new Array(ansLen).fill(null);
+    const startCol = ansLen - ppLen - shift;
+    for (let j = 0; j < ppLen; j++) {
+      const col = startCol + j;
+      if (col >= 0 && col < ansLen) {
+        paddedDigits[col] = Number(ppStr[j]);
+        paddedCarries[col] = carries[j];
+      }
+    }
+    partialProducts.push({ multiplierDigit: bDigit, digits: paddedDigits, carries: paddedCarries });
+  }
+
+  return {
+    answerDigits: pStr.split('').map(Number),
+    aDigits, bDigits, digits: aLen,
+    multiDigitMultiplier: true, partialProducts, ansLen
+  };
+}
+
+app.get('/column-multiplication-api/question', (req, res) => {
+  const difficulty = req.query.difficulty || 'easy';
+  let a, m, data;
+  let attempts = 0;
+  if (difficulty === 'hard') {
+    const aRange = digitRange(2), bRange = digitRange(2);
+    do {
+      a = randomInt(Math.max(aRange.min, 10), aRange.max);
+      m = randomInt(Math.max(bRange.min, 10), bRange.max);
+      data = computeMulData(a, m);
+      attempts++;
+    } while (attempts < 30 && data.partialProducts.every(pp => pp.carries.every(c => c === null || c === 0)));
+  } else if (difficulty === 'extrahard') {
+    const coin = Math.random() < 0.5;
+    const aDig = coin ? 3 : 4, bDig = 3;
+    const aRange = digitRange(aDig), bRange = digitRange(bDig);
+    do {
+      a = randomInt(Math.max(aRange.min, Math.pow(10, aDig - 1)), aRange.max);
+      m = randomInt(Math.max(bRange.min, Math.pow(10, bDig - 1)), bRange.max);
+      data = computeMulData(a, m);
+      attempts++;
+    } while (attempts < 30 && data.partialProducts.every(pp => pp.carries.every(c => c === null || c === 0)));
+  } else {
+    const digitMap = { easy: 1, medium: 2 };
+    const numDigits = digitMap[difficulty] || 1;
+    const range = digitRange(numDigits);
+    do {
+      a = randomInt(Math.max(range.min, 1), range.max);
+      m = randomInt(2, 9);
+      data = computeMulData(a, m);
+      attempts++;
+    } while (data.carries.slice(1).every(c => c === 0) && attempts < 20);
+  }
+  res.json({
+    id: `cm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    a, b: m,
+    multiplier: m,
+    answer: a * m,
+    ...data,
+  });
+});
+
+app.post('/column-multiplication-api/check', (req, res) => {
+  const { a, b, userAnswer, userCarries, userPartialProducts } = req.body || {};
+  const numA = Number(a), numB = Number(b);
+  const correctAnswer = numA * numB;
+  const data = computeMulData(numA, numB);
+
+  if (data.multiDigitMultiplier && Array.isArray(userPartialProducts)) {
+    let answerCorrect = Array.isArray(userAnswer) &&
+      userAnswer.map(Number).join('') === data.answerDigits.join('');
+    let ppCorrect = true;
+    let carriesCorrect = true;
+    for (let pi = 0; pi < data.partialProducts.length; pi++) {
+      const up = Array.isArray(userPartialProducts[pi]) ? userPartialProducts[pi] : [];
+      const uc = Array.isArray(userCarries) && Array.isArray(userCarries[pi]) ? userCarries[pi] : [];
+      const cp = data.partialProducts[pi].digits;
+      const cc = data.partialProducts[pi].carries;
+      const userPpJoined = up.map(v => v === null || v === undefined || v === '' ? '_' : v).join('');
+      const correctPpJoined = cp.map(v => v === null ? '_' : v).join('');
+      const userCarrJoined = uc.map(v => v === null || v === undefined || v === '' ? '_' : v).join('');
+      const correctCarrJoined = cc.map(v => v === null ? '_' : v).join('');
+      if (userPpJoined !== correctPpJoined) ppCorrect = false;
+      if (userCarrJoined !== correctCarrJoined) carriesCorrect = false;
+    }
+    const correct = answerCorrect && ppCorrect && carriesCorrect;
+    return res.json({
+      correct,
+      correctAnswer,
+      answerDigits: data.answerDigits,
+      partialProducts: data.partialProducts,
+      multiDigitMultiplier: true,
+      message: correct ? 'Correct!'
+        : !ppCorrect ? 'Partial product digits wrong'
+        : !carriesCorrect ? 'Carries wrong'
+        : 'Answer wrong',
+    });
+  }
+
+  const answerCorrect = Array.isArray(userAnswer) &&
+    userAnswer.map(Number).join('') === data.answerDigits.join('');
+  const carriesCorrect = Array.isArray(userCarries) &&
+    userCarries.map(Number).join('') === data.carries.join('');
+  const correct = answerCorrect && carriesCorrect;
+  res.json({
+    correct,
+    correctAnswer,
+    answerDigits: data.answerDigits,
+    correctCarries: data.carries,
+    message: correct ? 'Correct!' : carriesCorrect ? 'Product digits wrong' : answerCorrect ? 'Carries wrong' : 'Try again',
+  });
+});
+
+/**
+ * COLUMN SUBTRACTION API
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Vertical column subtraction: minuend − subtrahend (minuend >= subtrahend).
+ * Mirrors the column-addition UI: user fills borrows above + difference digits below.
+ * GET  returns numbers + precomputed borrows/digits
+ * POST validates difference digits and borrow digits
+ */
+
+function computeSubData(minuend, subtrahend) {
+  const diff = minuend - subtrahend;
+  const aStr = String(minuend);
+  const bStr = String(subtrahend);
+  const dStr = String(diff);
+  const len = Math.max(aStr.length, bStr.length, dStr.length);
+  // Pad ALL THREE rows (minuend, subtrahend, difference) to the SAME length
+  // so column i in every row aligns vertically above the answer digit at column i.
+  const aPad = aStr.padStart(len, ' ');
+  const bPad = bStr.padStart(len, ' ');
+  const dPad = dStr.padStart(len, ' ');
+  // convertedTop[i] = the top digit in column i AFTER all borrows have been worked through.
+  // Paper-style: child strikes out the original digit and writes the converted value above.
+  // e.g. for 23−18, convertedTop = [1, 13]  (tens "2" becomes "1" after lending; ones "3" becomes "13")
+  // String values like "13", "12", "11", "9" mean "this column now holds a 2-digit-or-cascaded value".
+  const workTop = aPad.split('').map(d => d === ' ' ? 0 : Number(d));
+  const convertedTop = new Array(len).fill(0);
+  for (let i = len - 1; i >= 0; i--) {
+    const db = parseInt(bPad[i]) || 0;
+    let top = workTop[i];
+    if (top < db) {
+      let k = i - 1;
+      while (k >= 0 && workTop[k] === 0) k--;
+      if (k >= 0) {
+        workTop[k] -= 1;
+        for (let j = k + 1; j < i; j++) workTop[j] = 9;
+        top += 10;
+      }
+    }
+    convertedTop[i] = top;
+  }
+  const answerDigits = dPad.split('').map(Number);
+  const aDigits = aPad.split('').map(d => d === ' ' ? null : Number(d));
+  const bDigits = bPad.split('').map(d => d === ' ' ? null : Number(d));
+  return { answerDigits, aDigits, bDigits, borrows: convertedTop, digits: len };
+}
+
+app.get('/column-subtraction-api/question', (req, res) => {
+  const difficulty = req.query.difficulty || 'easy';
+  // Subtraction needs at least 2 digits to have any borrows; bump easy to 2
+  const digitMap = { easy: 2, medium: 2, hard: 3, extrahard: 4 };
+  const numDigits = digitMap[difficulty] || 2;
+  const range = digitRange(numDigits);
+  let a, b, data;
+  let attempts = 0;
+  do {
+    a = randomInt(Math.max(range.min, 10), range.max);
+    b = randomInt(Math.max(range.min, 1), Math.max(a - 1, Math.max(range.min, 1)));
+    data = computeSubData(a, b);
+    attempts++;
+  } while (data.borrows.slice(0, -1).every(x => x === 0) && attempts < 20);
+  res.json({
+    id: `cs-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    a, b,
+    answer: a - b,
+    ...data,
+  });
+});
+
+app.post('/column-subtraction-api/check', (req, res) => {
+  const { a, b, userAnswer, userBorrows } = req.body || {};
+  const numA = Number(a), numB = Number(b);
+  const correctAnswer = numA - numB;
+  const data = computeSubData(numA, numB);
+  const aPad = String(numA).padStart(data.answerDigits.length, ' ');
+  const answerCorrect = Array.isArray(userAnswer) &&
+    userAnswer.map(v => v === '' || v == null ? -1 : Number(v)).join('') === data.answerDigits.join('');
+  // For borrows: blank is OK when the converted top equals the original digit (no borrow happened)
+  const borrowsCorrect = Array.isArray(userBorrows) &&
+    userBorrows.every((raw, i) => {
+      const v = (raw === '' || raw == null) ? '' : String(raw).trim();
+      const expected = String(data.borrows[i]);
+      const originalDigit = data.aDigits[i];
+      const isOptional = originalDigit != null && expected === String(originalDigit);
+      if (isOptional) return v === '' || v === expected;
+      return v !== '' && v === expected;
+    });
+  const correct = answerCorrect && borrowsCorrect;
+  res.json({
+    correct,
+    correctAnswer,
+    answerDigits: data.answerDigits,
+    correctBorrows: data.borrows,
+    message: correct ? 'Correct!' : borrowsCorrect ? 'Difference digits wrong' : answerCorrect ? 'Borrow marks wrong' : 'Try again',
+  });
+});
+
+/**
  * QUADRATIC EVALUATION API
  * ═══════════════════════════════════════════════════════════════════════════
  */
@@ -2492,7 +2828,10 @@ app.post('/fractionadd-api/check', (req, res) => {
     // Hard: expect answer as mixed number {ansWhole, ansNum, ansDen}
     const mixed = toMixed(simplified.num, simplified.den);
     // User answer: convert to improper fraction for comparison
-    const userTotal = (Number(body.ansWhole) || 0) * (Number(body.ansDen) || 1) + (Number(body.ansNum) || 0);
+    const whole = Number(body.ansWhole) || 0;
+    const den = Number(body.ansDen) || 1;
+    const num = Number(body.ansNum) || 0;
+    const userTotal = whole < 0 ? (whole * den - num) : (whole * den + num);
     const userDen = Number(body.ansDen) || 1;
     const userSimp = simplifyFraction(userTotal, userDen);
     correct = userSimp.num === simplified.num && userSimp.den === simplified.den;
@@ -2876,7 +3215,7 @@ app.post('/surds-api/check', express.json(), (req, res) => {
   } else if (userParsed && cDen !== 1) {
     // User might type e.g. "2√3/3" — parse fraction form
     // Try parsing as "X/Y" where X is a surd expression
-    const fracMatch = (body.answer || '').replace(/\s+/g, '').match(/^\(?(.+?)\)?\/?(\d+)$/);
+    const fracMatch = (body.answer || '').replace(/\s+/g, '').match(/^\(?(.+?)\)?\/(\d+)$/);
     if (fracMatch) {
       const numParsed = parseSurd(fracMatch[1]);
       const userDen = parseInt(fracMatch[2]);
@@ -3166,7 +3505,7 @@ app.get('/sequences-api/question', (req, res) => {
   if (difficulty === 'easy') {
     // Arithmetic: a, a+d, a+2d, ... Find the nth term
     const a = seqRand(-10, 20);
-    const d = seqRand(-8, 8);
+    let d = seqRand(-8, 8);
     if (d === 0) d = seqPick([1, -1, 2, -2, 3, 5]);
     const n = seqRand(5, 20);
     const terms = [a, a + d, a + 2 * d, a + 3 * d];
@@ -3941,7 +4280,7 @@ app.get('/ineq-api/question', (req, res) => {
   }
   else {
     // Represent on number line: find integer solutions to compound inequality
-    const a = triRand(-3, 3); if (a === 0) a = 1;
+    let a = triRand(-3, 3); if (a === 0) a = 1;
     const b = triRand(-5, 5);
     const lo = triRand(-10, 0);
     const hi = triRand(1, 10);
@@ -4522,7 +4861,7 @@ app.get('/stats-api/question', (req, res) => {
       data = [modeVal, modeVal, modeVal];
       while (data.length < n) {
         const v = triRand(1, 25);
-        if (v !== modeVal || data.filter(x => x === v).length < 2) data.push(v);
+        if (v !== modeVal && data.filter(x => x === v).length < 2) data.push(v);
       }
       // Shuffle
       for (let i = data.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [data[i], data[j]] = [data[j], data[i]]; }
@@ -4604,7 +4943,7 @@ app.get('/matrix-api/question', (req, res) => {
   }
   else if (difficulty === 'medium') {
     // Scalar multiplication
-    const k = triRand(-3, 5); if (k === 0) k = 2;
+    let k = triRand(-3, 5); if (k === 0) k = 2;
     const A = [[triRand(-5,9), triRand(-5,9)], [triRand(-5,9), triRand(-5,9)]];
     const R = [[k*A[0][0], k*A[0][1]], [k*A[1][0], k*A[1][1]]];
     const fmtM = (m) => `[${m[0][0]},${m[0][1]};${m[1][0]},${m[1][1]}]`;
@@ -4675,7 +5014,7 @@ app.get('/vectors-api/question', (req, res) => {
   }
   else if (difficulty === 'medium') {
     // Scalar multiplication
-    const k = triRand(-3, 5); if (k === 0) k = 2;
+    let k = triRand(-3, 5); if (k === 0) k = 2;
     const a = [triRand(-6,6), triRand(-6,6)];
     const ans = [k*a[0], k*a[1]];
     const prompt = `a = (${a[0]}, ${a[1]}). Find ${k}a.`;
@@ -5039,7 +5378,7 @@ app.get('/bearings-api/question', (req, res) => {
   }
   else if (difficulty === 'hard') {
     // Find bearing given coordinates
-    const dx = triRand(-10, 10); const dy = triRand(-10, 10);
+    let dx = triRand(-10, 10); const dy = triRand(-10, 10);
     if (dx === 0 && dy === 0) dx = 1;
     // Bearing = angle measured clockwise from North
     let angle = Math.atan2(dx, dy) * 180 / Math.PI;
@@ -5182,7 +5521,7 @@ app.get('/diff-api/question', (req, res) => {
   }
   else if (difficulty === 'medium') {
     // Differentiate polynomial: ax² + bx + c
-    const a = triRand(-5, 5); const b = triRand(-8, 8); const c = triRand(-10, 10);
+    let a = triRand(-5, 5); const b = triRand(-8, 8); const c = triRand(-10, 10);
     if (a === 0) a = 2;
     const x = triRand(-3, 3);
     const deriv = 2 * a * x + b;

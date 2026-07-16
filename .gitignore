@@ -5,3 +5,4 @@ server.log
 server/dictionaryCache
 ISSUE_DRAFT.md
 PR_DRAFT.md
+**/*.ps1
