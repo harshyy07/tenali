@@ -75,7 +75,8 @@ import VisualMathLabRedux, {
 import CoordinateGrid from './components/CoordinateGrid';
 import LanguageDashboard from './language/LanguageDashboard'
 import { VOCAB_CORPUS } from './vocabCorpus'
-import CuriosityApp from './Curiosity.jsx'
+import DiagnosticQuiz from './lib/DiagnosticQuiz.jsx';
+import CuriosityApp from './Curiosity.jsx';
 import PercentExplanationApp from './PercentExplanationApp'
 import { playSound } from './audioContext'
 import GeometryApp from './GeometryApp'
@@ -42259,6 +42260,8 @@ function PercentPage(props) {
 }
 
 function App() {
+  const [diagnosticState, setDiagnosticState] = useState({});
+
   // Currently selected quiz mode (null = home menu, or key like 'gk', 'addition', etc.)
   const [mode, setMode] = useState(() => {
     try {
@@ -44174,7 +44177,7 @@ function App() {
         {theme === 'dark' ? '☀️' : '🌙'}
       </button>
       {mode === 'vachana' ? (
-        <Vachana onBack={() => setMode(null)} />
+        <Vachana onBack={() => setMode(null)} initialAdaptScore={diagnosticState[mode] || 0} />
       ) : (
         <div className="card">
           {renderContent()}
