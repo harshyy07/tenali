@@ -79,8 +79,11 @@ import VisualMathLabRedux, {
 import CoordinateGrid from './components/CoordinateGrid';
 import LanguageDashboard from './language/LanguageDashboard'
 import { VOCAB_CORPUS } from './vocabCorpus'
+import DiagnosticQuiz from './lib/DiagnosticQuiz.jsx';
+import CuriosityApp from './Curiosity.jsx';
 import PercentExplanationApp from './PercentExplanationApp'
 import { playSound } from './audioContext'
+import GeometryApp from './GeometryApp'
 
 // API base URL from environment variables (Vite) — exported as `API` at module top
 
@@ -146,6 +149,21 @@ function AuthMenu() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
+  // Hide hamburger menu in visual learning to prevent navigation away
+  const params = new URLSearchParams(window.location.search)
+  const mode = params.get('mode')
+  const pathname = window.location.pathname.replace(/\/$/, '').toLowerCase()
+  const isVisualLearning =
+    pathname === '/geocraft' ||
+    pathname === '/visual-math-lab-redux' ||
+    pathname === '/mensuration-lab' ||
+    pathname === '/math-lab' ||
+    mode === 'math-lab' ||
+    mode === 'visual-math-lab-redux' ||
+    mode === 'mensuration-lab' ||
+    mode === 'addition' ||
+    mode === 'geocraft'
+
   useEffect(() => {
     const onKey = e => { if (e.key === 'Escape') { setOpen(false); setShowLogin(false); setError('') } }
     window.addEventListener('keydown', onKey)
@@ -159,10 +177,18 @@ function AuthMenu() {
       await login(username.trim(), password)
       setShowLogin(false); setOpen(false)
       setUsername(''); setPassword('')
-      window.location.href = '/tenth'
+      if (isVisualLearning) {
+        window.location.reload()
+      } else {
+        window.location.href = '/tenth'
+      }
     } catch (err) {
       setError(err.message || 'login failed')
     } finally { setBusy(false) }
+  }
+
+  if (isVisualLearning) {
+    return null
   }
 
   return (
@@ -206,6 +232,31 @@ function AuthMenu() {
                 <div style={{ padding: '8px 12px', fontSize: '0.85rem', opacity: 0.75 }}>
                   Signed in as <strong>{user.username}</strong>
                 </div>
+                <hr style={{ border: 'none', borderTop: '1px solid var(--clr-border, #444)', margin: '4px 0' }} />
+                {!isVisualLearning && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => { window.location.href = '/'; setOpen(false) }}
+                      style={{ width: '100%', textAlign: 'left', padding: '8px 12px', borderRadius: 6, background: 'transparent', border: 'none', color: 'var(--clr-text)', cursor: 'pointer', fontSize: '0.95rem' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                    >
+                      Puzzles
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => { window.location.href = '/profile'; setOpen(false) }}
+                      style={{ width: '100%', textAlign: 'left', padding: '8px 12px', borderRadius: 6, background: 'transparent', border: 'none', color: 'var(--clr-text)', cursor: 'pointer', fontSize: '0.95rem' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                    >
+                      Profile
+                    </button>
+                    <hr style={{ border: 'none', borderTop: '1px solid var(--clr-border, #444)', margin: '4px 0' }} />
+                  </>
+                )}
                 <button
                   type="button"
                   onClick={() => { logout(); setOpen(false) }}
@@ -40003,6 +40054,8 @@ function PercentPage(props) {
 
 
 function App() {
+  const [diagnosticState, setDiagnosticState] = useState({});
+
   // Currently selected quiz mode (null = home menu, or key like 'gk', 'addition', etc.)
   const [mode, setMode] = useState(null)
   // Tracks if the active practice session should show the Goal Selector UI
@@ -40183,6 +40236,22 @@ function App() {
           {theme === 'dark' ? '☀️' : '🌙'}
         </button>
         <AuthGate><TenthApp onBack={() => { window.location.href = '/' }} /></AuthGate>
+      </>
+    )
+  }
+
+  // Route: /geocraft → Kids Geometry Workspace
+  if (pathname === '/geocraft') {
+    return (
+      <>
+        <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
+        <div className="app-shell">
+          <div className="card">
+            <GeometryApp onBack={() => { window.location.href = '/' }} />
+          </div>
+        </div>
       </>
     )
   }
@@ -41308,6 +41377,7 @@ function App() {
     'visual-math-lab-redux': VisualMathLabRedux,
     'mensuration-lab': MensurationLabApp,
     'basic-arith-lab': BasicArithmeticLabApp,
+    geocraft: GeometryApp,
 
     'comic-addition': ComicAdditionApp,
     gk: GKApp,                    // General Knowledge
@@ -41389,6 +41459,7 @@ function App() {
     randommix: RandomMixApp,       // Random Mix (adaptive)
     custom: CustomApp,             // Custom lesson builder
     gym: GymApp,                   // Unified adaptive Gym — bundles all 7 below
+    curiosity: CuriosityApp,       // Curiosity Mode — experiment with "what if" variations
     guess: GuessNumberApp,         // Binary magic — guess a number 0–31
     detective: EnhancedMathDetectiveApp, // Math Detective Agency — story-based mystery cases
     gymdecimals: GymDecimalsApp,   // Gym Decimals — signed decimal multiplication (MCQ)
@@ -41520,7 +41591,7 @@ function App() {
         {theme === 'dark' ? '☀️' : '🌙'}
       </button>
       {mode === 'vachana' ? (
-        <Vachana onBack={() => setMode(null)} />
+        <Vachana onBack={() => setMode(null)} initialAdaptScore={diagnosticState[mode] || 0} />
       ) : (
         <div className="card">
           {renderContent()}
@@ -41552,6 +41623,12 @@ function Home({ onSelect, isGoalSelection = false, onBack }) {
   ]
   // Visual Learning Universe lives only in the hamburger menu
   const mathLabEntry = { key: 'math-lab', name: '🔬 Visual Learning Universe', subtitle: 'Visual, Mensuration & Addition labs', color: 'orange' }
+  const geocraftEntry = { key: 'geocraft', name: '📐 GeoCraft', subtitle: 'Interactive Geometry Lab', color: 'featured', isRedirect: true, path: '/geocraft' }
+
+  const hamburgerApps = [
+    ...featuredApps,
+    { key: 'curiosity', name: 'Curiosity Mode', subtitle: 'Explore "What if" variations', color: 'pink' },
+  ]
 
   // All regular quiz apps sorted alphabetically by name
   const regularApps = [
@@ -41644,7 +41721,7 @@ function Home({ onSelect, isGoalSelection = false, onBack }) {
   ]
 
   // Combined list for search filtering
-  const allApps = [...featuredApps, ...regularApps]
+  const allApps = [...hamburgerApps, ...regularApps]
 
   // Hamburger menu open state
   const menuRef = useRef(null)
@@ -41675,6 +41752,7 @@ function Home({ onSelect, isGoalSelection = false, onBack }) {
   
   // Decide which items to show on the main grid list
   const displayGridApps = isGoalSelection ? filteredRegular : [...filteredRegular]
+  const filteredHamburgerApps = isSearching ? hamburgerApps.filter(matchFilter) : hamburgerApps
 
   // Grid layout tracking (for responsive display)
   const gridRef = useRef(null)
@@ -41745,9 +41823,16 @@ function Home({ onSelect, isGoalSelection = false, onBack }) {
               onMouseLeave={e => e.target.style.background = 'none'}>
               <strong style={{ color: 'var(--clr-accent)' }}>ℹ️ About Tenali</strong>
             </button>
-            {/* Visual Learning Universe pinned at top of hamburger menu */}
-            {[mathLabEntry].map(app => (
-              <button key={app.key} onClick={() => { setMenuOpen(false); onSelect(app.key) }} style={{
+            {/* Visual Learning Universe & GeoCraft pinned at top of hamburger menu */}
+            {[mathLabEntry, geocraftEntry].map(app => (
+              <button key={app.key} onClick={() => {
+                setMenuOpen(false);
+                if (app.isRedirect) {
+                  window.location.href = app.path;
+                } else {
+                  onSelect(app.key);
+                }
+              }} style={{
                 display: 'block', width: '100%', textAlign: 'left', padding: '10px 16px',
                 background: 'none', border: 'none', cursor: 'pointer', color: 'var(--clr-text)',
                 fontFamily: 'var(--font-body)', fontSize: '0.95rem', transition: 'background var(--transition)'
@@ -41769,7 +41854,7 @@ function Home({ onSelect, isGoalSelection = false, onBack }) {
               <span style={{ display: 'block', fontSize: '0.78rem', color: 'var(--clr-text-soft)', marginTop: '2px' }}>Practice with targets & limits</span>
             </button>
 
-            {featuredApps.map(app => (
+            {filteredHamburgerApps.map(app => (
               <button key={app.key} onClick={() => { setMenuOpen(false); onSelect(app.key) }} style={{
                 display: 'block', width: '100%', textAlign: 'left', padding: '10px 16px',
                 background: 'none', border: 'none', cursor: 'pointer', color: 'var(--clr-text)',
